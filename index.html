@@ -68,6 +68,18 @@
       text-decoration: underline;
     }
 
+
+    .linkedin-line,
+    .linkedin-line:visited {
+      color: var(--ensina-blue);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .linkedin-line:hover {
+      text-decoration: underline;
+    }
+
     .linkedin-icon {
       width: 14px;
       height: 14px;
@@ -1540,6 +1552,36 @@ const lampiarCities = [
         .trim();
     }
 
+
+
+    function normalizarLinkedinUrl(valor) {
+      let url = String(valor || "")
+        .trim()
+        .replace(/^@+/, "")
+        .replace(/[\u200B-\u200D\uFEFF]/g, "")
+        .replace(/\s+/g, "");
+
+      if (!url || url === "-" || url.toLowerCase() === "sem dados") return "";
+
+      // Se a pessoa colou apenas o usuário, transforma em perfil do LinkedIn
+      if (!url.includes(".") && !url.includes("/")) {
+        return "https://www.linkedin.com/in/" + encodeURIComponent(url);
+      }
+
+      if (url.startsWith("//")) {
+        url = "https:" + url;
+      }
+
+      if (url.startsWith("linkedin.com")) {
+        url = "https://www." + url;
+      } else if (url.startsWith("www.linkedin.com") || url.startsWith("br.linkedin.com")) {
+        url = "https://" + url;
+      } else if (!/^https?:\/\//i.test(url)) {
+        url = "https://" + url;
+      }
+
+      return url;
+    }
     function getCorPrograma(programa) {
       if (!programa) return 'background: rgba(27, 35, 78, 0.08); color: #1B234E; border: 1px solid rgba(27, 35, 78, 0.25);'; // padrão azul-escuro
 
@@ -3878,6 +3920,8 @@ const instituicoes = [...new Set(
           }
         }
 
+        const linkedinUrl = normalizarLinkedinUrl(p.linkedin);
+
         div.innerHTML = `
   <div class="person-main-row">
     <!-- Nome à esquerda -->
@@ -3888,14 +3932,18 @@ const instituicoes = [...new Set(
     <!-- LinkedIn CENTRAL -->
     <div class="person-main-middle">
       ${
-        p.linkedin
+        linkedinUrl
           ? `
-            <span class="linkedin-line">
+            <a class="linkedin-line"
+               href="${linkedinUrl}"
+               target="_top"
+               rel="noopener noreferrer"
+               onclick="event.stopPropagation();">
               <img class="linkedin-icon"
                    src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png"
                    alt="LinkedIn">
-              <a href="${p.linkedin}" target="_blank">LinkedIn</a>
-            </span>
+              <span>LinkedIn</span>
+            </a>
           `
           : ""
       }
