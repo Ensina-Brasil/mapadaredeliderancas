@@ -113,11 +113,12 @@
       margin: 0 12px;
     }
 
-    .page-wrap {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 16px;
-    }
+.page-wrap {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
 
     /* Card institucional */
     .intro-card {
@@ -163,18 +164,22 @@
       color: var(--text-muted);
     }
 
-    main {
-      display: grid;
-      grid-template-columns: 1.7fr 1fr;
-      gap: 28px;
-      align-items: stretch;
-    }
+main {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: 12px;
+  align-items: stretch;
+  width: 100%;
+  padding: 0 12px 12px;
+}
 
     .left-column {
+      width: 100%;
       display: flex;
       flex-direction: column;
       gap: 30px;
-      height: 84vh;
+      height: calc(100vh - 260px);;
+    
     }
 
     .filters-panel,
@@ -193,14 +198,14 @@
     .panel {
       display: flex;
       flex-direction: column;
-      height: 84vh;
-      max-height: 84vh;
+     height: calc(100vh - 260px);
+      max-height: calc(100vh - 260px);
     }
 
     .map-wrapper {
       display: flex;
       flex-direction: column;
-      height: 84vh;
+      height: calc(100vh - 260px);;
       position: relative;
     }
 
@@ -978,7 +983,20 @@
     .logo-lampiar {
   z-index: 9999;
 }
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+}
 
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#map {
+  min-height: 700px;
+}
   </style>
 </head>
 <body>
