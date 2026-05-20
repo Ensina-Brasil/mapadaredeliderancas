@@ -1,0 +1,4146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mapa da Rede de Lideranças Ensina Brasil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+
+  <!-- Fonte estilo Ensina -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root {
+      --ensina-blue: #004b8d;
+      --ensina-blue-dark: #273766;
+      --ensina-green: #00bfa5;
+      --bg-light: #f4f6fb;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --card-bg: #ffffff;
+      --border-soft: #e5e7eb;
+    }
+
+    /* Transição suave para estados do mapa */
+    .state-transition {
+      transition: fill-opacity 0.6s ease-in-out, stroke 0.4s ease-in-out, stroke-width 0.4s ease-in-out !important;
+    }
+
+    .state-highlighted {
+      animation: pulseHighlight 1.5s ease-in-out;
+    }
+
+    @keyframes pulseHighlight {
+      0%, 100% {
+        filter: brightness(1);
+      }
+      50% {
+        filter: brightness(1.15);
+      }
+    }
+
+    .state-dimmed {
+      transition: fill-opacity 0.8s ease-out, stroke 0.5s ease-out !important;
+    }
+
+    .linkedin-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.78rem;
+      color: var(--ensina-blue);
+      text-decoration: none;
+    }
+
+    .linkedin-link:hover {
+      text-decoration: underline;
+    }
+
+    .linkedin-icon {
+      width: 14px;
+      height: 14px;
+      display: inline-block;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+      margin: 0;
+      background: var(--bg-light);
+      color: var(--text-main);
+    }
+
+    header {
+      padding: 14px 24px;
+      background: var(--ensina-blue-dark);
+      color: #f9fafb;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    header span {
+      font-size: 0.8rem;
+      opacity: 0.85;
+    }
+
+    .header-logo {
+      height: 40px;
+      width: auto;
+      margin: 0 12px;
+    }
+
+    .page-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    /* Card institucional */
+    .intro-card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 16px 18px 14px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      margin-bottom: 16px;
+    }
+
+    .intro-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(0, 191, 165, 0.08);
+      color: var(--ensina-blue-dark);
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .intro-chip-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--ensina-green);
+    }
+
+    .intro-card h2 {
+      margin: 2px 0 4px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--ensina-blue-dark);
+    }
+
+    .intro-card p {
+      margin: 3px 0;
+      font-size: 0.87rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 1.7fr 1fr;
+      gap: 28px;
+      align-items: stretch;
+    }
+
+    .left-column {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      height: 84vh;
+    }
+
+    .filters-panel,
+    .panel {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 14px 14px 12px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    .filters-panel {
+      margin-bottom: 28px;
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      height: 84vh;
+      max-height: 84vh;
+    }
+
+    .map-wrapper {
+      display: flex;
+      flex-direction: column;
+      height: 84vh;
+      position: relative;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+.leaflet-interactive,
+.leaflet-interactive:focus,
+.leaflet-container,
+.leaflet-container:focus {
+  outline: none !important;
+}
+    /* Container para botão Home + legendas */
+    .map-top-right {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 520;
+    }
+
+    .map-home-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.9);
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.15);
+      z-index: 1;
+      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    }
+
+    .map-home-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.22);
+      border-color: var(--ensina-blue);
+    }
+
+    /* Legenda da logo do Ensina */
+.ensina-legend {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 999px;
+  padding: 4px 8px 4px 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.15);
+  border: 2px solid #4BAF56;
+  cursor: default;
+  transition:
+    padding 0.25s ease,
+    border-color 0.2s ease;
+}
+
+.ensina-legend:hover {
+  padding: 4px 14px 4px 4px;
+}
+
+    .ensina-legend-logo {
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background-color: #ffffff;
+      border: 2px solid rgba(15, 23, 42, 0.15);
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .ensina-legend-logo img {
+      width: 90%;
+      height: 90%;
+      object-fit: contain;
+    }
+
+    /* Tooltip de nome do estado */
+    .estado-tooltip.leaflet-tooltip {
+      background: rgba(17, 24, 39, 0.95);
+      color: #fff;
+      border-radius: 6px;
+      padding: 6px 8px;
+      box-shadow: 0 6px 18px rgba(15,23,42,0.32);
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .ensina-legend-text {
+      opacity: 0;
+      max-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: opacity 0.2s ease, max-width 0.2s ease;
+    }
+
+    .ensina-legend:hover .ensina-legend-text {
+      opacity: 1;
+      max-width: 650px;
+    }
+
+    /* Modo polo: borda e texto em azul escuro */
+    .ensina-legend.ensina-legend--polo {
+      border-color: var(--ensina-blue-dark);
+      color: var(--ensina-blue-dark);
+    }
+
+    /* ========= LEGENDA LAMPIAR ========= */
+    .lampiar-legend {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 999px;
+      padding: 4px 8px 4px 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.15);
+      border: 2px solid #E9A542;
+      cursor: default;
+      transition: border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .lampiar-legend-logo {
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background-color: #ffffff;
+      border: 2px solid rgba(15, 23, 42, 0.15);
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .lampiar-legend-logo img {
+      width: 90%;
+      height: 90%;
+      object-fit: contain;
+    }
+
+    .lampiar-legend-text {
+      opacity: 0;
+      max-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: opacity 0.2s ease, max-width 0.2s ease;
+    }
+
+    .lampiar-legend:hover .lampiar-legend-text { opacity: 1; max-width: 420px; }
+
+    .impulso-legend {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 999px;
+      padding: 4px 8px 4px 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.15);
+      border: 2px solid #18203B;
+      cursor: default;
+      transition: border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .impulso-legend-logo {
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background-color: #ffffff;
+      border: 2px solid rgba(15, 23, 42, 0.15);
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .impulso-legend-logo img {
+      width: 90%;
+      height: 90%;
+      object-fit: contain;
+    }
+
+    .impulso-legend-text {
+      opacity: 0;
+      max-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: opacity 0.2s ease, max-width 0.2s ease;
+    }
+
+    .impulso-legend:hover .impulso-legend-text { opacity: 1; max-width: 420px; }
+
+
+    /* leve offset horizontal só na logo do Lampiar na legenda (não nos marcadores do mapa) */
+.lampiar-legend .logo-lampiar {
+  transform: translateX(18px);
+}
+
+    .panel h2,
+    .filters-panel h2 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ensina-blue);
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
+      gap: 10px 14px;
+      margin-bottom: 10px;
+      align-items: end;
+    }
+
+    .filters label {
+      display: flex;
+      flex-direction: column;
+      font-size: 0.8rem;
+      gap: 4px;
+      color: var(--ensina-blue-dark);
+      font-weight: 600;
+      min-width: 0;
+    }
+
+    .filters label:nth-child(9) {
+      align-self: flex-end;
+    }
+
+    .filters-panel {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    select {
+      padding: 6px 8px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      font-size: 0.86rem;
+      background: #f9fafb;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+
+    select:focus {
+      border-color: var(--ensina-green);
+      box-shadow: 0 0 0 1px rgba(0, 191, 165, 0.4);
+      background: #ffffff;
+    }
+
+    .btn-limpar {
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: var(--ensina-blue);
+      border: 1px solid var(--ensina-blue);
+      color: white;
+      font-size: 0.86rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 0.15s, background 0.15s, border-color 0.15s;
+    }
+
+    .btn-limpar:hover {
+      background: var(--ensina-blue-dark);
+      border-color: var(--ensina-blue-dark);
+      color: white;
+      transform: translateY(-1px);
+    }
+
+    #summary {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .last-update {
+      font-size: 0.8rem;
+      color: #475569;
+      white-space: nowrap;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .summary-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .summary-sort-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .summary-sort-label select {
+      min-width: 100px;
+    }
+
+    .summary-sort-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .summary-sort-label select {
+      min-width: 100px;
+    }
+
+#people-list {
+  overflow-y: auto;
+  flex: 1;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 6px;
+  padding: 12px;
+  background-color: #fafafa;
+  overflow-x: hidden;
+  min-height: 0;
+}
+
+    .person-card {
+      padding: 5px 7px;
+      border-radius: 4px;
+      border: none;
+      border-left: 4px solid transparent;
+      margin-bottom: 6px;
+      background: #ffffff;
+      transition: opacity 0.15s, background-color 0.2s, box-shadow 0.2s, border-color 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      cursor: pointer;
+    }
+
+    .person-card:hover {
+      background-color: #f8fafc;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+      border-color: rgba(0, 191, 165, 0.4);
+    }
+
+    .person-main-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .person-main-left {
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .person-main-left strong {
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    .person-main-middle {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .linkedin-line {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+    }
+
+    .linkedin-icon {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+      border-radius: 3px;
+    }
+
+    .person-main-right {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .person-flag {
+      width: 40px;
+      aspect-ratio: 4 / 3;
+      object-fit: contain;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+      background: white;
+      padding: 1px;
+      transition: all 0.2s ease;
+    }
+
+    .person-flag.clickable-filter:hover {
+      transform: scale(1.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      border-color: var(--ensina-green);
+    }
+
+    .person-bottom-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .person-card.selected {
+      border-color: rgba(0, 75, 141, 0.8);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.16);
+      transform: translateY(-1px);
+      background: #ecfeff;
+      opacity: 1;
+    }
+
+    .person-card.dimmed {
+      opacity: 0.45;
+    }
+
+    .person-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 6px;
+      object-fit: contain;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      flex-shrink: 0;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      margin-right: 4px;
+      margin-bottom: 3px;
+      font-weight: 500;
+    }
+
+    .clickable-filter {
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .clickable-filter:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      filter: brightness(1.1);
+    }
+
+    .clickable-filter:active {
+      transform: translateY(0) scale(1);
+    }
+
+    /* Cidade dentro de person-main-right não deve ter transform que afeta layout */
+    .person-main-right .clickable-filter:hover {
+      transform: none;
+      box-shadow: none;
+      filter: brightness(0.9);
+      text-decoration: underline;
+    }
+
+    .person-main-right .clickable-filter:active {
+      transform: none;
+      filter: brightness(0.8);
+    }
+
+    .badge-role {
+      background: rgba(0, 75, 141, 0.08);
+      color: var(--ensina-blue-dark);
+      border: 1px solid rgba(0, 75, 141, 0.25);
+    }
+
+    .badge-inst {
+      background: rgba(0, 191, 165, 0.08);
+      color: var(--ensina-blue-dark);
+      border: 1px solid rgba(0, 191, 165, 0.25);
+    }
+
+    .badge-turma {
+      background: #eef2ff;
+      color: #3730a3;
+      border: 1px solid #c7d2fe;
+    }
+
+    a {
+      color: var(--ensina-blue);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      margin-top: 20px;
+      padding: 12px 0 6px;
+      border-top: 1px solid rgba(148, 163, 184, 0.5);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    footer strong {
+      color: var(--ensina-blue-dark);
+      font-weight: 600;
+    }
+
+    /* Seção de cadastro no mapa */
+    .join-section {
+      margin-top: 18px;
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 14px 16px;
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .join-section-text {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .join-section-text strong {
+      display: block;
+      font-size: 0.95rem;
+      color: var(--ensina-blue-dark);
+      margin-bottom: 4px;
+    }
+
+    .btn-cadastro {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 18px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      background: var(--ensina-blue);
+      color: #ffffff;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.25);
+      transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .btn-cadastro:hover {
+      background: var(--ensina-blue-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.3);
+    }
+
+    .btn-cadastro:active {
+      transform: translateY(0);
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.2);
+    }
+
+    /* Popup quando não há lideranças ensina no estado selecionado */
+    .no-alumni-popup {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.45);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .no-alumni-popup.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .no-alumni-popup-content {
+      background: #ffffff;
+      padding: 18px 20px 16px;
+      border-radius: 14px;
+      max-width: 360px;
+      width: 90%;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      font-size: 0.9rem;
+    }
+
+    .no-alumni-popup-content h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      color: var(--ensina-blue-dark);
+      font-weight: 600;
+    }
+
+    .no-alumni-popup-content p {
+      margin: 0 0 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .popup-close-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      background: var(--ensina-blue);
+      color: #ffffff;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.25);
+    }
+
+    .popup-close-btn:hover {
+      background: var(--ensina-blue-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.3);
+    }
+
+    .popup-close-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 5px 16px rgba(15, 23, 42, 0.22);
+    }
+
+    /* Logo markers (estado e município) */
+    .logo-marker {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      background-color: #ffffff;
+      border: 2px solid rgba(15, 23, 42, 0.15);
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .logo-marker img {
+      width: 90%;
+      height: 90%;
+      object-fit: contain;
+      transition: transform 160ms ease;
+    }
+
+    /* destaque ao passar o mouse para logos (Ensina/Lampiar) */
+    .ensina-legend-logo:hover,
+    .logo-marker.logo-municipal:hover,
+    .logo-marker.logo-polo-state:hover,
+    .logo-marker.logo-lampiar:hover,
+    .logo-marker.logo-trainee:hover,
+    .logo-marker--hover {
+      transform: scale(1.18);
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.32);
+    }
+
+    .logo-marker.logo-municipal {
+      border-color: var(--ensina-blue);
+    }
+
+    .logo-marker.logo-polo-state {
+      border-color: #002b55;
+      border-width: 2px;
+      border-style: solid;
+      box-shadow: 0 6px 16px rgba(0, 43, 85, 0.18);
+    }
+
+    .logo-marker.logo-trainee {
+      border: 2px solid #4BAF56;
+      box-shadow: 0 4px 12px rgba(75, 175, 86, 0.25);
+    }
+
+    .logo-marker.logo-lampiar {
+      border: 2px solid #E9A542;
+      box-shadow: 0 4px 12px rgba(233, 165, 66, 0.25);
+    }
+
+    /* Logos de programas (bandeiras) começam opacas e clareiam no hover */
+    .logo-marker.logo-program {
+      opacity: 0.55;
+      transition: opacity 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .logo-marker.logo-program.logo-marker--hover,
+    .logo-marker.logo-program:hover {
+      opacity: 1;
+    }
+
+    /* efeito ativo (clique) nos logos */
+    .logo-marker--active {
+      transform: scale(1.25) !important;
+      box-shadow: 0 8px 24px rgba(15,23,42,0.36) !important;
+      transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      #map,
+      .panel {
+        max-height: none;
+        height: 55vh;
+      }
+
+      .panel {
+        height: auto;
+      }
+
+      .map-top-right {
+        top: 8px;
+        right: 8px;
+      }
+
+      .filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .join-section {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .btn-cadastro {
+        align-self: stretch;
+        text-align: center;
+      }
+    }
+    .logo-lampiar {
+  z-index: 9999;
+}
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Mapa da Rede de Lideranças Ensina Brasil</h1>
+    <img src="marca-mae.png" alt="Marca Mãe Ensina Brasil" class="header-logo">
+    <span>Visualização interna da presença territorial da rede</span>
+  </header>
+
+  <div class="page-wrap">
+    <!-- Card institucional -->
+    <section class="intro-card">
+      <div class="intro-chip">
+        <span class="intro-chip-dot"></span>
+        Rede de Lideranças
+      </div>
+      <h2>Onde estamos atuando pelo Brasil</h2>
+      <p>
+        Este mapa apresenta, de forma viva e acessível, a presença territorial da rede de lideranças do Ensina. Cada ponto representa uma liderança que seguem contribuindo para a transformação da educação pública e da sociedade brasileira em diferentes cidades e contextos. Ele torna visível algo que acreditamos profundamente: que a força da nossa rede está na pluralidade de trajetórias que continuam impactando escolas, governos, organizações sociais e iniciativas comunitárias em todo o país.
+      </p>
+    </section>
+
+    <section class="filters-panel">
+      <h2>Filtros da rede</h2>
+
+      <div class="filters">
+        <label>
+          Região
+          <select id="filter-regiao">
+            <option value="">Todas</option>
+          </select>
+        </label>
+        <label>
+          Estado
+          <select id="filter-estado">
+            <option value="">Todos</option>
+          </select>
+        </label>
+        <label>
+          Cidade
+          <select id="filter-cidade">
+            <option value="">Todas</option>
+          </select>
+        </label>
+        <label>
+          Turma
+          <select id="filter-turma">
+            <option value="">Todas</option>
+          </select>
+        </label>
+        <label>
+          Programa
+          <select id="filter-programa">
+            <option value="">Todos</option>
+          </select>
+        </label>
+        <label>
+          Cargo
+          <select id="filter-cargo">
+            <option value="">Todos</option>
+          </select>
+        </label>
+        <label>
+          Instituição
+          <select id="filter-instituicao">
+            <option value="">Todas</option>
+          </select>
+        </label>
+        <label>
+          Buscar pessoa
+          <input type="text" id="filter-busca" placeholder="Digite o nome..." style="padding: 6px 8px; border-radius: 999px; border: 1px solid #d1d5db; font-size: 0.86rem; background: #f9fafb; outline: none; transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;">
+        </label>
+        <label style="display: flex; flex-direction: column; justify-content: flex-end;">
+          <button id="btn-limpar" class="btn-limpar" style="margin-left: 10px;">Limpar filtros</button>
+        </label>
+      </div>
+    </section>
+
+    <main>
+      <div class="map-wrapper">
+        <div id="map"></div>
+
+        <!-- Botão Home + legendas -->
+        <div class="map-top-right">
+          <button id="map-home-btn" class="map-home-btn" title="Mapa completo">🏠</button>
+
+          <!-- Legenda Ensina -->
+          <div id="ensina-legend" class="ensina-legend"></div>
+
+          <!-- Legenda Lampiar -->
+          <div id="lampiar-legend" class="lampiar-legend">
+            <div class="lampiar-legend-logo">
+              <img src="lampiar.png" alt="Programa Lampiar" />
+            </div>
+            <span class="lampiar-legend-text">
+              Localidade onde atua o Programa Lampiar
+            </span>
+          </div>
+
+          <!-- Legenda Impulso -->
+          <div id="impulso-legend" class="impulso-legend">
+            <div class="impulso-legend-logo">
+              <img src="impulso.png" alt="Programa Impulso" />
+            </div>
+            <span class="impulso-legend-text">
+              Não há marcação do Impulso pois o programa atua em todo Brasil
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="panel">
+        <div class="panel-header">
+          <h2>Lideranças encontradas</h2>
+          <div id="last-update" class="last-update">Última atualização: —</div>
+        </div>
+        <div class="summary-row">
+          <div id="summary">Carregando dados...</div>
+          <label class="summary-sort-label">
+            Ordenar
+            <select id="filter-sort">
+              <option value="az">A-Z</option>
+              <option value="za">Z-A</option>
+            </select>
+          </label>
+        </div>
+        <div id="people-list"></div>
+      </aside>
+    </main>
+
+    <!-- Seção de convite para cadastro no mapa -->
+    <section class="join-section">
+      <div class="join-section-text">
+        <strong>Mantenha suas informações atualizadas no mapa da rede</strong>
+         <span>
+    O mapa da Rede de Lideranças é construído coletivamente e depende da atualização constante das trajetórias que seguem impactando diferentes territórios do Brasil. Caso você tenha mudado de cidade, instituição, área de atuação ou queira revisar suas informações cadastradas, preencha o formulário abaixo para manter sua presença atualizada no mapa.
+  </span>
+</div>
+      <a
+        href="https://forms.gle/nLic4hbtuTLBLeTJ7"
+        class="btn-cadastro"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Preencher formulário
+      </a>
+    </section>
+
+    <footer>
+  <strong>Mapa da Rede de Lideranças Ensina Brasil</strong>
+  <span>Criado por <a href="https://www.linkedin.com/in/viniciuspradop/" target="_blank" rel="noopener noreferrer">Vinícius Prado Pereira</a> — Alumni Ensina 2023</span>
+  <span>
+    Este mapa exibe dados pessoais de alumni que consentiram com sua divulgação,
+    conforme a Lei Geral de Proteção de Dados (Lei 13.709/2018). 
+    Para solicitar correção ou remoção dos seus dados, escreva para 
+    <a href="mailto:alumni@ensinabrasil.org">alumni@ensinabrasil.org</a>.
+  </span>
+</footer>
+
+  </div> <!-- fim .page-wrap -->
+
+  <!-- Popup: estado sem alumni -->
+  <div id="no-alumni-popup" class="no-alumni-popup">
+    <div class="no-alumni-popup-content">
+      <h3>Nenhuma liderança cadastrada nessa localidade</h3>
+      <p id="no-alumni-text">
+        Nessa localidade não foram cadastradas lideranças atuando (por enquanto!).
+      </p>
+      <button id="popup-close-btn" class="popup-close-btn">Fechar</button>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <script>
+    // -------------------------
+    // VARIÁVEIS GLOBAIS
+    // -------------------------
+    let pessoas = [];
+    let map;
+    let estadosLayer;
+    let municipiosLayer = null;
+    let paisesVizinhosLayer = null;
+    let programasMarkers = [];
+    const estadoBoundsBySigla = {};
+    const municipiosCache = {};
+    let brasilMarker = null;
+    let pessoaSelecionadaKey = null;
+    let highlightState = null;
+    let highlightCityNorm = null;
+    let selectedRegion = null; // região selecionada no filtro
+    let hoverState = null; // estado em hover (passar mouse sobre nome na lista)
+
+    const stateLogoMarkers = [];        // ícones de parceria estadual
+    let municipalLogoMarkers = [];      // marcadores dinâmicos (por município)
+    let municipalInitialMarkers = [];   // marcadores fixos (agregados ou por cidade)
+    let stateExtraCityMarkers = [];     // polos estaduais (zoom)
+    let municipalZoomMarkers = [];      // polos municipais (zoom)
+    let currentStateLogoZoom = null;    // qual estado está em modo polo
+
+    // Lampiar
+    let lampiarMarkers = [];
+
+    // DOM
+    const filterRegiao = document.getElementById("filter-regiao");
+    const filterEstado = document.getElementById("filter-estado");
+    const filterCidade = document.getElementById("filter-cidade");
+    const filterTurma  = document.getElementById("filter-turma");
+    const filterPrograma = document.getElementById("filter-programa");
+    const filterCargo  = document.getElementById("filter-cargo");
+    const filterInstituicao = document.getElementById("filter-instituicao");
+    const filterBusca = document.getElementById("filter-busca");
+    const filterSort = document.getElementById("filter-sort");
+    const peopleList   = document.getElementById("people-list");
+    const summary      = document.getElementById("summary");
+    const lastUpdateEl = document.getElementById("last-update");
+    const btnLimpar    = document.getElementById("btn-limpar");
+    const mapHomeBtn   = document.getElementById("map-home-btn");
+
+    // Legenda em modo polo ou não
+    let poloLegendActive = false;
+
+    // UF atualmente com municípios carregados
+    let currentMunicipiosUF = null;
+
+    // Regiões com cores próprias
+    const regionColors = {
+      "Norte": "#0f766e",
+      "Nordeste": "#9333ea",
+      "Centro-Oeste": "#facc15",
+      "Sudeste": "#0ea5e9",
+      "Sul": "#ef4444"
+    };
+
+    // Estados com parceria estadual Ensina
+    const partnershipStates = ["GO", "MT", "MS"];
+
+    // Cidades com parceria municipal
+    const municipalPartnerships = [
+      { cidadeNorm: "vitoria", uf: "ES" },
+      { cidadeNorm: "caruaru", uf: "PE" },
+      { cidadeNorm: "petrolina", uf: "PE" }
+    ];
+
+    // Cidades que devem ter logo já no mapa inicial
+    const municipalInitialCities = [
+      {
+        nome: "Vitória",
+        uf: "ES",
+        cidadeNorm: "vitoria",
+        lat: -20.3155,
+        lng: -40.3128
+      },
+      {
+        nome: "Caruaru",
+        uf: "PE",
+        cidadeNorm: "caruaru",
+        lat: -8.2823,
+        lng: -35.9699
+      },
+      {
+        nome: "Petrolina",
+        uf: "PE",
+        cidadeNorm: "petrolina",
+        lat: -9.3891,
+        lng: -40.5033
+      }
+    ];
+
+    // Cidades associadas às parcerias estaduais (para polos)
+    const statePartnershipCities = {
+      GO: [
+        { name: "Águas Lindas de Goiás", lat: -15.7611, lng: -48.2816 },
+        { name: "Luziânia", lat: -16.2530, lng: -47.9500 }
+      ],
+      MT: [
+        { name: "Cuiabá", lat: -15.6010, lng: -56.0970 }
+      ],
+      MS: [
+  { name: "Campo Grande", lat: -20.4697, lng: -54.6201 },
+  { name: "Dourados", lat: -22.2231, lng: -54.8120 }
+]
+    };
+
+    // Mapa de nome -> sigla
+    const stateNameToSigla = {
+      "Acre": "AC",
+      "Alagoas": "AL",
+      "Amapá": "AP",
+      "Amazonas": "AM",
+      "Bahia": "BA",
+      "Ceará": "CE",
+      "Distrito Federal": "DF",
+      "Espírito Santo": "ES",
+      "Goiás": "GO",
+      "Maranhão": "MA",
+      "Mato Grosso": "MT",
+      "Mato Grosso do Sul": "MS",
+      "Minas Gerais": "MG",
+      "Pará": "PA",
+      "Paraíba": "PB",
+      "Paraná": "PR",
+      "Pernambuco": "PE",
+      "Piauí": "PI",
+      "Rio de Janeiro": "RJ",
+      "Rio Grande do Norte": "RN",
+      "Rio Grande do Sul": "RS",
+      "Rondônia": "RO",
+      "Roraima": "RR",
+      "Santa Catarina": "SC",
+      "São Paulo": "SP",
+      "Sergipe": "SE",
+      "Tocantins": "TO"
+    };
+
+    // Região de cada estado
+    const stateRegionBySigla = {
+      AC: "Norte",
+      AL: "Nordeste",
+      AP: "Norte",
+      AM: "Norte",
+      BA: "Nordeste",
+      CE: "Nordeste",
+      DF: "Centro-Oeste",
+      ES: "Sudeste",
+      GO: "Centro-Oeste",
+      MA: "Nordeste",
+      MT: "Centro-Oeste",
+      MS: "Centro-Oeste",
+      MG: "Sudeste",
+      PA: "Norte",
+      PB: "Nordeste",
+      PR: "Sul",
+      PE: "Nordeste",
+      PI: "Nordeste",
+      RJ: "Sudeste",
+      RN: "Nordeste",
+      RS: "Sul",
+      RO: "Norte",
+      RR: "Norte",
+      SC: "Sul",
+      SP: "Sudeste",
+      SE: "Nordeste",
+      TO: "Norte"
+    };
+
+    // Código IBGE da UF -> usado no arquivo geojs-XX-mun.json
+    const stateCodeBySigla = {
+      AC: "12",
+      AL: "27",
+      AP: "16",
+      AM: "13",
+      BA: "29",
+      CE: "23",
+      DF: "53",
+      ES: "32",
+      GO: "52",
+      MA: "21",
+      MT: "51",
+      MS: "50",
+      MG: "31",
+      PA: "15",
+      PB: "25",
+      PR: "41",
+      PE: "26",
+      PI: "22",
+      RJ: "33",
+      RN: "24",
+      RS: "43",
+      RO: "11",
+      RR: "14",
+      SC: "42",
+      SP: "35",
+      SE: "28",
+      TO: "17"
+    };
+
+    // Nome do estado por sigla (pra mensagens)
+    const stateNameBySigla = {
+      AC: "Acre",
+      AL: "Alagoas",
+      AP: "Amapá",
+      AM: "Amazonas",
+      BA: "Bahia",
+      CE: "Ceará",
+      DF: "Distrito Federal",
+      ES: "Espírito Santo",
+      GO: "Goiás",
+      MA: "Maranhão",
+      MT: "Mato Grosso",
+      MS: "Mato Grosso do Sul",
+      MG: "Minas Gerais",
+      PA: "Pará",
+      PB: "Paraíba",
+      PR: "Paraná",
+      PE: "Pernambuco",
+      PI: "Piauí",
+      RJ: "Rio de Janeiro",
+      RN: "Rio Grande do Norte",
+      RS: "Rio Grande do Sul",
+      RO: "Rondônia",
+      RR: "Roraima",
+      SC: "Santa Catarina",
+      SP: "São Paulo",
+      SE: "Sergipe",
+      TO: "Tocantins"
+    };
+
+    // Ícone global de logo usando arquivo
+    const LOGO_SRC = "ensina-logo.png";
+
+    // Ícones
+    const ensinaIcon = L.divIcon({
+      html: '<div class="logo-marker logo-state logo-trainee"><img src="' + LOGO_SRC + '" alt="Programa Trainee Ensina Brasil"></div>',
+      className: "",
+      iconSize: [26, 26],
+      iconAnchor: [13, 13]
+    });
+
+    const cityIcon = L.divIcon({
+      html: '<div class="logo-marker logo-municipal logo-trainee"><img src="' + LOGO_SRC + '" alt="Programa Trainee Ensina Brasil"></div>',
+      className: "",
+      iconSize: [26, 26],
+      iconAnchor: [13, 13]
+    });
+
+    const poloIcon = L.divIcon({
+      html: '<div class="logo-marker logo-polo-state logo-trainee"><img src="' + LOGO_SRC + '" alt="Polo Ensina Brasil"></div>',
+      className: "",
+      iconSize: [26, 26],
+      iconAnchor: [13, 13]
+    });
+
+    // Ícone Lampiar (usa arquivo lampiar.png)
+    const lampiarIcon = L.divIcon({
+      html: '<div class="logo-marker logo-municipal logo-lampiar"><img src="lampiar.png" alt="Lampiar"></div>',
+      className: "",
+      iconSize: [26, 26],
+      iconAnchor: [13, 13]
+    });
+
+// Helper: adiciona hover de destaque (pequeno zoom + sombra) a um marker de logo
+function attachLogoHover(marker) {
+  if (!marker) return;
+  marker.on('mouseover', function () {
+    try {
+      const el = this._icon || (this.getElement && this.getElement());
+      if (el) {
+        const inner = el.querySelector && el.querySelector('.logo-marker');
+        if (inner) inner.classList.add('logo-marker--hover');
+        else el.classList.add('logo-marker--hover');
+      }
+    } catch (e) {}
+  });
+  marker.on('mouseout', function () {
+    try {
+      const el = this._icon || (this.getElement && this.getElement());
+      if (el) {
+        const inner = el.querySelector && el.querySelector('.logo-marker');
+        if (inner) inner.classList.remove('logo-marker--hover');
+        else el.classList.remove('logo-marker--hover');
+      }
+    } catch (e) {}
+  });
+}
+
+   // CIDADES DO PROGRAMA LAMPIAR (com deslocamento à direita ajustado)
+const lampiarCities = [
+  { nome: "Vitória", uf: "ES", lat: -19.0, lng: -40.1 },
+  { nome: "Dourados", uf: "MS", lat: -22.2231, lng: -54.8120 },
+  { nome: "Serra", uf: "ES", lat: -20.1300, lng: -40.3144 },
+  { nome: "Diadema", uf: "SP", lat: -23.6816, lng: -46.6201 },
+  { nome: "Taubaté", uf: "SP", lat: -23.0102, lng: -45.5586 },
+  { nome: "São Luís", uf: "MA", lat: -2.5387, lng: -44.2820 }
+];
+
+
+    // Cria a legenda da logo do Ensina sobre o mapa
+    function criarLegendaEnsina() {
+      const legendEl = document.getElementById("ensina-legend");
+      if (!legendEl) return;
+      legendEl.innerHTML = `
+        <div class="ensina-legend-logo">
+          <img src="${LOGO_SRC}" alt="Programa TraineeEnsina Brasil" onerror="this.parentElement.innerHTML='<span style=\'font-size:14px; font-weight:bold; color:#004b8d;\'>E</span>'" />
+        </div>
+        <span class="ensina-legend-text">Localidade onde atua o Programa Trainee Ensina Brasil</span>
+      `;
+
+      // aplicar hover JS consistente (adiciona classe no elemento interno)
+      const logoEl = legendEl.querySelector('.ensina-legend-logo');
+      if (logoEl) {
+        logoEl.addEventListener('mouseover', () => logoEl.classList.add('logo-marker--hover'));
+        logoEl.addEventListener('mouseout', () => logoEl.classList.remove('logo-marker--hover'));
+      }
+    }
+
+    function setLegendPoloMode(active) {
+      const legendEl = document.getElementById("ensina-legend");
+      if (!legendEl) return;
+      const textSpan = legendEl.querySelector(".ensina-legend-text");
+      if (!textSpan) return;
+
+      if (active) {
+        legendEl.classList.add("ensina-legend--polo");
+        textSpan.textContent = "Polo de atuação do Programa Trainee Ensina Brasil";
+        poloLegendActive = true;
+      } else {
+        legendEl.classList.remove("ensina-legend--polo");
+        textSpan.textContent = "Localidade onde há parceria com o Programa Trainee Ensina";
+        poloLegendActive = false;
+      }
+    }
+
+    function getSiglaFromFeature(feature) {
+      const props = feature.properties || {};
+      return (
+        props.sigla ||
+        props.SIGLA ||
+        stateNameToSigla[props.name] ||
+        stateNameToSigla[props.NOME_UF] ||
+        ""
+      );
+    }
+
+    function getNomeFromFeature(feature) {
+      const props = feature.properties || {};
+      return (
+        props.nome ||
+        props.NOME_UF ||
+        props.name ||
+        getSiglaFromFeature(feature) ||
+        "Estado"
+      );
+    }
+
+    // Nome do município em um feature (GeoJSON municípios)
+    function getMunicipioNome(feature) {
+      const props = feature.properties || {};
+      return (
+        props.name ||
+        props.NM_MUNICIP ||
+        props.NM_MUN ||
+        props.NOME ||
+        props.nome ||
+        ""
+      );
+    }
+
+    function normalizarTexto(s) {
+      return (s || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+    }
+
+    function getCorPrograma(programa) {
+      if (!programa) return 'background: rgba(27, 35, 78, 0.08); color: #1B234E; border: 1px solid rgba(27, 35, 78, 0.25);'; // padrão azul-escuro
+
+      const programaNorm = programa.toLowerCase().trim();
+      if (programaNorm.includes('trainee') || programaNorm.includes('ensina')) {
+        return 'background: rgba(75, 175, 86, 0.08); color: #4BAF56; border: 1px solid rgba(75, 175, 86, 0.25);'; // verde
+      } else if (programaNorm.includes('lampiar')) {
+        return 'background: rgba(233, 165, 66, 0.08); color: #E9A542; border: 1px solid rgba(233, 165, 66, 0.25);'; // laranja
+      } else if (programaNorm.includes('impulso')) {
+        return 'background: rgba(24, 32, 59, 0.08); color: #18203B; border: 1px solid rgba(24, 32, 59, 0.25);'; // azul-escuro
+      } else {
+        return 'background: rgba(27, 35, 78, 0.08); color: #1B234E; border: 1px solid rgba(27, 35, 78, 0.25);'; // padrão
+      }
+    }
+
+    function getCorCardPrograma(programa) {
+      if (!programa) return '#1B234E'; // padrão azul-escuro
+
+      const programaNorm = programa.toLowerCase().trim();
+      if (programaNorm.includes('trainee') || programaNorm.includes('ensina')) {
+        return '#4BAF56'; // verde
+      } else if (programaNorm.includes('lampiar')) {
+        return '#E9A542'; // laranja
+      } else if (programaNorm.includes('impulso')) {
+        return '#18203B'; // azul-escuro
+      } else {
+        return '#1B234E'; // padrão
+      }
+    }
+
+    // -------------------------
+    // POPUP "SEM LIDERANÇAS"
+    // -------------------------
+    function showNoAlumniPopup(uf) {
+      const popup = document.getElementById("no-alumni-popup");
+      const textSpan = document.getElementById("no-alumni-text");
+      if (!popup || !textSpan) return;
+
+      const nomeEstado = stateNameBySigla[uf] || uf;
+
+      textSpan.textContent =
+        `Nessa localidade (${nomeEstado}) não foram cadastrados lideranças atuando (por enquanto!).`;
+
+      popup.classList.add("show");
+    }
+
+    function hideNoAlumniPopup() {
+      const popup = document.getElementById("no-alumni-popup");
+      if (!popup) return;
+      popup.classList.remove("show");
+    }
+
+    // Estilo dos municípios (para highlight por pessoa)
+    function municipioStyle(feature) {
+      const nomeMunNorm = normalizarTexto(getMunicipioNome(feature));
+      const isHighlight =
+        highlightCityNorm &&
+        nomeMunNorm === highlightCityNorm;
+
+      const regiao = stateRegionBySigla[currentMunicipiosUF] || "";
+      const baseColor = regionColors[regiao] || "#16a34a";
+
+      if (isHighlight) {
+        return {
+          color: "#0f172a",
+          weight: 3,
+          fillColor: baseColor,
+          fillOpacity: 0.85
+        };
+      }
+
+      return {
+        color: baseColor,
+        weight: 2.2,
+        fillColor: baseColor,
+        fillOpacity: 0.7
+      };
+    }
+
+    // Avatar: tenta usar a bandeira da UF, senão usa avatar antigo
+function getAvatarUrl(p) {
+  const uf = (p.estado_sigla || "").toUpperCase().trim();
+
+  if (uf) {
+    return "bandeiras/" + uf + ".png";
+  }
+
+  if (p.avatar_url) {
+    return p.avatar_url;
+  }
+
+  const seed = encodeURIComponent(p.nome || "Alumni Ensina");
+  return "https://api.dicebear.com/7.x/thumbs/svg?seed=" + seed;
+}
+
+    // -------------------------
+    // MAPA
+    // -------------------------
+    function initMap() {
+  map = L.map("map").setView([-14.5, -52], 4);
+
+  setTimeout(() => {
+    map.invalidateSize();
+    map.setView([-14.5, -52], 4);
+  }, 300);
+
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+        maxZoom: 8,
+        minZoom: 3,
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+      }).addTo(map);
+
+      const brazilBounds = L.latLngBounds(
+        L.latLng(-34, -74),
+        L.latLng(6, -34)
+      );
+
+      map.setMaxBounds(brazilBounds);
+      // Drag habilitado com bounds constraint
+      map.dragging.enable();
+
+// Limite ampliado para todo o continente americano
+const worldBounds = L.latLngBounds(
+  L.latLng(-85, -220),
+  L.latLng(85, 220)
+);
+
+map.setMaxBounds(worldBounds);
+// ❌ Remove o panInsideBounds, não precisamos mais dele
+// map.on("drag", function () {
+//   map.panInsideBounds(americasBounds, { animate: false });
+// });
+      // Removido: evento de click que voltava para zoom nacional
+      // Apenas use os botões e filtros para controlar a navegação
+
+      map.on("zoomend", onMapZoomEnd);
+    }
+
+ function onMapZoomEnd() {
+  if (!map) return;
+
+  const z = map.getZoom();
+  const zoomContinental = z <= 3.6;
+
+  if (zoomContinental) {
+    adicionarBrasilTeachForAll();
+
+    if (brasilMarker && !map.hasLayer(brasilMarker)) {
+      brasilMarker.addTo(map);
+    }
+
+    if (estadosLayer && map.hasLayer(estadosLayer)) {
+      map.removeLayer(estadosLayer);
+    }
+
+    stateLogoMarkers.forEach(obj => {
+      if (map.hasLayer(obj.marker)) {
+        map.removeLayer(obj.marker);
+      }
+    });
+
+    municipalInitialMarkers.forEach(obj => {
+      if (map.hasLayer(obj.marker)) {
+        map.removeLayer(obj.marker);
+      }
+    });
+
+    municipalLogoMarkers.forEach(obj => {
+      if (map.hasLayer(obj.marker)) {
+        map.removeLayer(obj.marker);
+      }
+    });
+
+    lampiarMarkers.forEach(marker => {
+      if (map.hasLayer(marker)) {
+        map.removeLayer(marker);
+      }
+    });
+
+    clearStateExtraCityMarkers();
+    clearMunicipalZoomMarkers();
+
+    if (municipiosLayer && map.hasLayer(municipiosLayer)) {
+      map.removeLayer(municipiosLayer);
+    }
+
+    setLegendPoloMode(false);
+    return;
+  }
+
+  if (brasilMarker && map.hasLayer(brasilMarker)) {
+    map.removeLayer(brasilMarker);
+  }
+
+  if (estadosLayer && !map.hasLayer(estadosLayer)) {
+    estadosLayer.addTo(map);
+  }
+
+  stateLogoMarkers.forEach(obj => {
+    if (!map.hasLayer(obj.marker)) {
+      obj.marker.addTo(map);
+    }
+  });
+
+  municipalInitialMarkers.forEach(obj => {
+    if (!map.hasLayer(obj.marker)) {
+      obj.marker.addTo(map);
+    }
+  });
+
+  lampiarMarkers.forEach(marker => {
+    if (!map.hasLayer(marker)) {
+      marker.addTo(map);
+    }
+  });
+}
+    // Estilo dos estados
+function estadoStyle(feature) {
+  const sigla = getSiglaFromFeature(feature);
+  const regiao = stateRegionBySigla[sigla];
+  const baseColor = regionColors[regiao] || "#9ca3af";
+
+  const hasPeople = pessoas && pessoas.some((p) => p.estado_sigla === sigla);
+  const isSelectedState = !!highlightState && sigla === highlightState;
+  const isInSelectedRegion = !selectedRegion || regiao === selectedRegion;
+
+  // Verificar se há filtro de programa ativo
+  const programaFiltrado = filterPrograma ? filterPrograma.value : null;
+  let hasProgramInState = false;
+  
+  if (programaFiltrado && pessoas) {
+    hasProgramInState = pessoas.some(p => p.programa === programaFiltrado && p.estado_sigla === sigla);
+  }
+
+  // Estados de outra região quando filtro de região estiver ativo
+  if (selectedRegion && !isInSelectedRegion) {
+    return {
+      color: "#e5e7eb",
+      weight: 1,
+      fillColor: "#f9fafb",
+      fillOpacity: 0.15,
+      className: 'state-transition'
+    };
+  }
+
+  // Se há filtro de programa, destacar apenas estados com pessoas desse programa
+  if (programaFiltrado) {
+    if (hasProgramInState) {
+      // Estado COM pessoas do programa filtrado - destaque forte
+      return {
+        color: baseColor,
+        weight: 3,
+        fillColor: baseColor,
+        fillOpacity: 0.4,
+        className: 'state-transition state-highlighted'
+      };
+    } else {
+      // Estado SEM pessoas do programa filtrado - muito apagado
+      return {
+        color: "#e0e0e0",
+        weight: 1,
+        fillColor: "#f8f8f8",
+        fillOpacity: 0.15,
+        className: 'state-transition state-dimmed'
+      };
+    }
+  }
+
+  // Quando há estado destacado, os outros ficam suaves (aplica também a estados sem alumni)
+  if (highlightState && sigla !== highlightState) {
+    return {
+      color: "#d1d5db",
+      weight: 1,
+      fillColor: "#f3f4f6",
+      fillOpacity: 0.35,
+      className: 'state-transition'
+    };
+  }
+
+  // 🔹 ESTADO SEM ALUMNI: contorno cinza mais escuro, mas bem suave
+  if (!hasPeople) {
+    return {
+      // mantém contorno neutro, mas usa cor da região com opacidade bem baixa
+      color: "#6b7280",
+      weight: 1.2,
+      fillColor: baseColor,
+      fillOpacity: 0.06,
+      className: 'state-transition'
+    };
+  }
+
+  // Configuração padrão pra estados com alumni
+  let color = baseColor;
+  let weight = 2;
+  let fillOpacity = 0.18;
+
+  // Quando os municípios da UF estão desenhados, deixa o estado mais “de fundo”
+  if (currentMunicipiosUF && sigla === currentMunicipiosUF && municipiosLayer) {
+    fillOpacity = 0.08;
+    color = "#9ca3af";
+  }
+
+  // Estado selecionado (clique ou polo)
+  if (isSelectedState) {
+    const regionColor = regionColors[regiao] || "#004b8d";
+
+    color = regionColor;
+    weight = 3; // um pouco mais fino pra não deformar tanto
+    if (currentMunicipiosUF && sigla === currentMunicipiosUF && municipiosLayer) {
+      fillOpacity = 0.1;
+    } else {
+      fillOpacity = 0.3;
+    }
+  }
+
+  // Estado em hover (passando mouse sobre nome)
+  if (hoverState) {
+    if (sigla === hoverState) {
+      // Estado em hover - destaque forte
+      color = baseColor;
+      weight = 3;
+      fillOpacity = 0.4;
+    } else {
+      // Outros estados - levemente esbranquiçados
+      fillOpacity = fillOpacity * 0.5; // Reduz opacidade pela metade
+      color = "#c0c0c0"; // Cor mais clara/esbranquiçada
+      weight = 1.5;
+    }
+  }
+
+  return {
+    color,
+    weight,
+    fillColor: baseColor,
+    fillOpacity,
+    className: 'state-transition'
+  };
+}
+
+
+    function onEachEstado(feature, layer) {
+      const sigla = getSiglaFromFeature(feature);
+
+      if (sigla) {
+        estadoBoundsBySigla[sigla] = layer.getBounds();
+        const stateName = stateNameBySigla[sigla] || feature.properties && (feature.properties.name || feature.properties.NAME) || sigla;
+        // tooltip com nome do estado (abre ao passar o mouse)
+        try {
+          layer.bindTooltip(stateName, {
+            sticky: true,
+            direction: 'auto',
+            className: 'estado-tooltip',
+            opacity: 0.95
+          });
+        } catch (e) {}
+      }
+
+      layer.on("click", () => {
+        if (!sigla) return;
+
+        const regiao = stateRegionBySigla[sigla] || "";
+        const hasPeople = pessoas && pessoas.some(p => p.estado_sigla === sigla);
+
+        if (!hasPeople) {
+          showNoAlumniPopup(sigla);
+          return;
+        }
+
+        selectedRegion = regiao || null;
+        highlightState = sigla;
+        highlightCityNorm = null;
+
+        filterRegiao.value = regiao;
+        atualizarOpcoesEstado(regiao);
+        filterEstado.value = sigla;
+
+        atualizarCidades();
+        atualizarLista();
+
+        if (estadosLayer) {
+          estadosLayer.setStyle(estadoStyle);
+        }
+
+        ajustarZoom();
+      });
+
+      layer.on("mouseover", function (e) {
+        this.setStyle({
+          weight: 4,
+          color: "#111827"
+        });
+        try { this.openTooltip(e.latlng); } catch (err) {}
+      });
+
+      layer.on("mouseout", function () {
+        try { this.closeTooltip(); } catch (err) {}
+        estadosLayer.resetStyle(this);
+      });
+    }
+
+    function clearStateExtraCityMarkers() {
+      stateExtraCityMarkers.forEach(m => map.removeLayer(m));
+      stateExtraCityMarkers = [];
+    }
+
+    function clearMunicipalZoomMarkers() {
+      municipalZoomMarkers.forEach(obj => map.removeLayer(obj.marker));
+      municipalZoomMarkers = [];
+    }
+
+    // Clique nas logos de parceria ESTADUAL (GO, MT, MS)
+    function handleStateLogoClick(sigla, marker) {
+      const citiesClick = statePartnershipCities[sigla] || [];
+      const regiao = stateRegionBySigla[sigla] || "";
+
+      if (currentStateLogoZoom === sigla) {
+        clearStateExtraCityMarkers();
+        clearMunicipalZoomMarkers();
+
+        if (!map.hasLayer(marker)) {
+          marker.addTo(map);
+        }
+
+        municipalInitialMarkers.forEach(init => {
+          if (!map.hasLayer(init.marker)) {
+            init.marker.addTo(map);
+          }
+        });
+
+        municipalLogoMarkers.forEach(entry => {
+          if (!map.hasLayer(entry.marker)) {
+            entry.marker.addTo(map);
+          }
+        });
+
+        filterRegiao.value = regiao;
+        filterEstado.value = "";
+        highlightState = null;
+        highlightCityNorm = null;
+
+        atualizarOpcoesEstado(regiao);
+        atualizarCidades();
+        atualizarLista();
+        if (estadosLayer) {
+          estadosLayer.setStyle(estadoStyle);
+        }
+
+        setLegendPoloMode(false);
+        currentStateLogoZoom = null;
+        return;
+      }
+
+      currentStateLogoZoom = sigla;
+      highlightState = sigla;
+      highlightCityNorm = null;
+      if (estadosLayer) {
+        estadosLayer.setStyle(estadoStyle);
+      }
+
+      if (citiesClick.length) {
+        const latlngs = citiesClick.map(c => [c.lat, c.lng]);
+
+        if (latlngs.length === 1) {
+          map.flyTo(latlngs[0], 6.4);
+        } else {
+          const b = L.latLngBounds(latlngs);
+          map.flyToBounds(b, { padding: [20, 20] });
+        }
+
+        if (map.hasLayer(marker)) {
+          map.removeLayer(marker);
+        }
+
+        clearStateExtraCityMarkers();
+
+        citiesClick.forEach(c => {
+          const extra = L.marker([c.lat, c.lng], { icon: poloIcon })
+            .addTo(map)
+            .bindTooltip("Polo de atuação do Programa Trainee Ensina Brasil – " + c.name, {
+              direction: "top",
+              offset: [0, -10],
+              opacity: 0.9
+            });
+
+          // destaque ao passar o mouse
+          attachLogoHover(extra);
+
+          stateExtraCityMarkers.push(extra);
+        });
+
+        setLegendPoloMode(true);
+      }
+    }
+
+    // Clique nas logos de parceria MUNICIPAL
+    function handleMunicipalLogoClick(uf, marker) {
+      const polos = municipalInitialCities.filter(c => c.uf === uf);
+      if (!polos.length) return;
+
+      const latlngs = polos.map(c => [c.lat, c.lng]);
+      if (latlngs.length === 1) {
+        map.flyTo(latlngs[0], 6.4);
+      } else {
+        const b = L.latLngBounds(latlngs);
+        map.flyToBounds(b, { padding: [20, 20] });
+      }
+
+      municipalInitialMarkers.forEach(entry => {
+        if (entry.uf === uf && map.hasLayer(entry.marker)) {
+          map.removeLayer(entry.marker);
+        }
+      });
+
+      municipalLogoMarkers.forEach(entry => {
+        if (entry.uf === uf && map.hasLayer(entry.marker)) {
+          map.removeLayer(entry.marker);
+        }
+      });
+
+      clearMunicipalZoomMarkers();
+
+      highlightState = uf;
+      highlightCityNorm = null;
+      if (estadosLayer) {
+        estadosLayer.setStyle(estadoStyle);
+      }
+
+      polos.forEach(c => {
+        const bigMarker = L.marker([c.lat, c.lng], { icon: poloIcon })
+          .addTo(map)
+          .bindTooltip("Polo de atuação do Programa Trainee Ensina Brasil – " + c.nome, {
+            direction: "top",
+            offset: [0, -10],
+            opacity: 0.9
+          });
+
+        // destaque ao passar o mouse
+        attachLogoHover(bigMarker);
+
+        municipalZoomMarkers.push({ uf, marker: bigMarker });
+      });
+
+      setLegendPoloMode(true);
+    }
+
+    function carregarEstados() {
+      const urlGeoJSON =
+        "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson";
+
+      fetch(urlGeoJSON)
+        .then(r => r.json())
+        .then(geo => {
+          // Cria a layer de estados
+          estadosLayer = L.geoJSON(geo, {
+            style: estadoStyle,
+            onEachFeature: onEachEstado
+          }).addTo(map);
+
+          // Garante que todos os bounds fiquem salvos em estadoBoundsBySigla
+          estadosLayer.eachLayer(layer => {
+            const sigla = getSiglaFromFeature(layer.feature);
+            if (sigla) {
+              estadoBoundsBySigla[sigla] = layer.getBounds();
+            }
+          });
+
+          // Adiciona logos nos estados parceiros (GO, MT, MS)
+          partnershipStates.forEach(sigla => {
+            const bounds = estadoBoundsBySigla[sigla];
+            if (!bounds) return;
+
+            const markerLatLng = bounds.getCenter();
+
+            let tooltipText = "Parceria estadual do Programa Trainee Ensina Brasil"; if (sigla === "GO") { tooltipText = "Parceria estadual do Programa Trainee Ensina Brasil em Goiás"; } if (sigla === "MT") { tooltipText = "Parceria estadual do Programa Trainee Ensina Brasil em Mato Grosso"; } if (sigla === "MS") { tooltipText = "Parceria estadual do Programa Trainee Ensina Brasil em Mato Grosso do Sul"; }
+
+            const marker = L.marker(markerLatLng, { icon: ensinaIcon })
+              .addTo(map)
+              .bindTooltip(tooltipText, {
+                direction: "top",
+                offset: [0, -10],
+                opacity: 0.9
+              });
+
+            marker.on("click", () => handleStateLogoClick(sigla, marker));
+
+            // aplicar destaque hover nas logos de parceria estadual
+            try { attachLogoHover(marker); } catch (e) {}
+            stateLogoMarkers.push({ sigla, marker });
+          });
+        })
+        .catch(err => {
+          console.error("Erro ao carregar GeoJSON de estados:", err);
+        });
+    }
+
+ // -------------------------
+// PAÍSES DO MUNDO (estilo cinza)
+// -------------------------
+function carregarPaisesVizinhos() {
+  const urlSimples =
+    "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_0_countries.geojson";
+
+  fetch(urlSimples)
+    .then(r => r.json())
+    .then(geo => {
+      const paisesMundo = geo.features.filter(f => {
+        const props = f.properties || {};
+        return props.NAME !== "Brazil";
+      });
+
+      const paisBaseStyle = {
+        color: "#6b7280",
+        weight: 1.6,
+        fillColor: "#f9fafb",
+        fillOpacity: 0.18
+      };
+
+      paisesVizinhosLayer = L.geoJSON(
+        {
+          type: "FeatureCollection",
+          features: paisesMundo
+        },
+        {
+          style: paisBaseStyle,
+
+          onEachFeature: function (feature, layer) {
+            layer.on("mouseover", function () {
+              layer.setStyle({
+                color: "#0ea5e9",
+                weight: 2.8,
+                fillOpacity: 0.28
+              });
+            });
+
+            layer.on("mouseout", function () {
+              layer.setStyle(paisBaseStyle);
+            });
+
+            layer.on("click", function () {
+              if (!layer.getBounds) return;
+
+              const bounds = layer.getBounds();
+
+              if (bounds && bounds.isValid()) {
+                map.flyToBounds(bounds, {
+                  padding: [30, 30],
+                  duration: 1
+                });
+              }
+            });
+          }
+        }
+      ).addTo(map);
+
+      if (estadosLayer) {
+        estadosLayer.bringToFront();
+      }
+    })
+    .catch(err => {
+      console.error("Erro ao carregar GeoJSON dos países:", err);
+    });
+}
+    // -------------------------
+    // PROGRAMAS TEACH FOR ALL (Enseña/Ensina)
+    // -------------------------
+ function adicionarBrasilTeachForAll() {
+  if (brasilMarker) return;
+
+  const prog = {
+    pais: "Brasil",
+    nome: "Ensina Brasil",
+    lat: -14.2350,
+    lng: -51.9253,
+    logo: "https://flagcdn.com/w40/br.png",
+    site: "https://ensinabrasil.org"
+  };
+
+  function createIcon(size = 26) {
+    return L.divIcon({
+      html: `
+        <div class="logo-marker logo-program" style="width: ${size}px; height: ${size}px; border-radius: 50%; border: 1.5px solid #004b8d; background: white; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+          <img src="${prog.logo}" alt="${prog.pais}" style="width: 85%; height: 85%; object-fit: cover; border-radius: 50%;" onerror="this.parentElement.innerHTML='<span style=\\'font-size: 12px; font-weight: bold; color: #004b8d;\\'>${prog.pais.charAt(0).toUpperCase()}</span>';">
+        </div>
+      `,
+      className: "",
+      iconSize: [size, size],
+      iconAnchor: [Math.round(size / 2), Math.round(size / 2)]
+    });
+  }
+
+  brasilMarker = L.marker([prog.lat, prog.lng], { icon: createIcon(26) })
+    .bindPopup(`
+      <div style="text-align: center; font-weight: 500; font-family: 'Inter', sans-serif;">
+        <strong>${prog.pais}</strong><br>
+        <span style="font-size: 0.9rem; color: #6b7280;">${prog.nome}</span><br>
+        <a href="${prog.site}" target="_blank" rel="noopener noreferrer" style="font-size: 0.85rem; color: #0ea5e9; text-decoration: underline;">Visitar site</a>
+      </div>
+    `, {
+      maxWidth: 200,
+      className: "programa-popup"
+    });
+
+  try { attachLogoHover(brasilMarker); } catch (e) {}
+}
+    function adicionarProgramasTeachForAll() {
+      const programas = [
+        {
+          pais: "Argentina",
+          nome: "Enseñá por Argentina",
+          lat: -38.4161,
+          lng: -63.6167,
+          logo: "https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/ar.svg",
+          site: "https://ensenaporargentina.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Bolívia",
+          nome: "Enseña Bolivia",
+          lat: -16.5,
+          lng: -63.5823,
+          logo: "https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/bo.svg",
+          site: "https://ensenabolivia.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Chile",
+          nome: "Enseña Chile",
+          lat: -30.7191,
+          lng: -71.5439,
+          logo: "https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/cl.svg",
+          site: "https://www.ensenachile.cl",
+          mostrarSempre: true
+        },
+        {
+          pais: "Colômbia",
+          nome: "Enseña por Colombia",
+          lat: 4.5709,
+          lng: -74.2973,
+          logo: "https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/co.svg",
+          site: "https://ensenaporcolombia.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Equador",
+          nome: "Enseña Ecuador",
+          lat: -0.1807,
+          lng: -78.4678,
+          logo: "https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/ec.svg",
+          site: "https://ensenaecuador.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "México",
+          nome: "Enseña por México",
+          lat: 19.4326,
+          lng: -99.1332,
+          logo: "https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/mx.svg",
+          site: "https://ensenapormexico.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "United States of America",
+          nome: "Teach For America",
+          lat: 39.8283,
+          lng: -98.5795,
+          logo: "https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/us.svg",
+          site: "https://teachforamerica.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Paraguai",
+          nome: "Enseña Paraguay",
+          lat: -25.2637,
+          lng: -57.5759,
+          logo: "https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/py.svg",
+          site: "https://ensenaparaguay.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Peru",
+          nome: "Enseña Perú",
+          lat: -12.0464,
+          lng: -77.0428,
+          logo: "https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/pe.svg",
+          site: "https://ensenaperu.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Uruguai",
+          nome: "Enseña Uruguay",
+          lat: -34.9011,
+          lng: -56.1645,
+          logo: "https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/uy.svg",
+          site: "https://www.ensenauruguay.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Panamá",
+          nome: "Enseña por Panamá",
+          lat: 8.9824,
+          lng: -79.5199,
+          logo: "https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/pa.svg",
+          site: "https://ensenaporpanama.com",
+          mostrarSempre: true
+        },
+
+        {
+          pais: "Haiti",
+          nome: "Anseye Pou Ayiti",
+          lat: 18.9712,
+          lng: -72.2852,
+          logo: "https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/ht.svg",
+          site: "https://anseyepouayiti.org",
+          mostrarSempre: true,
+        },
+                 {
+          pais: "Afeganistao",
+          nome: "Teach For Afghanistan",
+          lat: 33.9391,
+          lng: 67.7100,
+          logo: "https://flagcdn.com/w40/af.png",
+          site: "https://teachforafghanistan.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Africa do Sul",
+          nome: "Teach For South Africa",
+          lat: -30.5595,
+          lng: 22.9375,
+          logo: "https://flagcdn.com/w40/za.png",
+          site: "https://teachforsouthafrica.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Alemanha",
+          nome: "Teach First Deutschland",
+          lat: 51.1657,
+          lng: 10.4515,
+          logo: "https://flagcdn.com/w40/de.png",
+          site: "https://www.teachfirst.de",
+          mostrarSempre: true
+        },
+        {
+          pais: "Armenia",
+          nome: "Teach For Armenia",
+          lat: 40.0691,
+          lng: 45.0382,
+          logo: "https://flagcdn.com/w40/am.png",
+          site: "https://teachforarmenia.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Australia",
+          nome: "Teach For Australia",
+          lat: -25.2744,
+          lng: 133.7751,
+          logo: "https://flagcdn.com/w40/au.png",
+          site: "https://teachforaustralia.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Austria",
+          nome: "Teach For Austria",
+          lat: 47.5162,
+          lng: 14.5501,
+          logo: "https://flagcdn.com/w40/at.png",
+          site: "https://www.teachforaustria.at",
+          mostrarSempre: true
+        },
+        {
+          pais: "Bangladesh",
+          nome: "Teach For Bangladesh",
+          lat: 23.6850,
+          lng: 90.3563,
+          logo: "https://flagcdn.com/w40/bd.png",
+          site: "https://teachforbangladesh.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Belgica",
+          nome: "Teach for Belgium",
+          lat: 50.5039,
+          lng: 4.4699,
+          logo: "https://flagcdn.com/w40/be.png",
+          site: "https://teachforbelgium.be",
+          mostrarSempre: true
+        },
+        {
+          pais: "Bulgaria",
+          nome: "Teach For Bulgaria",
+          lat: 42.7339,
+          lng: 25.4858,
+          logo: "https://flagcdn.com/w40/bg.png",
+          site: "https://zaednovchas.bg",
+          mostrarSempre: true
+        },
+        {
+          pais: "Cambodja",
+          nome: "Teach For Cambodia",
+          lat: 12.5657,
+          lng: 104.9910,
+          logo: "https://flagcdn.com/w40/kh.png",
+          site: "https://teachforcambodia.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "China",
+          nome: "Teach For China",
+          lat: 35.8617,
+          lng: 104.1954,
+          logo: "https://flagcdn.com/w40/cn.png",
+          site: "https://tfchina.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Dinamarca",
+          nome: "Teach First Danmark",
+          lat: 56.2639,
+          lng: 9.5018,
+          logo: "https://flagcdn.com/w40/dk.png",
+          site: "https://teachfirst.dk",
+          mostrarSempre: true
+        },
+        {
+          pais: "Espanha",
+          nome: "Empieza por Educar",
+          lat: 40.4637,
+          lng: -3.7492,
+          logo: "https://flagcdn.com/w40/es.png",
+          site: "https://programaexe.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Estonia",
+          nome: "Noored Kooli",
+          lat: 58.5953,
+          lng: 25.0136,
+          logo: "https://flagcdn.com/w40/ee.png",
+          site: "https://www.nooredkooli.ee",
+          mostrarSempre: true
+        },
+        {
+          pais: "Etiopia",
+          nome: "Teach For Ethiopia",
+          lat: 9.1450,
+          lng: 40.4897,
+          logo: "https://flagcdn.com/w40/et.png",
+          site: "https://www.iteachforethiopia.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Filipinas",
+          nome: "Teach for the Philippines",
+          lat: 12.8797,
+          lng: 121.7740,
+          logo: "https://flagcdn.com/w40/ph.png",
+          site: "https://teachforthephilippines.com",
+          mostrarSempre: true
+        },
+        {
+          pais: "Franca",
+          nome: "Le Choix de l'école",
+          lat: 46.2276,
+          lng: 2.2137,
+          logo: "https://flagcdn.com/w40/fr.png",
+          site: "https://www.lechoixdelecole.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "India",
+          nome: "Teach For India",
+          lat: 20.5937,
+          lng: 78.9629,
+          logo: "https://flagcdn.com/w40/in.png",
+          site: "https://teachforindia.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Italia",
+          nome: "Teach For Italy",
+          lat: 41.8719,
+          lng: 12.5674,
+          logo: "https://flagcdn.com/w40/it.png",
+          site: "https://insegnareperlitalia.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Japao",
+          nome: "Teach For Japan",
+          lat: 36.2048,
+          lng: 138.2529,
+          logo: "https://flagcdn.com/w40/jp.png",
+          site: "https://teachforjapan.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Malasia",
+          nome: "Teach For Malaysia",
+          lat: 4.2105,
+          lng: 101.9758,
+          logo: "https://flagcdn.com/w40/my.png",
+          site: "https://teachformalaysia.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Nigeria",
+          nome: "Teach For Nigeria",
+          lat: 9.0820,
+          lng: 8.6753,
+          logo: "https://flagcdn.com/w40/ng.png",
+          site: "https://teachfornigeria.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Nova Zelandia",
+          nome: "Teach First NZ",
+          lat: -40.9006,
+          lng: 174.8860,
+          logo: "https://flagcdn.com/w40/nz.png",
+          site: "https://teachfirstnz.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Paquistao",
+          nome: "Teach For Pakistan",
+          lat: 30.3753,
+          lng: 69.3451,
+          logo: "https://flagcdn.com/w40/pk.png",
+          site: "https://www.iteachforpakistan.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Portugal",
+          nome: "Teach For Portugal",
+          lat: 39.3999,
+          lng: -8.2245,
+          logo: "https://flagcdn.com/w40/pt.png",
+          site: "https://www.teachforportugal.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Reino Unido",
+          nome: "Teach First",
+          lat: 55.3781,
+          lng: -3.4360,
+          logo: "https://flagcdn.com/w40/gb.png",
+          site: "https://www.teachfirst.org.uk",
+          mostrarSempre: true
+        },
+        {
+          pais: "Romania",
+          nome: "Teach For Romania",
+          lat: 45.9432,
+          lng: 24.9668,
+          logo: "https://flagcdn.com/w40/ro.png",
+          site: "https://teachforromania.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Suecia",
+          nome: "Teach For Sweden",
+          lat: 60.1282,
+          lng: 18.6435,
+          logo: "https://flagcdn.com/w40/se.png",
+          site: "https://www.teachforsweden.se",
+          mostrarSempre: true
+        },
+        {
+          pais: "Tailandia",
+          nome: "Teach For Thailand",
+          lat: 15.8700,
+          lng: 100.9925,
+          logo: "https://flagcdn.com/w40/th.png",
+          site: "https://teachforthailand.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Ucrania",
+          nome: "Teach For Ukraine",
+          lat: 48.3794,
+          lng: 31.1656,
+          logo: "https://flagcdn.com/w40/ua.png",
+          site: "https://teachforukraine.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Uganda",
+          nome: "Teach For Uganda",
+          lat: 1.3733,
+          lng: 32.2903,
+          logo: "https://flagcdn.com/w40/ug.png",
+          site: "https://teachforuganda.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Vietna",
+          nome: "Teach For Viet Nam",
+          lat: 14.0583,
+          lng: 108.2772,
+          logo: "https://flagcdn.com/w40/vn.png",
+          site: "https://teachforvietnam.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Libano",
+          nome: "Teach For Lebanon",
+          lat: 33.8547,
+          lng: 35.8623,
+          logo: "https://flagcdn.com/w40/lb.png",
+          site: "https://teachforlebanon.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Palestina",
+          nome: "Teach For Palestine",
+          lat: 31.9522,
+          lng: 35.2332,
+          logo: "https://flagcdn.com/w40/ps.png",
+          site: "https://teachforpalestine.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Marrocos",
+          nome: "Teach For Morocco",
+          lat: 31.7917,
+          lng: -7.0926,
+          logo: "https://flagcdn.com/w40/ma.png",
+          site: "https://www.teachformorocco.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Quenia",
+          nome: "Teach For Kenya",
+          lat: -0.0236,
+          lng: 37.9062,
+          logo: "https://flagcdn.com/w40/ke.png",
+          site: "https://teachforkenya.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Liberia",
+          nome: "Teach For Liberia",
+          lat: 6.4281,
+          lng: -9.4295,
+          logo: "https://flagcdn.com/w40/lr.png",
+          site: "https://teachforliberia.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Nepal",
+          nome: "Teach For Nepal",
+          lat: 28.3949,
+          lng: 84.1240,
+          logo: "https://flagcdn.com/w40/np.png",
+          site: "https://teachfornepal.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Polonia",
+          nome: "Teach For Poland",
+          lat: 51.9194,
+          lng: 19.1451,
+          logo: "https://flagcdn.com/w40/pl.png",
+          site: "https://teachforpoland.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Senegal",
+          nome: "Teach For Senegal",
+          lat: 14.4974,
+          lng: -14.4524,
+          logo: "https://flagcdn.com/w40/sn.png",
+          site: "https://www.teachforsenegal.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Serra Leoa",
+          nome: "Teach For Sierra Leone",
+          lat: 8.4606,
+          lng: -11.7799,
+          logo: "https://flagcdn.com/w40/sl.png",
+          site: "https://teachforsierraleone.org",
+          mostrarSempre: true
+        },
+        {
+          pais: "Zimbabue",
+          nome: "Teach For Zimbabwe",
+          lat: -19.0154,
+          lng: 29.1549,
+          logo: "https://flagcdn.com/w40/zw.png",
+          site: "https://www.teachforzimbabwe.org",
+          mostrarSempre: true
+        }
+              ];
+
+      programas.forEach(prog => {
+        // helper: cria ícone com tamanho variável (hover aumenta)
+        function createIcon(size = 26) {
+          return L.divIcon({
+            html: `
+              <div class="logo-marker logo-program" style="width: ${size}px; height: ${size}px; border-radius: 50%; border: 1.5px solid #004b8d; background: white; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                <img src="${prog.logo}" alt="${prog.pais}" style="width: 85%; height: 85%; object-fit: cover; border-radius: 50%;" onerror="this.parentElement.innerHTML='<span style=\\'font-size: 12px; font-weight: bold; color: #004b8d;\\'>${prog.pais.charAt(0).toUpperCase()}</span>';">
+              </div>
+            `,
+            className: "",
+            iconSize: [size, size],
+            iconAnchor: [Math.round(size / 2), Math.round(size / 2)]
+          });
+        }
+
+        const marker = L.marker([prog.lat, prog.lng], { icon: createIcon(26) })
+          .bindPopup(`
+            <div style="text-align: center; font-weight: 500; font-family: 'Inter', sans-serif;">
+              <strong>${prog.pais}</strong><br>
+              <span style="font-size: 0.9rem; color: #6b7280;">${prog.nome}</span><br>
+              <a href="${prog.site}" target="_blank" rel="noopener noreferrer" style="font-size: 0.85rem; color: #0ea5e9; text-decoration: underline;">Visitar site</a>
+            </div>
+          `, {
+            maxWidth: 200,
+            className: "programa-popup"
+          });
+
+        // Usamos attachLogoHover para escala/sombra; popup abre no click (não no hover)
+        marker.addTo(map);
+        try { attachLogoHover(marker); } catch (e) {}
+        programasMarkers.push({ marker, prog });
+      });
+
+
+    }
+
+
+
+    // -------------------------
+    // MUNICÍPIOS
+    // -------------------------
+    function limparMunicipios() {
+      if (municipiosLayer) {
+        map.removeLayer(municipiosLayer);
+        municipiosLayer = null;
+      }
+
+      currentMunicipiosUF = null;
+
+      municipalLogoMarkers.forEach(obj => map.removeLayer(obj.marker));
+      municipalLogoMarkers = [];
+    }
+
+    function carregarMunicipiosEstado(sigla) {
+      const code = stateCodeBySigla[sigla];
+      if (!code) {
+        limparMunicipios();
+        return;
+      }
+
+      currentMunicipiosUF = sigla;
+
+      const cidadesSet = new Set(
+        pessoas
+          .filter(p => p.estado_sigla === sigla)
+          .map(p => normalizarTexto(p.cidade))
+          .filter(Boolean)
+      );
+
+      if (!cidadesSet.size && !municipalPartnerships.some(pc => pc.uf === sigla)) {
+        limparMunicipios();
+        return;
+      }
+
+      const url = `https://raw.githubusercontent.com/tbrugz/geodata-br/master/geojson/geojs-${code}-mun.json`;
+
+      const desenhar = (geo) => {
+        const centersByCidadeNorm = {};
+        (geo.features || []).forEach(f => {
+          const nomeNorm = normalizarTexto(getMunicipioNome(f));
+          if (!nomeNorm) return;
+          const tempLayer = L.geoJSON(f);
+          centersByCidadeNorm[nomeNorm] = tempLayer.getBounds().getCenter();
+        });
+
+        const featuresFiltradas = (geo.features || []).filter(f => {
+          const nomeMun = normalizarTexto(getMunicipioNome(f));
+          return cidadesSet.has(nomeMun);
+        });
+
+        limparMunicipios();
+        currentMunicipiosUF = sigla;
+
+        if (featuresFiltradas.length) {
+          municipiosLayer = L.geoJSON(
+            { type: "FeatureCollection", features: featuresFiltradas },
+            {
+              style: municipioStyle
+            }
+          ).addTo(map);
+
+          if (estadosLayer) {
+            estadosLayer.setStyle(estadoStyle);
+          }
+        }
+
+                municipalPartnerships
+          .filter(pc => pc.uf === sigla)
+          .forEach(pc => {
+            // Já têm marcador inicial agregado/individual:
+            // não recriar marcador de parceria ao carregar municípios
+            if (sigla === "PE" || sigla === "ES" || sigla === "MA") return;
+
+            const center = centersByCidadeNorm[pc.cidadeNorm];
+            if (!center) return;
+
+            const marker = L.marker(center, { icon: cityIcon })
+              .addTo(map)
+              .bindTooltip("Parceria municipal do Programa Trainee Ensina Brasil", {
+                direction: "top",
+                offset: [0, -10],
+                opacity: 0.9
+              });
+
+            marker.on("click", () => {
+              handleMunicipalLogoClick(sigla, marker);
+            });
+
+            municipalLogoMarkers.push({ uf: sigla, marker });
+          });
+
+      };
+
+      if (municipiosCache[sigla]) {
+        desenhar(municipiosCache[sigla]);
+        return;
+      }
+
+      fetch(url)
+        .then(r => r.json())
+        .then(geo => {
+          municipiosCache[sigla] = geo;
+          desenhar(geo);
+        })
+        .catch(err => {
+          console.error("Erro ao carregar municípios do estado", sigla, err);
+        });
+    }
+
+    // -------------------------
+    // LOGOS MUNICIPAIS INICIAIS
+    // -------------------------
+    function adicionarLogosMunicipaisIniciais() {
+      const groupedByUF = {};
+      municipalInitialCities.forEach(c => {
+        if (!groupedByUF[c.uf]) groupedByUF[c.uf] = [];
+        groupedByUF[c.uf].push(c);
+      });
+
+      Object.keys(groupedByUF).forEach(uf => {
+        const cities = groupedByUF[uf];
+
+        if (uf === "PE" || uf === "ES") {
+          const latlngs = cities.map(c => [c.lat, c.lng]);
+          const bounds = L.latLngBounds(latlngs);
+          const center = bounds.getCenter();
+
+          const marker = L.marker(center, { icon: cityIcon })
+            .addTo(map)
+            .bindTooltip("Parceria municipal do Programa Trainee Ensina Brasil", {
+              direction: "top",
+              offset: [0, -10],
+              opacity: 0.9
+            });
+
+          marker.on("click", () => {
+            handleMunicipalLogoClick(uf, marker);
+          });
+
+          // aplicar hover de destaque também aos marcadores iniciais
+          try { attachLogoHover(marker); } catch (e) {}
+
+          municipalInitialMarkers.push({
+            uf,
+            nome: "Parceria com Municípios",
+            marker
+          });
+        } else {
+          cities.forEach(cidade => {
+            const marker = L.marker([cidade.lat, cidade.lng], { icon: cityIcon })
+              .addTo(map)
+              .bindTooltip("Parceria com Municípios", {
+                direction: "top",
+                offset: [0, -10],
+                opacity: 0.9
+              });
+
+            marker.on("click", () => {
+              handleMunicipalLogoClick(cidade.uf, marker);
+            });
+
+            // aplicar hover de destaque também aos marcadores municipais individuais
+            try { attachLogoHover(marker); } catch (e) {}
+
+            municipalInitialMarkers.push({
+              uf: cidade.uf,
+              nome: cidade.nome,
+              marker
+            });
+          });
+        }
+      });
+    }
+
+    // -------------------------
+    // LOGOS PROGRAMA LAMPIAR
+    // -------------------------
+    function limparLogosLampiar() {
+      lampiarMarkers.forEach(m => map.removeLayer(m));
+      lampiarMarkers = [];
+    }
+
+function adicionarLogosLampiar() {
+  if (!map) return;
+
+  limparLogosLampiar();
+
+  lampiarCities.forEach(cidade => {
+
+    const marker = L.marker([cidade.lat, cidade.lng], { icon: lampiarIcon })
+      .addTo(map)
+      .bindTooltip(
+        "Programa Lampiar – " + cidade.nome + "/" + cidade.uf,
+        { direction: "top", offset: [0, -10], opacity: 0.9 }
+      );
+
+    // 🔹 Clique: destacar UF igual ao ícone do Ensina + zoom para o estado
+    marker.on('click', function () {
+      const uf = cidade.uf;
+      const regiao = stateRegionBySigla[uf] || "";
+
+      // Atualiza variáveis de destaque
+      selectedRegion = regiao || null;
+      highlightState = uf;
+      highlightCityNorm = null;
+
+      // Ajusta filtros da lateral
+      filterRegiao.value = regiao;
+      atualizarOpcoesEstado(regiao || null);
+      filterEstado.value = uf;
+      filterCidade.value = "";
+      filterTurma.value = "";
+
+      atualizarCidades();
+      atualizarLista();
+
+      // Reaplica estilo dos estados para refletir highlightState
+      if (estadosLayer) {
+        estadosLayer.setStyle(estadoStyle);
+      }
+
+      // Carrega municípios da UF (como nos outros fluxos)
+      carregarMunicipiosEstado(uf);
+
+      // Zoom para o estado (usa bounds se tiver, senão vai pro centro)
+      try {
+        const bounds = estadoBoundsBySigla && estadoBoundsBySigla[uf];
+        if (bounds && bounds.isValid && bounds.isValid()) {
+          const padded = bounds.pad ? bounds.pad(0.12) : bounds;
+          map.fitBounds(padded, { animate: true, maxZoom: 6 });
+        } else {
+          // fallback: centro do ponto, zoom estadual
+          map.flyTo([cidade.lat, cidade.lng], 7);
+        }
+      } catch (e) {
+        // fallback hard caso algo dê ruim nos bounds
+        map.flyTo([cidade.lat, cidade.lng], 7);
+      }
+    });
+
+    // hover bonito (escala + sombra)
+    attachLogoHover(marker);
+
+    lampiarMarkers.push(marker);
+  });
+}
+
+    // -------------------------
+    // ZOOMS
+    // -------------------------
+    function zoomNacional() {
+      highlightState = null;
+      highlightCityNorm = null;
+      selectedRegion = null;
+
+      if (estadosLayer) {
+        estadosLayer.setStyle(estadoStyle);
+      }
+
+      if (map) {
+        map.flyTo([-14.5, -52], 4);
+      }
+
+      limparMunicipios();
+      clearStateExtraCityMarkers();
+      clearMunicipalZoomMarkers();
+      currentStateLogoZoom = null;
+      setLegendPoloMode(false);
+      // Lampiar continua visível
+    }
+
+    function zoomRegiao(regiao) {
+      if (!regiao || !map || !estadosLayer) return;
+
+      const ufs = Object.keys(stateRegionBySigla).filter(
+        (sigla) => stateRegionBySigla[sigla] === regiao
+      );
+
+      const boundsList = ufs
+        .map((sigla) => estadoBoundsBySigla[sigla])
+        .filter(Boolean);
+
+      if (!boundsList.length) return;
+
+      let combined = boundsList[0].clone();
+      for (let i = 1; i < boundsList.length; i++) {
+        combined.extend(boundsList[i]);
+      }
+
+      map.flyToBounds(combined, {
+        padding: [40, 40],
+        maxZoom: 5.2,
+        animate: true,
+      });
+    }
+
+    function zoomEstado(sigla) {
+      if (!sigla || !map) return;
+
+      let b = estadoBoundsBySigla[sigla];
+
+      if (!b && estadosLayer) {
+        estadosLayer.eachLayer(layer => {
+          const s = getSiglaFromFeature(layer.feature);
+          if (s === sigla) {
+            b = layer.getBounds();
+            estadoBoundsBySigla[sigla] = b;
+          }
+        });
+      }
+
+      if (b) {
+        map.flyToBounds(b, {
+          padding: [40, 40],
+          maxZoom: 5.8,
+          animate: true
+        });
+      }
+
+      carregarMunicipiosEstado(sigla);
+    }
+
+    function zoomLocal(sigla) {
+      const b = estadoBoundsBySigla[sigla];
+      if (b) {
+        const center = b.getCenter();
+        map.flyTo(center, 7);
+      }
+      carregarMunicipiosEstado(sigla);
+    }
+
+    function ajustarZoom() {
+      if (!map) return;
+
+      const estado = filterEstado.value;
+      const regiao = filterRegiao.value;
+
+      if (estado) {
+        zoomEstado(estado);
+      } else if (regiao) {
+        zoomRegiao(regiao);
+      } else {
+        zoomNacional();
+      }
+    }
+
+    // -------------------------
+    // SELEÇÃO DE PESSOA
+    // -------------------------
+    function criarChavePessoa(p) {
+      return (p.nome || "") + "|" + (p.estado_sigla || "") + "|" + (p.cidade || "");
+    }
+
+    function selecionarPessoa(p) {
+      const key = criarChavePessoa(p);
+      pessoaSelecionadaKey = key;
+
+      highlightState = p.estado_sigla || null;
+      highlightCityNorm = normalizarTexto(p.cidade || "");
+
+      if (p.estado_sigla) {
+        filterRegiao.value = stateRegionBySigla[p.estado_sigla] || "";
+        atualizarOpcoesEstado(filterRegiao.value || null);
+        filterEstado.value = p.estado_sigla;
+      }
+
+      atualizarCidades();
+      atualizarLista();
+
+      if (estadosLayer) {
+        estadosLayer.setStyle(estadoStyle);
+      }
+
+      ajustarZoom();
+      if (p.estado_sigla) {
+        carregarMunicipiosEstado(p.estado_sigla);
+      }
+    }
+
+function limparSelecao() {
+  pessoaSelecionadaKey = null;
+  highlightState = null;
+  highlightCityNorm = null;
+  selectedRegion = null;
+  hoverState = null;
+
+  filterRegiao.value = "";
+  filterEstado.value = "";
+  filterCidade.value = "";
+  filterTurma.value = "";
+  filterPrograma.value = "";
+  filterCargo.value = "";
+  filterInstituicao.value = "";
+  if (filterSort) filterSort.value = "az";
+  filterBusca.value = "";
+
+  atualizarOpcoesEstado(null);
+  atualizarCidades();
+  atualizarTurmas();
+  atualizarProgramas();
+  atualizarCargos();
+  atualizarInstituicoes();
+  atualizarLista();
+
+  if (estadosLayer) {
+    estadosLayer.setStyle(estadoStyle);
+  }
+
+  if (municipiosLayer) {
+    map.removeLayer(municipiosLayer);
+    municipiosLayer = null;
+    currentMunicipiosUF = null;
+  }
+
+  clearStateExtraCityMarkers();
+  clearMunicipalZoomMarkers();
+
+  currentStateLogoZoom = null;
+  setLegendPoloMode(false);
+
+  zoomNacional();
+}
+function padronizarInstituicao(nome) {
+  if (!nome) return "Sem dados";
+
+  let textoOriginal = String(nome).trim();
+
+  let texto = textoOriginal
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[”“"]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  let textoUpper = texto.toUpperCase();
+
+  if (!textoUpper || textoUpper === "SEM DADOS" || textoUpper === "ESCOLA" || textoUpper === "-") {
+    return "Sem dados";
+  }
+  function padronizarInstituicao(nome) {
+  if (!nome) return "";
+
+  const original = String(nome).trim();
+
+  const texto = original
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[”“"]/g, "")
+    .replace(/\s+/g, " ")
+    .toUpperCase()
+    .trim();
+
+  const pareceSecretariaEducacao =
+    texto.includes("SECRETARIA DE EDUCACAO") ||
+    texto.includes("SECRETARIA DA EDUCACAO") ||
+    texto.includes("SECRETARIA ESTADUAL DE EDUCACAO") ||
+    texto.includes("SECRETARIA DE ESTADO DE EDUCACAO") ||
+    texto.includes("SEDUC") ||
+    texto.includes("SEC ");
+
+  if (!pareceSecretariaEducacao) {
+    return original;
+  }
+
+  const estados = {
+    AC: "Acre",
+    AL: "Alagoas",
+    AP: "Amapá",
+    AM: "Amazonas",
+    BA: "Bahia",
+    CE: "Ceará",
+    DF: "Distrito Federal",
+    ES: "Espírito Santo",
+    GO: "Goiás",
+    MA: "Maranhão",
+    MT: "Mato Grosso",
+    MS: "Mato Grosso do Sul",
+    MG: "Minas Gerais",
+    PA: "Pará",
+    PB: "Paraíba",
+    PR: "Paraná",
+    PE: "Pernambuco",
+    PI: "Piauí",
+    RJ: "Rio de Janeiro",
+    RN: "Rio Grande do Norte",
+    RS: "Rio Grande do Sul",
+    RO: "Rondônia",
+    RR: "Roraima",
+    SC: "Santa Catarina",
+    SP: "São Paulo",
+    SE: "Sergipe",
+    TO: "Tocantins"
+  };
+
+  for (const [uf, nomeEstado] of Object.entries(estados)) {
+    const nomeEstadoNorm = nomeEstado
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toUpperCase();
+
+    const encontrouNomeEstado = texto.includes(nomeEstadoNorm);
+
+    const encontrouUF =
+      texto.includes(` ${uf}`) ||
+      texto.includes(`-${uf}`) ||
+      texto.includes(`/${uf}`) ||
+      texto.includes(`(${uf})`) ||
+      texto.endsWith(` ${uf}`);
+
+    if (encontrouNomeEstado || encontrouUF) {
+      return `Secretaria de Educação do Estado de ${nomeEstado}`;
+    }
+  }
+
+  return original;
+}
+  if (textoUpper.includes("FGV")) return "FGV";
+  if (textoUpper.includes("ENSINA BRASIL")) return "Ensina Brasil";
+  if (textoUpper.includes("ASSOCIACAO BEM COMUM")) return "Associação Bem Comum";
+  if (textoUpper.includes("LETRUS")) return "Letrus";
+  if (textoUpper.includes("ARCO")) return "Arco Educação";
+  if (textoUpper.includes("TODOS PELA EDUCACAO")) return "Todos Pela Educação";
+  if (textoUpper.includes("FUNDACAO LEMANN")) return "Fundação Lemann";
+  if (textoUpper.includes("INSTITUTO UNIBANCO")) return "Instituto Unibanco";
+  if (textoUpper.includes("INSTITUTO SONHO GRANDE")) return "Instituto Sonho Grande";
+  if (textoUpper.includes("ITAU SOCIAL")) return "Itaú Social";
+  if (textoUpper.includes("MINISTERIO DA EDUCACAO") || textoUpper === "MEC") return "Ministério da Educação";
+// FGV
+if (
+  textoUpper.includes("FGV") ||
+  textoUpper.includes("FUNDACAO GETULIO VARGAS")
+) {
+  return "FGV";
+}
+
+// Ensina Brasil
+if (
+  textoUpper.includes("ENSINA BRASIL") ||
+  textoUpper === "ENSINA"
+) {
+  return "Ensina Brasil";
+}
+
+// Associação Bem Comum
+if (
+  textoUpper.includes("ASSOCIACAO BEM COMUM") ||
+  textoUpper.includes("BEM COMUM")
+) {
+  return "Associação Bem Comum";
+}
+
+// Arco Educação
+if (
+  textoUpper === "ARCO" ||
+  textoUpper.includes("ARCO EDUCACAO")
+) {
+  return "Arco Educação";
+}
+
+// Letrus
+if (textoUpper.includes("LETRUS")) {
+  return "Letrus";
+}
+
+// Todos Pela Educação
+if (
+  textoUpper.includes("TODOS PELA EDUCACAO") ||
+  textoUpper.includes("TODOS PELA EDUCAÇÃO")
+) {
+  return "Todos Pela Educação";
+}
+
+// Fundação Lemann
+if (
+  textoUpper.includes("FUNDACAO LEMANN") ||
+  textoUpper.includes("FUNDAÇÃO LEMANN") ||
+  textoUpper.includes("CENTRO LEMANN")
+) {
+  return "Fundação Lemann";
+}
+
+// Instituto Sonho Grande
+if (textoUpper.includes("INSTITUTO SONHO GRANDE")) {
+  return "Instituto Sonho Grande";
+}
+
+// Instituto Unibanco
+if (textoUpper.includes("INSTITUTO UNIBANCO")) {
+  return "Instituto Unibanco";
+}
+
+// Itaú / Itaú Social
+if (
+  textoUpper.includes("ITAU SOCIAL") ||
+  textoUpper.includes("ITAÚ SOCIAL")
+) {
+  return "Itaú Social";
+}
+
+if (
+  textoUpper.includes("ITAU UNIBANCO") ||
+  textoUpper.includes("ITAÚ UNIBANCO")
+) {
+  return "Itaú Unibanco";
+}
+
+// Motriz
+if (textoUpper.includes("MOTRIZ")) {
+  return "Motriz";
+}
+
+// CENPEC / CENPRE
+if (
+  textoUpper.includes("CENPRE") ||
+  textoUpper.includes("CENPEC")
+) {
+  return "CENPEC";
+}
+
+// Associação Nova Escola
+if (
+  textoUpper.includes("ASSOCIACAO NOVA ESCOLA") ||
+  textoUpper.includes("NOVA ESCOLA")
+) {
+  return "Associação Nova Escola";
+}
+
+// SAS
+if (textoUpper.includes("SAS")) {
+  return "SAS Plataforma de Educação";
+}
+
+// COC
+if (textoUpper.includes("COC")) {
+  return "COC Plataforma de Educação";
+}
+
+// SESI
+if (
+  textoUpper.includes("SESI") ||
+  textoUpper.includes("SERVICO SOCIAL DA INDUSTRIA")
+) {
+  return "SESI";
+}
+
+// Instituto Ponte
+if (textoUpper.includes("INSTITUTO PONTE")) {
+  return "Instituto Ponte";
+}
+
+// Instituto Ayrton Senna
+if (textoUpper.includes("INSTITUTO AYRTON SENNA")) {
+  return "Instituto Ayrton Senna";
+}
+
+// Vozes da Educação
+if (textoUpper.includes("VOZES DA EDUCACAO")) {
+  return "Vozes da Educação";
+}
+
+// MegaEdu
+if (textoUpper.includes("MEGAEDU")) {
+  return "MegaEdu";
+}
+
+// Manacá
+if (textoUpper.includes("MANACA")) {
+  return "Manacá Tecnologias Sociais";
+}
+
+// Geekie
+if (textoUpper.includes("GEEKIE")) {
+  return "Geekie";
+}
+
+// Fundação Bradesco
+if (textoUpper.includes("FUNDACAO BRADESCO")) {
+  return "Fundação Bradesco";
+}
+
+// Fundação Iochpe
+if (textoUpper.includes("FUNDACAO IOCHPE")) {
+  return "Fundação Iochpe";
+}
+if (
+  textoUpper.includes("SEDUC-GO") ||
+  textoUpper.includes("SEDUC GO") ||
+  textoUpper.includes("SEDUC GOIAS") ||
+  textoUpper.includes("SEDUC/GO") ||
+  textoUpper === "SEDUC" ||
+  textoUpper.includes("REDE ESTADUAL DE GOIAS") ||
+  textoUpper.includes("GOVERNO DE GOIAS") ||
+  textoUpper.includes("GOVERNO DO ESTADO DE GOIAS") ||
+  textoUpper.includes("ESTADO DE GOIAS") ||
+  textoUpper.includes("SECRETARIA DE EDUCACAO DE GOIAS") ||
+  textoUpper.includes("SECRETARIA DA EDUCACAO DE GOIAS") ||
+  textoUpper.includes("SECRETARIA ESTADUAL DE EDUCACAO DE GOIAS") ||
+  textoUpper.includes("SECRETARIA ESTADUAL DA EDUCACAO DE GOIAS") ||
+  textoUpper.includes("SECRETARIA DE EDUCACAO DO ESTADO DE GOIAS") ||
+  textoUpper.includes("SECRETARIA DA EDUCACAO DO ESTADO DE GOIAS") ||
+  textoUpper.includes("SECRETARIA DE ESTADO DE EDUCACAO DE GOIAS") ||
+  textoUpper.includes("SECRETARIA DE ESTADO DA EDUCACAO DE GOIAS")
+) {
+  return "Secretaria de Educação do Estado de Goiás";
+}
+
+  if (textoUpper.includes("SEDUC MA") || textoUpper.includes("SEDUC /MA") || textoUpper.includes("MAIS INTEGRAL SEDUC-MA") || textoUpper.includes("SECRETARIA DE EDUCACAO DO ESTADO DO MARANHAO") || textoUpper.includes("SECRETARIA DE ESTADO DA EDUCACAO DO MARANHAO") || textoUpper.includes("GOVERNO DO MARANHAO")) {
+    return "Secretaria de Educação do Estado do Maranhão";
+  }
+
+  if (textoUpper.includes("SED/MS") || textoUpper.includes("SEDMS") || textoUpper.includes("SECRETARIA DE EDUCACAO DO ESTADO DO MATO GROSSO DO SUL") || textoUpper.includes("SECRETARIA DE ESTADO DE EDUCACAO DE MATO GROSSO DO SUL") || textoUpper.includes("GOVERNO DO ESTADO DE MATO GROSSO DO SUL")) {
+    return "Secretaria de Educação do Estado de Mato Grosso do Sul";
+  }
+
+  if (textoUpper.includes("CARUARU") && (textoUpper.includes("SECRETARIA") || textoUpper.includes("SEDUC") || textoUpper.includes("PREFEITURA") || textoUpper.includes("REDE MUNICIPAL"))) {
+    return "Secretaria Municipal de Educação de Caruaru";
+  }
+
+  if (textoUpper.includes("VITORIA") && (textoUpper.includes("SECRETARIA") || textoUpper.includes("SME") || textoUpper.includes("PREFEITURA") || textoUpper.includes("GABINETE") || textoUpper.includes("SUBGABINETE"))) {
+    return "Secretaria Municipal de Educação de Vitória";
+  }
+
+  if (textoUpper.includes("PETROLINA") && textoUpper.includes("SECRETARIA")) {
+    return "Secretaria Municipal de Educação de Petrolina";
+  }
+
+  if (textoUpper.includes("RIO DE JANEIRO") && (textoUpper.includes("SECRETARIA MUNICIPAL") || textoUpper.includes("SME RIO") || textoUpper.includes("PREFEITURA DO RIO"))) {
+    return "Secretaria Municipal de Educação do Rio de Janeiro";
+  }
+
+  if (textoUpper.includes("BELEM") && textoUpper.includes("SECRETARIA")) {
+    return "Secretaria Municipal de Educação de Belém";
+  }
+
+  if (textoUpper.includes("PORTO ALEGRE") || textoUpper.includes("SMED/POA")) {
+    return "Secretaria Municipal de Educação de Porto Alegre";
+  }
+
+  return formatarNomeProprio(textoOriginal);
+}
+
+function formatarNomeProprio(texto) {
+  const minusculas = ["de", "da", "do", "das", "dos", "e", "em", "para"];
+  const siglas = ["FGV", "MEC", "SEDUC", "SME", "SEMED", "EMEF", "EMEFTI", "EE", "CE", "CEM", "CEIM", "CEEP", "CEEJA", "UFES", "USP", "IFSP", "CAPES", "UNESCO", "UNAIDS", "SESI", "SENAC", "XP"];
+
+  return String(texto)
+    .trim()
+    .replace(/[”“"]/g, "")
+    .replace(/\s+/g, " ")
+    .toLowerCase()
+    .split(" ")
+    .map((palavra, index) => {
+      const limpa = palavra.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/[.,]/g, "");
+
+      if (siglas.includes(limpa)) return limpa;
+      if (index > 0 && minusculas.includes(palavra)) return palavra;
+
+      return palavra.charAt(0).toUpperCase() + palavra.slice(1);
+    })
+    .join(" ");
+}
+    // -------------------------
+    // PESSOAS (Google Sheets - Única Fonte)
+    // -------------------------
+    const API_URL = "https://script.google.com/macros/s/AKfycbyLH9WrPrpbWVfXD1RRJbQIh6WkrUCJqVTRnzpM3YZ-A9cdnEUL9qayt8slwKGXvKlT/exec";
+
+    function carregarPessoas() {
+      console.log("📊 Carregando alumni da planilha Google Sheets...");
+      
+      fetch(API_URL + "?t=" + new Date().getTime(), {
+        method: 'GET',
+        redirect: 'follow'
+      })
+        .then(resp => {
+          if (!resp.ok) {
+            throw new Error(`Erro HTTP ${resp.status}: ${resp.statusText}`);
+          }
+          return resp.json();
+        })
+        .then(data => {
+          console.log("✅ Dados carregados com sucesso!");
+          console.log("📦 Total de registros:", data.length);
+          
+          if (!Array.isArray(data)) {
+            throw new Error("Resposta da API não é um array válido");
+          }
+          
+          if (data.length === 0) {
+            summary.textContent = "Nenhum alumni encontrado na planilha.";
+            console.warn("⚠️ Planilha retornou 0 registros");
+            return;
+          }
+          
+          inicializarComDados(data);
+        })
+        .catch(err => {
+          console.error("❌ Erro ao carregar dados da planilha:", err);
+          summary.textContent = "Erro ao carregar dados da planilha: " + err.message;
+        });
+    }
+
+    function inicializarComDados(data) {
+      console.log("🚀 Inicializando mapa com", data.length, "alumni");
+      
+pessoas = data.map(p => {
+
+  p.organizacao = padronizarInstituicao(
+    p.organizacao ||
+    p.organizacao ||
+    p.organização ||
+    ""
+  );
+  p.estado_sigla = (p.estado_sigla || "").trim().toUpperCase();
+  p.funcao =
+    p.funcao ||
+    p.função ||
+    p.cargo ||
+    p.Cargo ||
+    p.posicao ||
+    p.posição ||
+    "";
+  p.regiao = p.regiao || stateRegionBySigla[p.estado_sigla] || "";
+  return p;
+});
+  
+      console.log("✅ Total após filtro:", pessoas.length, "alumni válidos");
+      
+      popularFiltros();
+      atualizarTurmas();
+      atualizarProgramas();
+      atualizarCargos();
+      atualizarInstituicoes();
+      atualizarRegioes(); 
+      atualizarLista();
+      setLastUpdate();
+      
+      if (estadosLayer) {
+        estadosLayer.setStyle(estadoStyle);
+      }
+      ajustarZoom();
+    }
+function atualizarRegioes() {
+  filterRegiao.innerHTML = '<option value="">Todas</option>';
+
+  const regioes = [...new Set(
+    pessoas.map(p => p.regiao || stateRegionBySigla[p.estado_sigla] || "").filter(Boolean)
+  )].sort();
+
+  regioes.forEach(regiao => {
+    const opt = document.createElement("option");
+    opt.value = regiao;
+    opt.textContent = regiao;
+    filterRegiao.appendChild(opt);
+  });
+}
+    function setLastUpdate() {
+      if (!lastUpdateEl) return;
+      const now = new Date();
+      lastUpdateEl.textContent = `Última atualização: ${now.toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })}`;
+    }
+
+    // -------------------------
+    // FILTROS E LISTA
+    // -------------------------
+    function atualizarOpcoesEstado(regiao) {
+      filterEstado.innerHTML = "";
+      const optEstadoAll = document.createElement("option");
+      optEstadoAll.value = "";
+      optEstadoAll.textContent = regiao ? "Todos da região" : "Todos";
+      filterEstado.appendChild(optEstadoAll);
+
+      let estados = [...new Set(pessoas.map((p) => p.estado_sigla).filter(Boolean))].sort();
+
+      if (regiao) {
+        estados = estados.filter((sigla) => stateRegionBySigla[sigla] === regiao);
+      }
+
+      estados.forEach((sigla) => {
+        const opt = document.createElement("option");
+        opt.value = sigla;
+        opt.textContent = sigla;
+        filterEstado.appendChild(opt);
+      });
+    }
+
+    function popularFiltros() {
+      const regioes = [...new Set(
+        pessoas.map(p => p.regiao || stateRegionBySigla[p.estado_sigla] || "").filter(Boolean)
+      )].sort();
+      regioes.forEach(r => {
+        const opt = document.createElement("option");
+        opt.value = r;
+        opt.textContent = r;
+        filterRegiao.appendChild(opt);
+      });
+
+      atualizarOpcoesEstado(null);
+      atualizarCidades();
+    }
+
+    function atualizarTurmas() {
+      const regiaoAtual = filterRegiao.value;
+      const estadoAtual = filterEstado.value;
+      const cidadeAtual = filterCidade.value;
+
+      filterTurma.innerHTML = "";
+      const optAll = document.createElement("option");
+      optAll.value = "";
+      optAll.textContent = "Todas";
+      filterTurma.appendChild(optAll);
+
+      let filtradas = [...pessoas];
+
+      if (regiaoAtual) {
+        filtradas = filtradas.filter(p => p.regiao === regiaoAtual);
+      }
+      if (estadoAtual) {
+        filtradas = filtradas.filter(p => p.estado_sigla === estadoAtual);
+      }
+      if (cidadeAtual) {
+        filtradas = filtradas.filter(p => p.cidade === cidadeAtual);
+      }
+
+      const turmas = [...new Set(
+        filtradas.map(p => p.turma).filter(Boolean)
+      )].sort();
+
+      turmas.forEach(t => {
+        const opt = document.createElement("option");
+        opt.value = t;
+        opt.textContent = t;
+        filterTurma.appendChild(opt);
+      });
+    }
+
+    function atualizarProgramas() {
+      filterPrograma.innerHTML = '<option value="">Todos</option>';
+      const programas = [...new Set(pessoas.map(p => p.programa).filter(Boolean))].sort();
+      programas.forEach(prog => {
+        const opt = document.createElement("option");
+        opt.value = prog;
+        opt.textContent = prog;
+        filterPrograma.appendChild(opt);
+      });
+    }
+
+    function atualizarCargos() {
+      filterCargo.innerHTML = '<option value="">Todos</option>';
+      const cargos = [...new Set(pessoas.map(p => p.funcao).filter(Boolean))].sort();
+      cargos.forEach(cargo => {
+        const opt = document.createElement("option");
+        opt.value = cargo;
+        opt.textContent = cargo;
+        filterCargo.appendChild(opt);
+      });
+    }
+
+    function atualizarInstituicoes() {
+      filterInstituicao.innerHTML = '<option value="">Todas</option>';
+const instituicoes = [...new Set(
+  pessoas.map(p => p.organizacao || p.instituicao).filter(Boolean)
+)].sort();
+      instituicoes.forEach(inst => {
+        const opt = document.createElement("option");
+        opt.value = inst;
+        opt.textContent = inst;
+        filterInstituicao.appendChild(opt);
+      });
+    }
+
+    function atualizarCidades() {
+      const regiaoAtual = filterRegiao.value;
+      const estadoAtual = filterEstado.value;
+
+      filterCidade.innerHTML = "";
+      const optAll = document.createElement("option");
+      optAll.value = "";
+      optAll.textContent = "Todas";
+      filterCidade.appendChild(optAll);
+
+      let filtradas = [...pessoas];
+
+      if (regiaoAtual) {
+        filtradas = filtradas.filter(p => p.regiao === regiaoAtual);
+      }
+      if (estadoAtual) {
+        filtradas = filtradas.filter(p => p.estado_sigla === estadoAtual);
+      }
+
+      const cidades = [...new Set(
+        filtradas.map(p => p.cidade).filter(Boolean)
+      )].sort();
+
+      cidades.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c;
+        filterCidade.appendChild(opt);
+      });
+
+      atualizarTurmas();
+    }
+
+    function atualizarLista() {
+      const regiaoAtual = filterRegiao.value;
+      const estadoAtual = filterEstado.value;
+      const cidadeAtual = filterCidade.value;
+      const turmaAtual  = filterTurma.value;
+      const programaAtual = filterPrograma.value;
+      const cargoAtual = filterCargo.value;
+      const instituicaoAtual = filterInstituicao.value;
+
+      let filtradas = [...pessoas];
+
+      if (regiaoAtual) {
+        filtradas = filtradas.filter(p => p.regiao === regiaoAtual);
+      }
+      if (estadoAtual) {
+        filtradas = filtradas.filter(p => p.estado_sigla === estadoAtual);
+      }
+      if (cidadeAtual) {
+        filtradas = filtradas.filter(p => p.cidade === cidadeAtual);
+      }
+      if (turmaAtual) {
+        filtradas = filtradas.filter(p => p.turma === turmaAtual);
+      }
+      if (programaAtual) {
+        filtradas = filtradas.filter(p => p.programa === programaAtual);
+      }
+      if (cargoAtual) {
+        filtradas = filtradas.filter(p => p.funcao === cargoAtual || p.cargo === cargoAtual);
+      }
+      if (instituicaoAtual) {
+        filtradas = filtradas.filter(p => p.instituicao === instituicaoAtual);
+      }
+
+      const buscaAtual = filterBusca.value.trim();
+      if (buscaAtual) {
+        const buscaNorm = normalizarTexto(buscaAtual);
+        filtradas = filtradas.filter(p => normalizarTexto(p.nome || "").includes(buscaNorm));
+      }
+
+      // Ordenar alfabeticamente por nome ou em ordem reversa
+      const sortOrder = filterSort ? filterSort.value : 'az';
+      filtradas.sort((a, b) => {
+        const result = (a.nome || "").localeCompare(b.nome || "", 'pt-BR');
+        return sortOrder === 'za' ? -result : result;
+      });
+
+      summary.textContent =
+        `${filtradas.length} pessoa(s) encontrada(s)` +
+       (regiaoAtual || estadoAtual || cidadeAtual || turmaAtual || programaAtual || cargoAtual || instituicaoAtual || buscaAtual
+          ? " com os filtros aplicados."
+          : " no total.");
+
+      peopleList.innerHTML = "";
+
+      if (!filtradas.length) {
+        if (estadoAtual) {
+          summary.textContent = "Nenhuma pessoa cadastrada neste estado até o momento.";
+          peopleList.innerHTML = `
+            <div style="font-size:0.85rem; color:#6b7280; line-height:1.5;">
+              <p>
+                Nessa localidade ainda não foram cadastrados alumni atuando (por enquanto!).
+              </p>
+              <p>
+                Se você é alumni do Ensina Brasil e está atuando aqui,
+                <a href="https://forms.gle/nLic4hbtuTLBLeTJ7"noopener noreferrer">
+                  preencha o formulário de cadastro
+                </a>
+                para aparecer neste mapa.
+              </p>
+            </div>
+          `;
+        } else {
+          summary.textContent = "Nenhuma pessoa encontrada com os filtros aplicados.";
+          peopleList.textContent = "Nenhum registro encontrado para este filtro.";
+        }
+        return;
+      }
+
+      filtradas.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "person-card";
+        div.style.borderLeft = `4px solid ${getCorCardPrograma(p.programa)}`;
+
+        const key = criarChavePessoa(p);
+
+        if (pessoaSelecionadaKey) {
+          if (key === pessoaSelecionadaKey) {
+            div.classList.add("selected");
+          } else {
+            div.classList.add("dimmed");
+          }
+        }
+
+        div.innerHTML = `
+  <div class="person-main-row">
+    <!-- Nome à esquerda -->
+    <div class="person-main-left">
+      <strong>${p.nome}</strong>
+    </div>
+
+    <!-- LinkedIn CENTRAL -->
+    <div class="person-main-middle">
+      ${
+        p.linkedin
+          ? `
+            <span class="linkedin-line">
+              <img class="linkedin-icon"
+                   src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png"
+                   alt="LinkedIn">
+              <a href="${p.linkedin}" target="_blank">LinkedIn</a>
+            </span>
+          `
+          : ""
+      }
+    </div>
+
+    <!-- Cidade + bandeira à direita -->
+    <div class="person-main-right">
+      <span class="clickable-filter" data-filter="cidade" data-value="${p.cidade || ""}" style="cursor: pointer;" title="Filtrar por ${p.cidade}">${p.cidade || ""} - ${p.estado_sigla || ""}</span>
+      <img class="person-flag clickable-filter" data-filter="estado" data-value="${p.estado_sigla || ""}" src="${p.estado_sigla ? `bandeiras/${p.estado_sigla}.png` : 'sem-dados.png'}" alt="${p.estado_sigla ? `Bandeira de ${p.estado_sigla}` : 'Bandeira do Brasil'}" style="cursor: pointer;" title="Filtrar por ${p.estado_sigla || 'Brasil'}" onerror="this.onerror=null; this.src='sem-dados.png';">
+    </div>
+  </div>
+          <div class="person-bottom-row">
+            ${p.programa ? `<span class="badge badge-programa ${normalizarTexto(p.programa)} clickable-filter" data-filter="programa" data-value="${p.programa}" style="cursor: pointer; ${getCorPrograma(p.programa)} font-weight: 600;" title="Filtrar por programa">${p.programa}</span>` : ""}
+            <span class="badge badge-role clickable-filter" data-filter="cargo" data-value="${p.funcao || ''}" style="cursor: pointer;" title="Filtrar por cargo">${p.funcao || "Sem função"}</span>
+            ${
+              (p.organizacao || p.instituicao)
+                ? `<span class="badge badge-inst clickable-filter" data-filter="instituicao" data-value="${(p.organizacao || p.instituicao)}" style="cursor: pointer;" title="Filtrar por instituição">${(p.organizacao || p.instituicao)}</span>`
+                : ""
+            }
+            <span class="badge badge-turma clickable-filter" data-filter="turma" data-value="${p.turma || ''}" style="cursor: pointer;" title="Filtrar por turma">Turma ${p.turma || "-"}</span>
+          </div>
+        `;
+
+        div.addEventListener("click", (e) => {
+          // Se clicou em um badge de filtro, aplicar filtro
+          if (e.target.classList.contains('clickable-filter')) {
+            e.stopPropagation();
+            const filterType = e.target.getAttribute('data-filter');
+            const filterValue = e.target.getAttribute('data-value');
+            
+            if (filterType && filterValue) {
+              // Aplicar o filtro
+              if (filterType === 'cidade') filterCidade.value = filterValue;
+              else if (filterType === 'estado') filterEstado.value = filterValue;
+              else if (filterType === 'turma') filterTurma.value = filterValue;
+              else if (filterType === 'programa') filterPrograma.value = filterValue;
+              else if (filterType === 'cargo') filterCargo.value = filterValue;
+              else if (filterType === 'instituicao') filterInstituicao.value = filterValue;
+              else if (filterType === 'instituicao') filterInstituicao.value = filterValue;
+              
+              // Atualizar a lista
+              atualizarLista();
+            }
+          } else {
+            // Comportamento normal: selecionar pessoa
+            selecionarPessoa(p);
+          }
+        });
+
+        div.addEventListener("mouseenter", () => {
+          const estadoPessoa = p.estado_sigla;
+          const cidadeNorm = normalizarTexto(p.cidade || "");
+
+          // Destacar o estado da pessoa no hover (sem apagar os outros)
+          hoverState = estadoPessoa;
+          if (estadosLayer) {
+            estadosLayer.setStyle(estadoStyle);
+            
+            // Abrir tooltip do estado
+            estadosLayer.eachLayer((layer) => {
+              const sigla = getSiglaFromFeature(layer.feature);
+              if (sigla === estadoPessoa) {
+                const bounds = layer.getBounds();
+                const center = bounds.getCenter();
+                layer.openTooltip(center);
+              }
+            });
+          }
+
+          if (
+            estadoPessoa &&
+            filterEstado.value === estadoPessoa &&
+            municipiosLayer &&
+            currentMunicipiosUF === estadoPessoa
+          ) {
+            highlightCityNorm = cidadeNorm;
+            municipiosLayer.setStyle(municipioStyle);
+          }
+        });
+
+        div.addEventListener("mouseleave", () => {
+          // Remover hover do estado
+          hoverState = null;
+          
+          // Fechar tooltips dos estados
+          if (estadosLayer) {
+            estadosLayer.eachLayer((layer) => {
+              layer.closeTooltip();
+            });
+          }
+          
+          if (pessoaSelecionadaKey) {
+            const partes = pessoaSelecionadaKey.split("|");
+            const cidadeSel = partes[2] || "";
+            const ufSel = partes[1] || "";
+
+            highlightState = ufSel || null;
+            highlightCityNorm = normalizarTexto(cidadeSel || "");
+          } else {
+            highlightState = filterEstado.value || null;
+            highlightCityNorm = null;
+          }
+
+          // Atualizar estilo dos estados
+          if (estadosLayer) {
+            estadosLayer.setStyle(estadoStyle);
+          }
+
+          if (municipiosLayer) {
+            municipiosLayer.setStyle(municipioStyle);
+          }
+        });
+
+        peopleList.appendChild(div);
+      });
+    }
+
+    // -------------------------
+    // EVENTOS DOS FILTROS E BOTÕES
+    // -------------------------
+    filterRegiao.addEventListener("change", () => {
+      const regiao = filterRegiao.value || "";
+
+      selectedRegion = regiao || null;
+      highlightState = null;
+      highlightCityNorm = null;
+
+      filterEstado.value = "";
+      filterCidade.value = "";
+      filterTurma.value = "";
+      filterPrograma.value = "";
+      filterCargo.value = "";
+      filterInstituicao.value = "";
+
+      atualizarOpcoesEstado(regiao || null);
+      atualizarCidades();
+      atualizarLista();
+
+      if (estadosLayer) {
+        estadosLayer.setStyle(estadoStyle);
+      }
+
+      limparMunicipios();
+      ajustarZoom();
+    });
+
+    filterEstado.addEventListener("change", () => {
+      const est = filterEstado.value;
+
+      if (est) {
+        const regiao = stateRegionBySigla[est] || "";
+        filterRegiao.value = regiao;
+        selectedRegion = regiao || null;
+        highlightState = est;
+      } else {
+        highlightState = null;
+        if (!filterRegiao.value) {
+          selectedRegion = null;
+        }
+      }
+
+      highlightCityNorm = null;
+      filterCidade.value = "";
+      filterTurma.value = "";
+
+      atualizarCidades();
+      atualizarLista();
+
+      if (estadosLayer) estadosLayer.setStyle(estadoStyle);
+      if (municipiosLayer) municipiosLayer.setStyle(municipioStyle);
+
+      ajustarZoom();
+    });
+
+    filterCidade.addEventListener("change", () => {
+      atualizarTurmas();
+      atualizarLista();
+      ajustarZoom();
+    });
+
+    filterTurma.addEventListener("change", () => {
+      atualizarInstituicoes();
+      atualizarLista();
+    
+    });
+
+    filterPrograma.addEventListener("change", () => {
+      atualizarLista();
+      if (estadosLayer) {
+        estadosLayer.setStyle(estadoStyle);
+      }
+    });
+
+    filterCargo.addEventListener("change", () => {
+  atualizarLista();
+});
+
+    filterInstituicao.addEventListener("change", () => {
+      // Ao mudar instituição, respeita os outros filtros ativos
+      atualizarOpcoesEstado(filterRegiao.value || null);
+      atualizarCidades();
+      atualizarTurmas();
+      atualizarLista();
+    });
+
+    filterBusca.addEventListener("input", () => {
+      atualizarLista();
+    });
+
+    if (filterSort) {
+      filterSort.addEventListener("change", () => {
+        atualizarLista();
+      });
+    }
+
+    btnLimpar.addEventListener("click", limparSelecao);
+    mapHomeBtn.addEventListener("click", limparSelecao);
+
+    // -------------------------
+    // INICIALIZAÇÃO
+    // -------------------------
+    document.addEventListener("DOMContentLoaded", () => {
+      initMap();
+      carregarPaisesVizinhos();
+      adicionarProgramasTeachForAll();
+      carregarPessoas();
+      carregarEstados();
+      adicionarLogosMunicipaisIniciais();
+      criarLegendaEnsina();
+      adicionarLogosLampiar(); // Lampiar no mapa
+
+      const popupCloseBtn = document.getElementById("popup-close-btn");
+      if (popupCloseBtn) {
+        popupCloseBtn.addEventListener("click", hideNoAlumniPopup);
+      }
+
+      const popup = document.getElementById("no-alumni-popup");
+      if (popup) {
+        popup.addEventListener("click", (e) => {
+          if (e.target === popup) {
+            hideNoAlumniPopup();
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

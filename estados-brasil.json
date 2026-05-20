@@ -1,0 +1,329 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "sigla": "AC", "nome": "Acre", "regiao": "Norte" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-72.0, -7.1], [-70.1, -7.1], [-70.1, -10.9], [-72.0, -10.9], [-72.0, -7.1]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "AL", "nome": "Alagoas", "regiao": "Nordeste" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-38.5, -8.8], [-35.2, -8.8], [-35.2, -10.6], [-38.5, -10.6], [-38.5, -8.8]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "AP", "nome": "Amapá", "regiao": "Norte" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-53.0, 4.0], [-49.8, 4.0], [-49.8, 0.8], [-53.0, 0.8], [-53.0, 4.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "AM", "nome": "Amazonas", "regiao": "Norte" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-70.0, 2.0], [-57.0, 2.0], [-57.0, -9.0], [-70.0, -9.0], [-70.0, 2.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "BA", "nome": "Bahia", "regiao": "Nordeste" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-46.5, -8.0], [-37.0, -8.0], [-37.0, -18.0], [-46.5, -18.0], [-46.5, -8.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "CE", "nome": "Ceará", "regiao": "Nordeste" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-41.5, -3.0], [-37.0, -3.0], [-37.0, -8.0], [-41.5, -8.0], [-41.5, -3.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "DF", "nome": "Distrito Federal", "regiao": "Centro-Oeste" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-48.3, -15.4], [-47.3, -15.4], [-47.3, -16.1], [-48.3, -16.1], [-48.3, -15.4]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "ES", "nome": "Espírito Santo", "regiao": "Sudeste" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-41.5, -17.5], [-39.5, -17.5], [-39.5, -20.5], [-41.5, -20.5], [-41.5, -17.5]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "GO", "nome": "Goiás", "regiao": "Centro-Oeste" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-52.5, -13.0], [-46.5, -13.0], [-46.5, -19.0], [-52.5, -19.0], [-52.5, -13.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "MA", "nome": "Maranhão", "regiao": "Nordeste" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-46.0, -1.0], [-42.0, -1.0], [-42.0, -8.0], [-46.0, -8.0], [-46.0, -1.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "MT", "nome": "Mato Grosso", "regiao": "Centro-Oeste" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-60.0, -7.0], [-52.0, -7.0], [-52.0, -17.5], [-60.0, -17.5], [-60.0, -7.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "MS", "nome": "Mato Grosso do Sul", "regiao": "Centro-Oeste" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-58.0, -17.0], [-51.0, -17.0], [-51.0, -24.0], [-58.0, -24.0], [-58.0, -17.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "MG", "nome": "Minas Gerais", "regiao": "Sudeste" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-51.0, -14.0], [-39.8, -14.0], [-39.8, -22.3], [-51.0, -22.3], [-51.0, -14.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "PA", "nome": "Pará", "regiao": "Norte" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-58.0, 1.0], [-46.0, 1.0], [-46.0, -8.0], [-58.0, -8.0], [-58.0, 1.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "PB", "nome": "Paraíba", "regiao": "Nordeste" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-38.0, -7.0], [-34.8, -7.0], [-34.8, -8.8], [-38.0, -8.8], [-38.0, -7.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "PR", "nome": "Paraná", "regiao": "Sul" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-54.5, -23.0], [-48.0, -23.0], [-48.0, -26.5], [-54.5, -26.5], [-54.5, -23.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "PE", "nome": "Pernambuco", "regiao": "Nordeste" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-41.5, -7.5], [-34.8, -7.5], [-34.8, -9.5], [-41.5, -9.5], [-41.5, -7.5]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "PI", "nome": "Piauí", "regiao": "Nordeste" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-44.5, -2.5], [-40.0, -2.5], [-40.0, -10.0], [-44.5, -10.0], [-44.5, -2.5]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "RJ", "nome": "Rio de Janeiro", "regiao": "Sudeste" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-45.0, -21.0], [-41.0, -21.0], [-41.0, -23.5], [-45.0, -23.5], [-45.0, -21.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "RN", "nome": "Rio Grande do Norte", "regiao": "Nordeste" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-38.0, -4.5], [-35.0, -4.5], [-35.0, -6.0], [-38.0, -6.0], [-38.0, -4.5]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "RS", "nome": "Rio Grande do Sul", "regiao": "Sul" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-57.0, -29.0], [-49.0, -29.0], [-49.0, -34.0], [-57.0, -34.0], [-57.0, -29.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "RO", "nome": "Rondônia", "regiao": "Norte" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-66.0, -8.0], [-60.0, -8.0], [-60.0, -14.0], [-66.0, -14.0], [-66.0, -8.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "RR", "nome": "Roraima", "regiao": "Norte" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-62.0, 5.0], [-58.0, 5.0], [-58.0, 1.0], [-62.0, 1.0], [-62.0, 5.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "SC", "nome": "Santa Catarina", "regiao": "Sul" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-54.5, -26.5], [-48.5, -26.5], [-48.5, -29.5], [-54.5, -29.5], [-54.5, -26.5]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "SP", "nome": "São Paulo", "regiao": "Sudeste" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-51.2, -20.0], [-45.0, -20.0], [-45.0, -24.5], [-51.2, -24.5], [-51.2, -20.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "SE", "nome": "Sergipe", "regiao": "Nordeste" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-38.5, -10.5], [-36.0, -10.5], [-36.0, -11.5], [-38.5, -11.5], [-38.5, -10.5]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "sigla": "TO", "nome": "Tocantins", "regiao": "Norte" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-50.0, -5.0], [-45.0, -5.0], [-45.0, -13.0], [-50.0, -13.0], [-50.0, -5.0]
+          ]
+        ]
+      }
+    }
+  ]
+}
