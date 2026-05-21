@@ -3936,9 +3936,9 @@ const instituicoes = [...new Set(
           ? `
             <a class="linkedin-line"
                href="${linkedinUrl}"
-               target="_top"
+               target="_blank"
                rel="noopener noreferrer"
-               onclick="event.stopPropagation();">
+               data-linkedin-url="${linkedinUrl}">
               <img class="linkedin-icon"
                    src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png"
                    alt="LinkedIn">
@@ -3966,6 +3966,33 @@ const instituicoes = [...new Set(
             <span class="badge badge-turma clickable-filter" data-filter="turma" data-value="${p.turma || ''}" style="cursor: pointer;" title="Filtrar por turma">Turma ${p.turma || "-"}</span>
           </div>
         `;
+
+const linkedinLink = div.querySelector(".linkedin-line");
+
+if (linkedinLink) {
+  linkedinLink.addEventListener("click", (e) => {
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (typeof e.stopImmediatePropagation === "function") {
+      e.stopImmediatePropagation();
+    }
+
+    const url =
+      linkedinLink.dataset.linkedinUrl ||
+      linkedinLink.getAttribute("href");
+
+    if (!url) return;
+
+    window.open(
+      url,
+      "_blank",
+      "noopener,noreferrer"
+    );
+
+  });
+}
 
         div.addEventListener("click", (e) => {
           // Se clicou em um badge de filtro, aplicar filtro
