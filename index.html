@@ -3254,17 +3254,32 @@ function limparSelecao() {
       });
     }
 
-    function atualizarCargos() {
-      filterCargo.innerHTML = '<option value="">Todos</option>';
-      const cargos = [...new Set(pessoas.map(p => p.funcao).filter(Boolean))].sort();
-      cargos.forEach(cargo => {
-        const opt = document.createElement("option");
-        opt.value = cargo;
-        opt.textContent = cargo;
-        filterCargo.appendChild(opt);
-      });
-    }
+  function getCargoPessoa(p) {
+  return (
+    p.funcao ||
+    p.função ||
+    p.cargo ||
+    p.Cargo ||
+    p.posicao ||
+    p.posição ||
+    ""
+  ).trim();
+}
 
+function atualizarCargos() {
+  filterCargo.innerHTML = '<option value="">Todos</option>';
+
+  const cargos = [...new Set(
+    pessoas.map(p => getCargoPessoa(p)).filter(Boolean)
+  )].sort();
+
+  cargos.forEach(cargo => {
+    const opt = document.createElement("option");
+    opt.value = cargo;
+    opt.textContent = cargo;
+    filterCargo.appendChild(opt);
+  });
+}
     function atualizarInstituicoes() {
       filterInstituicao.innerHTML = '<option value="">Todas</option>';
       const instituicoes = [...new Set(pessoas.map(p => p.instituicao).filter(Boolean))].sort();
