@@ -711,8 +711,15 @@ main {
       cursor: pointer;
       box-shadow: 0 10px 24px rgba(15, 23, 42, 0.25);
       transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
-      white-space: nowrap;
+      width: 280px;
+      max-width: 100%;
+      min-height: 40px;
+      text-align: center;
+      white-space: normal;
       flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .btn-cadastro:hover {
@@ -1020,7 +1027,24 @@ main {
         target="_blank"
         rel="noopener noreferrer"
       >
-        Preencher formulário
+        Preencher formulário de atualização
+      </a>
+    </section>
+
+    <section class="join-section">
+      <div class="join-section-text">
+        <strong>Ajude a melhorar o mapa da rede</strong>
+        <span>
+          Este mapa é uma construção coletiva. Se você percebeu algo que pode melhorar, sentiu falta de alguma informação ou quer compartilhar um elogio sobre a experiência, envie sua contribuição pelo formulário abaixo.
+        </span>
+      </div>
+      <a
+        href="https://forms.gle/77BRtJN82rpPWJsL8"
+        class="btn-cadastro"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Preencher formulário de sugestão e elogios
       </a>
     </section>
 
@@ -1532,10 +1556,13 @@ const lampiarCities = [
     // MAPA
     // -------------------------
     function initMap() {
-     map = L.map("map").fitBounds([
-  [-34, -74],
-  [6, -32]
-]);
+     map = L.map("map").fitBounds(
+  [
+    [-35, -75],
+    [7, -28]
+  ],
+  { padding: [24, 24] }
+);
 
       L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
         maxZoom: 8,
@@ -2927,7 +2954,17 @@ function adicionarLogosLampiar() {
       }
 
       if (map) {
-        map.flyTo([-15.5, -52], 4.2);
+        map.flyToBounds(
+          [
+            [-35, -75],
+            [7, -28]
+          ],
+          {
+            padding: [24, 24],
+            maxZoom: 4.2,
+            animate: true
+          }
+        );
       }
 
       limparMunicipios();
@@ -3709,40 +3746,4 @@ function atualizarCargos() {
       atualizarLista();
     });
 
-    filterBusca.addEventListener("input", () => {
-      atualizarLista();
-    });
-
-    btnLimpar.addEventListener("click", limparSelecao);
-    mapHomeBtn.addEventListener("click", limparSelecao);
-
-    // -------------------------
-    // INICIALIZAÇÃO
-    // -------------------------
-    document.addEventListener("DOMContentLoaded", () => {
-      initMap();
-      carregarPaisesVizinhos();
-      adicionarProgramasTeachForAll();
-      carregarPessoas();
-      carregarEstados();
-      adicionarLogosMunicipaisIniciais();
-      criarLegendaEnsina();
-      adicionarLogosLampiar(); // Lampiar no mapa
-
-      const popupCloseBtn = document.getElementById("popup-close-btn");
-      if (popupCloseBtn) {
-        popupCloseBtn.addEventListener("click", hideNoAlumniPopup);
-      }
-
-      const popup = document.getElementById("no-alumni-popup");
-      if (popup) {
-        popup.addEventListener("click", (e) => {
-          if (e.target === popup) {
-            hideNoAlumniPopup();
-          }
-        });
-      }
-    });
-  </script>
-</body>
-</html>
+    filterBusc
