@@ -3374,7 +3374,7 @@ function atualizarCargos() {
   </div>
           <div class="person-bottom-row">
             ${p.programa ? `<span class="badge badge-programa ${normalizarTexto(p.programa)} clickable-filter" data-filter="programa" data-value="${p.programa}" style="cursor: pointer; ${getCorPrograma(p.programa)} font-weight: 600;" title="Filtrar por programa">${p.programa}</span>` : ""}
-            <span class="badge badge-role clickable-filter" data-filter="cargo" data-value="${p.funcao || ''}" style="cursor: pointer;" title="Filtrar por cargo">${p.funcao || "Sem função"}</span>
+            <span class="badge badge-role clickable-filter" data-filter="cargo" data-value="${getCargoPessoa(p)}" style="cursor: pointer;" title="Filtrar por cargo">${getCargoPessoa(p) || "Sem função"}</span>
             ${
               p.instituicao
                 ? `<span class="badge badge-inst clickable-filter" data-filter="instituicao" data-value="${p.instituicao}" style="cursor: pointer;" title="Filtrar por instituição">${p.instituicao}</span>`
@@ -3490,6 +3490,7 @@ function atualizarCargos() {
       const estadoAtual = filterEstado.value;
       const cidadeAtual = filterCidade.value;
       const turmaAtual  = filterTurma.value;
+      const cargoAtual = filterCargo.value;
 
       let filtradas = [...pessoas];
 
@@ -3504,6 +3505,9 @@ function atualizarCargos() {
       }
       if (turmaAtual) {
         filtradas = filtradas.filter(p => p.turma === turmaAtual);
+      }
+      if (cargoAtual) {
+        filtradas = filtradas.filter(p => getCargoPessoa(p) === cargoAtual);
       }
 
       const buscaAtual = filterBusca.value.trim();
@@ -3560,7 +3564,7 @@ function atualizarCargos() {
 
       summary.textContent =
         `${filtradas.length} pessoa(s) encontrada(s)` +
-        (regiaoAtual || estadoAtual || cidadeAtual || turmaAtual || buscaAtual
+        (regiaoAtual || estadoAtual || cidadeAtual || turmaAtual || cargoAtual || buscaAtual
           ? " com os filtros aplicados."
           : " no total.");
 
@@ -3691,6 +3695,10 @@ function atualizarCargos() {
       if (estadosLayer) {
         estadosLayer.setStyle(estadoStyle);
       }
+    });
+
+    filterCargo.addEventListener("change", () => {
+      atualizarLista();
     });
 
     filterInstituicao.addEventListener("change", () => {
