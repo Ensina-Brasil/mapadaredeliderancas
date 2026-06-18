@@ -23,9 +23,11 @@
 
   <style>
     :root {
-      --ensina-blue: #004b8d;
-      --ensina-blue-dark: #273766;
-      --ensina-green: #00bfa5;
+      --ensina-blue-dark: #18203a;
+      --ensina-blue: #273766;
+      --ensina-green: #45a351;
+      --ensina-coral: #e06031;
+      --ensina-orange: #f2a943;
       --bg-light: #f4f6fb;
       --text-main: #111827;
       --text-muted: #6b7280;
@@ -33,13 +35,13 @@
       --border-soft: #e5e7eb;
     }
 
-    /* Transição suave para estados do mapa */
+    /* Estados do mapa: sem transição para evitar desalinhamento com tiles no zoom/pan */
     .state-transition {
-      transition: fill-opacity 0.6s ease-in-out, stroke 0.4s ease-in-out, stroke-width 0.4s ease-in-out !important;
+      transition: none !important;
     }
 
     .state-highlighted {
-      animation: pulseHighlight 1.5s ease-in-out;
+      animation: none !important;
     }
 
     @keyframes pulseHighlight {
@@ -52,7 +54,13 @@
     }
 
     .state-dimmed {
-      transition: fill-opacity 0.8s ease-out, stroke 0.5s ease-out !important;
+      transition: none !important;
+    }
+
+    .leaflet-overlay-pane svg,
+    .leaflet-overlay-pane path {
+      transition: none !important;
+      animation: none !important;
     }
 
     .linkedin-link {
@@ -217,6 +225,23 @@ main {
 .leaflet-container:focus {
   outline: none !important;
 }
+
+.leaflet-control-zoom a,
+.leaflet-control-zoom a:focus,
+.leaflet-control-zoom a:active,
+.leaflet-control-zoom a:hover {
+  background: #ffffff !important;
+  color: #111827 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.leaflet-control-zoom a.leaflet-disabled,
+.leaflet-control-zoom a.leaflet-disabled:hover,
+.leaflet-control-zoom a.leaflet-disabled:focus {
+  background: #f8fafc !important;
+  color: #9ca3af !important;
+}
     /* Container para botão Home + legendas */
     .map-top-right {
       position: absolute;
@@ -262,7 +287,7 @@ main {
   gap: 6px;
   box-shadow: 0 6px 18px rgba(15, 23, 42, 0.15);
   border: 1px solid rgba(209, 213, 219, 0.9);
-  cursor: default;
+  cursor: pointer;
   max-width: 34px;
   overflow: hidden;
   white-space: nowrap;
@@ -278,12 +303,27 @@ main {
   padding: 4px 14px 4px 4px;
 }
 
+.ensina-legend.legend-pinned,
+.lampiar-legend.legend-pinned {
+  color: var(--ensina-blue-dark);
+}
+
+.ensina-legend.legend-pinned {
+  border-color: var(--ensina-green);
+  box-shadow: 0 8px 24px rgba(69, 163, 81, 0.28);
+}
+
+.lampiar-legend.legend-pinned {
+  border-color: var(--ensina-orange);
+  box-shadow: 0 8px 24px rgba(242, 169, 67, 0.3);
+}
+
     .ensina-legend-logo {
       width: 24px;
       height: 24px;
       border-radius: 999px;
       background-color: #ffffff;
-      border: 2px solid rgba(15, 23, 42, 0.15);
+      border: 2px solid var(--ensina-green);
       box-shadow: 0 4px 10px rgba(15, 23, 42, 0.25);
       display: flex;
       align-items: center;
@@ -307,6 +347,17 @@ main {
       box-shadow: 0 6px 18px rgba(15,23,42,0.32);
       font-weight: 600;
       font-size: 13px;
+    }
+
+    .municipio-tooltip.leaflet-tooltip {
+      background: rgba(24, 32, 58, 0.96);
+      color: #fff;
+      border: 1px solid var(--ensina-orange);
+      border-radius: 6px;
+      padding: 5px 7px;
+      box-shadow: 0 6px 18px rgba(24, 32, 58, 0.32);
+      font-weight: 600;
+      font-size: 12px;
     }
 
     .ensina-legend-text {
@@ -340,7 +391,7 @@ main {
       gap: 6px;
       box-shadow: 0 6px 18px rgba(15, 23, 42, 0.15);
       border: 1px solid rgba(209, 213, 219, 0.9);
-      cursor: default;
+      cursor: pointer;
       transition: border-color 0.2s ease, color 0.2s ease;
     }
 
@@ -349,7 +400,7 @@ main {
       height: 24px;
       border-radius: 999px;
       background-color: #ffffff;
-      border: 2px solid rgba(15, 23, 42, 0.15);
+      border: 2px solid var(--ensina-orange);
       box-shadow: 0 4px 10px rgba(15, 23, 42, 0.25);
       display: flex;
       align-items: center;
@@ -548,6 +599,96 @@ main {
       color: var(--text-muted);
     }
 
+    .mobilizacao-resumo {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+      margin: 0 0 8px;
+    }
+
+    .mobilizacao-item {
+      min-width: 0;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      background: #ffffff;
+      padding: 6px 7px;
+    }
+
+    .mobilizacao-item strong {
+      display: block;
+      color: var(--ensina-blue-dark);
+      font-size: 0.95rem;
+      line-height: 1.1;
+    }
+
+    .mobilizacao-item span {
+      display: block;
+      margin-top: 2px;
+      color: var(--text-muted);
+      font-size: 0.68rem;
+      line-height: 1.15;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .results-actions {
+      display: flex;
+      gap: 8px;
+      margin: 0 0 8px;
+    }
+
+    .btn-copy-whatsapp {
+      flex: 1;
+      border: 1px solid var(--ensina-green);
+      border-radius: 999px;
+      background: #ffffff;
+      color: var(--ensina-blue-dark);
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 7px 12px;
+      transition: background 0.15s, color 0.15s, transform 0.1s;
+    }
+
+    .btn-copy-whatsapp:hover:not(:disabled) {
+      background: var(--ensina-green);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .btn-copy-whatsapp:disabled {
+      border-color: #d1d5db;
+      color: #9ca3af;
+      cursor: not-allowed;
+      background: #f9fafb;
+    }
+
+    .btn-clear-results {
+      flex: 1;
+      border: 1px solid var(--ensina-orange);
+      border-radius: 999px;
+      background: #ffffff;
+      color: var(--ensina-blue-dark);
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 7px 12px;
+      transition: background 0.15s, color 0.15s, transform 0.1s;
+    }
+
+    .btn-clear-results:hover {
+      background: var(--ensina-orange);
+      color: var(--ensina-blue-dark);
+      transform: translateY(-1px);
+    }
+
+    @media (max-width: 900px) {
+      .mobilizacao-resumo {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
 #people-list {
   overflow-y: auto;
   flex: 1;
@@ -650,15 +791,15 @@ main {
     }
 
     .person-card.selected {
-      border-color: rgba(0, 75, 141, 0.8);
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.16);
+      border-color: var(--person-program-color, var(--ensina-blue));
+      box-shadow: 0 8px 20px var(--person-program-shadow, rgba(15, 23, 42, 0.16));
       transform: translateY(-1px);
-      background: #ecfeff;
+      background: var(--person-program-bg, #ecfeff);
       opacity: 1;
     }
 
     .person-card.dimmed {
-      opacity: 0.45;
+      opacity: 0.34;
     }
 
     .person-checkbox {
@@ -957,8 +1098,13 @@ main {
     }
 
     .logo-marker.logo-trainee {
-      border: 2px solid #4BAF56;
-      box-shadow: 0 4px 12px rgba(75, 175, 86, 0.25);
+      border: 2px solid var(--ensina-green);
+      box-shadow: 0 4px 12px rgba(69, 163, 81, 0.25);
+    }
+
+    .logo-marker.logo-lampiar {
+      border: 2px solid var(--ensina-orange);
+      box-shadow: 0 4px 12px rgba(242, 169, 67, 0.28);
     }
 
     /* Logos de programas (bandeiras) começam opacas e clareiam no hover */
@@ -1107,6 +1253,11 @@ main {
       <aside class="panel">
         <h2>Lideranças encontradas</h2>
         <div id="summary" style="margin: 0 0 10px 0; font-size: 0.95rem; color: var(--text-muted);">Carregando dados...</div>
+        <div id="mobilizacao-resumo" class="mobilizacao-resumo" aria-label="Resumo da mobilização"></div>
+        <div class="results-actions">
+          <button id="btn-copy-whatsapp" class="btn-copy-whatsapp" type="button">Copiar seleção</button>
+          <button id="btn-limpar-resultados" class="btn-clear-results" type="button">Limpar filtros</button>
+        </div>
         <div id="people-list"></div>
       </aside>
     </main>
@@ -1165,7 +1316,7 @@ main {
   <!-- Popup: estado sem lideranças -->
   <div id="no-alumni-popup" class="no-alumni-popup">
     <div class="no-alumni-popup-content">
-      <h3>Nenhuma liderança cadastrada nessa localidade</h3>
+      <h3>Nenhuma lideança cadastrada nessa localidade</h3>
       <p id="no-alumni-text">
         Nessa localidade não foram cadastradas lideranças atuando (por enquanto!).
       </p>
@@ -1188,6 +1339,7 @@ main {
     let map;
     let estadosLayer;
     let municipiosLayer = null;
+    let municipiosLayersByUF = {};
     let paisesVizinhosLayer = null;
     let programasMarkers = [];
     const estadoBoundsBySigla = {};
@@ -1208,6 +1360,10 @@ main {
 
     // Lampiar
     let lampiarMarkers = [];
+    let traineeMarkersVisible = false;
+    let lampiarMarkersVisible = false;
+    let traineeMarkersPinned = false;
+    let lampiarMarkersPinned = false;
 
     // DOM
     const filterRegiao = document.getElementById("filter-regiao");
@@ -1220,8 +1376,12 @@ main {
     const filterBusca = document.getElementById("filter-busca");
     const peopleList   = document.getElementById("people-list");
     const summary      = document.getElementById("summary");
+    const mobilizacaoResumo = document.getElementById("mobilizacao-resumo");
+    const btnCopyWhatsapp = document.getElementById("btn-copy-whatsapp");
     const btnLimpar    = document.getElementById("btn-limpar");
+    const btnLimparResultados = document.getElementById("btn-limpar-resultados");
     const mapHomeBtn   = document.getElementById("map-home-btn");
+    let pessoasFiltradasAtuais = [];
 
     // Legenda em modo polo ou não
     let poloLegendActive = false;
@@ -1231,11 +1391,11 @@ main {
 
     // Regiões com cores próprias
     const regionColors = {
-      "Norte": "#16a34a",
-      "Nordeste": "#f97316",
-      "Centro-Oeste": "#8b5cf6",
-      "Sudeste": "#0ea5e9",
-      "Sul": "#e11d48"
+      "Norte": "#45a351",
+      "Nordeste": "#f2a943",
+      "Centro-Oeste": "#273766",
+      "Sudeste": "#e06031",
+      "Sul": "#ffd966"
     };
 
     // Estados com parceria estadual Ensina
@@ -1516,6 +1676,61 @@ const lampiarCities = [
       }
     }
 
+    function setTraineeMarkersVisible(visible) {
+      traineeMarkersVisible = visible;
+      const legendEl = document.getElementById("ensina-legend");
+      if (legendEl) legendEl.classList.toggle("legend-pinned", traineeMarkersPinned);
+      [...stateLogoMarkers.map(obj => obj.marker), ...municipalInitialMarkers.map(obj => obj.marker)].forEach(marker => {
+        if (!marker) return;
+        if (visible) {
+          if (!map.hasLayer(marker)) marker.addTo(map);
+        } else if (map.hasLayer(marker)) {
+          map.removeLayer(marker);
+        }
+      });
+    }
+
+    function setLampiarMarkersVisible(visible) {
+      lampiarMarkersVisible = visible;
+      const legendEl = document.getElementById("lampiar-legend");
+      if (legendEl) legendEl.classList.toggle("legend-pinned", lampiarMarkersPinned);
+      lampiarMarkers.forEach(marker => {
+        if (!marker) return;
+        if (visible) {
+          if (!map.hasLayer(marker)) marker.addTo(map);
+        } else if (map.hasLayer(marker)) {
+          map.removeLayer(marker);
+        }
+      });
+    }
+
+    function configurarLegendasInterativas() {
+      const ensinaLegend = document.getElementById("ensina-legend");
+      const lampiarLegend = document.getElementById("lampiar-legend");
+
+      if (ensinaLegend) {
+        ensinaLegend.title = "Clique para fixar ou ocultar os ícones do Trainee";
+        ensinaLegend.addEventListener("mouseenter", () => setTraineeMarkersVisible(true));
+        ensinaLegend.addEventListener("mouseleave", () => setTraineeMarkersVisible(traineeMarkersPinned));
+        ensinaLegend.addEventListener("click", (event) => {
+          event.stopPropagation();
+          traineeMarkersPinned = !traineeMarkersPinned;
+          setTraineeMarkersVisible(traineeMarkersPinned);
+        });
+      }
+
+      if (lampiarLegend) {
+        lampiarLegend.title = "Clique para fixar ou ocultar os ícones do Lampiar";
+        lampiarLegend.addEventListener("mouseenter", () => setLampiarMarkersVisible(true));
+        lampiarLegend.addEventListener("mouseleave", () => setLampiarMarkersVisible(lampiarMarkersPinned));
+        lampiarLegend.addEventListener("click", (event) => {
+          event.stopPropagation();
+          lampiarMarkersPinned = !lampiarMarkersPinned;
+          setLampiarMarkersVisible(lampiarMarkersPinned);
+        });
+      }
+    }
+
     function getSiglaFromFeature(feature) {
       const props = feature.properties || {};
       return (
@@ -1589,6 +1804,20 @@ const lampiarCities = [
       }
     }
 
+    function getEstiloSelecaoPrograma(programa) {
+      const color = getCorCardPrograma(programa);
+      const colorRgb =
+        color === '#4BAF56' ? '69, 163, 81' :
+        color === '#E9A542' ? '242, 169, 67' :
+        '39, 55, 102';
+
+      return {
+        color,
+        bg: `rgba(${colorRgb}, 0.12)`,
+        shadow: `rgba(${colorRgb}, 0.28)`
+      };
+    }
+
     // -------------------------
     // POPUP "SEM ALUMNI"
     // -------------------------
@@ -1614,14 +1843,48 @@ const lampiarCities = [
     // Estilo dos municípios (para highlight por pessoa)
     function municipioStyle(feature) {
       const nomeMunNorm = normalizarTexto(getMunicipioNome(feature));
+      const ufMunicipio = feature.properties && feature.properties.__uf || currentMunicipiosUF;
       const cidadesSelecionadasNorm = getValoresSelecionados(filterCidade).map(normalizarTexto);
       const isHighlight =
         (highlightCityNorm && nomeMunNorm === highlightCityNorm) ||
         cidadesSelecionadasNorm.includes(nomeMunNorm);
       const hasSelectedCities = cidadesSelecionadasNorm.length > 0 || !!highlightCityNorm;
+      const regioesFiltradas = getValoresSelecionados(filterRegiao);
+      const estadosFiltrados = getValoresSelecionados(filterEstado);
+      const turmasFiltradas = getValoresSelecionados(filterTurma);
+      const programasFiltrados = getValoresSelecionados(filterPrograma);
+      const cargosFiltrados = getValoresSelecionados(filterCargo);
+      const instituicoesFiltradas = getValoresSelecionados(filterInstituicao);
+      const buscaFiltrada = filterBusca.value.trim();
+      const hasFiltrosDePessoas =
+        regioesFiltradas.length ||
+        estadosFiltrados.length ||
+        cidadesSelecionadasNorm.length ||
+        turmasFiltradas.length ||
+        programasFiltrados.length ||
+        cargosFiltrados.length ||
+        instituicoesFiltradas.length ||
+        buscaFiltrada;
+      const hasPessoaFiltradaNoMunicipio = !!(pessoas && pessoas.some(p => {
+        if (p.estado_sigla !== ufMunicipio) return false;
+        if (normalizarTexto(p.cidade || "") !== nomeMunNorm) return false;
+        if (regioesFiltradas.length && !regioesFiltradas.includes(p.regiao)) return false;
+        if (estadosFiltrados.length && !estadosFiltrados.includes(p.estado_sigla)) return false;
+        if (cidadesSelecionadasNorm.length && !cidadesSelecionadasNorm.includes(normalizarTexto(p.cidade || ""))) return false;
+        if (turmasFiltradas.length && !turmasFiltradas.includes(p.turma)) return false;
+        if (programasFiltrados.length && !programasFiltrados.includes(p.programa)) return false;
+        if (cargosFiltrados.length && !cargosFiltrados.includes(getCargoPessoa(p))) return false;
+        if (instituicoesFiltradas.length && !instituicoesFiltradas.includes(p.instituicao)) return false;
+        if (buscaFiltrada && !normalizarTexto(p.nome || "").includes(normalizarTexto(buscaFiltrada))) return false;
+        return true;
+      }));
+      const hasAlumniNoMunicipio = !!(pessoas && pessoas.some(p =>
+        p.estado_sigla === ufMunicipio &&
+        normalizarTexto(p.cidade || "") === nomeMunNorm
+      ));
 
-      const regiao = stateRegionBySigla[currentMunicipiosUF] || "";
-      const baseColor = regionColors[regiao] || "#16a34a";
+      const regiao = stateRegionBySigla[ufMunicipio] || "";
+    const baseColor = regionColors[regiao] || "#45a351";
 
       if (isHighlight) {
         return {
@@ -1629,6 +1892,33 @@ const lampiarCities = [
           weight: 3,
           fillColor: baseColor,
           fillOpacity: 0.85
+        };
+      }
+
+      if (hasSelectedCities && hasAlumniNoMunicipio) {
+        return {
+          color: baseColor,
+          weight: 2.2,
+          fillColor: baseColor,
+          fillOpacity: 0.28
+        };
+      }
+
+      if (hasFiltrosDePessoas) {
+        if (hasPessoaFiltradaNoMunicipio) {
+          return {
+            color: "#0f172a",
+            weight: 2.8,
+            fillColor: baseColor,
+            fillOpacity: 0.82
+          };
+        }
+
+        return {
+          color: "#cbd5e1",
+          weight: 1,
+          fillColor: "#f8fafc",
+          fillOpacity: 0.18
         };
       }
 
@@ -1726,17 +2016,21 @@ map.setMaxBounds(worldBounds);
       map.removeLayer(estadosLayer);
     }
 
-    stateLogoMarkers.forEach(obj => {
-      if (map.hasLayer(obj.marker)) {
-        map.removeLayer(obj.marker);
-      }
-    });
+    if (!traineeMarkersPinned) {
+      stateLogoMarkers.forEach(obj => {
+        if (map.hasLayer(obj.marker)) {
+          map.removeLayer(obj.marker);
+        }
+      });
 
-    municipalInitialMarkers.forEach(obj => {
-      if (map.hasLayer(obj.marker)) {
-        map.removeLayer(obj.marker);
-      }
-    });
+      municipalInitialMarkers.forEach(obj => {
+        if (map.hasLayer(obj.marker)) {
+          map.removeLayer(obj.marker);
+        }
+      });
+    } else {
+      setTraineeMarkersVisible(true);
+    }
 
     municipalLogoMarkers.forEach(obj => {
       if (map.hasLayer(obj.marker)) {
@@ -1744,18 +2038,20 @@ map.setMaxBounds(worldBounds);
       }
     });
 
-    lampiarMarkers.forEach(marker => {
-      if (map.hasLayer(marker)) {
-        map.removeLayer(marker);
-      }
-    });
+    if (!lampiarMarkersPinned) {
+      lampiarMarkers.forEach(marker => {
+        if (map.hasLayer(marker)) {
+          map.removeLayer(marker);
+        }
+      });
+    } else {
+      setLampiarMarkersVisible(true);
+    }
 
     clearStateExtraCityMarkers();
     clearMunicipalZoomMarkers();
 
-    if (municipiosLayer && map.hasLayer(municipiosLayer)) {
-      map.removeLayer(municipiosLayer);
-    }
+    limparMunicipios();
 
     setLegendPoloMode(false);
     return;
@@ -1769,23 +2065,8 @@ map.setMaxBounds(worldBounds);
     estadosLayer.addTo(map);
   }
 
-  stateLogoMarkers.forEach(obj => {
-    if (!map.hasLayer(obj.marker)) {
-      obj.marker.addTo(map);
-    }
-  });
-
-  municipalInitialMarkers.forEach(obj => {
-    if (!map.hasLayer(obj.marker)) {
-      obj.marker.addTo(map);
-    }
-  });
-
-  lampiarMarkers.forEach(marker => {
-    if (!map.hasLayer(marker)) {
-      marker.addTo(map);
-    }
-  });
+  setTraineeMarkersVisible(traineeMarkersVisible);
+  setLampiarMarkersVisible(lampiarMarkersVisible);
 }
     // Estilo dos estados
 function estadoStyle(feature) {
@@ -1807,13 +2088,33 @@ function estadoStyle(feature) {
     regioesSelecionadas.includes(regiao) ||
     (!regioesSelecionadas.length && (!selectedRegion || regiao === selectedRegion));
 
-  // Verificar se há filtro de programa ativo
+  const turmasFiltradas = filterTurma ? getValoresSelecionados(filterTurma) : [];
   const programasFiltrados = filterPrograma ? getValoresSelecionados(filterPrograma) : [];
-  let hasProgramInState = false;
-  
-  if (programasFiltrados.length && pessoas) {
-    hasProgramInState = pessoas.some(p => programasFiltrados.includes(p.programa) && p.estado_sigla === sigla);
-  }
+  const cargosFiltrados = filterCargo ? getValoresSelecionados(filterCargo) : [];
+  const instituicoesFiltradas = filterInstituicao ? getValoresSelecionados(filterInstituicao) : [];
+  const cidadesFiltradas = filterCidade ? getValoresSelecionados(filterCidade) : [];
+  const buscaFiltrada = filterBusca ? filterBusca.value.trim() : "";
+  const hasFiltrosDePessoas =
+    regioesSelecionadas.length ||
+    estadosSelecionados.length ||
+    cidadesFiltradas.length ||
+    turmasFiltradas.length ||
+    programasFiltrados.length ||
+    cargosFiltrados.length ||
+    instituicoesFiltradas.length ||
+    buscaFiltrada;
+  const hasPessoaFiltradaNoEstado = !!(pessoas && pessoas.some(p => {
+    if (p.estado_sigla !== sigla) return false;
+    if (regioesSelecionadas.length && !regioesSelecionadas.includes(p.regiao)) return false;
+    if (estadosSelecionados.length && !estadosSelecionados.includes(p.estado_sigla)) return false;
+    if (cidadesFiltradas.length && !cidadesFiltradas.includes(p.cidade)) return false;
+    if (turmasFiltradas.length && !turmasFiltradas.includes(p.turma)) return false;
+    if (programasFiltrados.length && !programasFiltrados.includes(p.programa)) return false;
+    if (cargosFiltrados.length && !cargosFiltrados.includes(getCargoPessoa(p))) return false;
+    if (instituicoesFiltradas.length && !instituicoesFiltradas.includes(p.instituicao)) return false;
+    if (buscaFiltrada && !normalizarTexto(p.nome || "").includes(normalizarTexto(buscaFiltrada))) return false;
+    return true;
+  }));
 
   // Estados de outra região quando filtro de região estiver ativo
   if ((regioesSelecionadas.length || selectedRegion) && !isInSelectedRegion) {
@@ -1826,10 +2127,9 @@ function estadoStyle(feature) {
     };
   }
 
-  // Se há filtro de programa, destacar apenas estados com pessoas desse programa
-  if (programasFiltrados.length) {
-    if (hasProgramInState) {
-      // Estado COM pessoas do programa filtrado - destaque forte
+  // Qualquer filtro ativo deve destacar os estados onde há pessoas compatíveis.
+  if (hasFiltrosDePessoas) {
+    if (hasPessoaFiltradaNoEstado) {
       return {
         color: baseColor,
         weight: 3,
@@ -1838,7 +2138,6 @@ function estadoStyle(feature) {
         className: 'state-transition state-highlighted'
       };
     } else {
-      // Estado SEM pessoas do programa filtrado - muito apagado
       return {
         color: "#e0e0e0",
         weight: 1,
@@ -1878,18 +2177,18 @@ function estadoStyle(feature) {
   let fillOpacity = 0.18;
 
   // Quando os municípios da UF estão desenhados, deixa o estado mais “de fundo”
-  if (currentMunicipiosUF && sigla === currentMunicipiosUF && municipiosLayer) {
+  if (municipiosLayersByUF[sigla]) {
     fillOpacity = 0.08;
     color = "#9ca3af";
   }
 
   // Estado selecionado (clique ou polo)
   if (isSelectedState) {
-    const regionColor = regionColors[regiao] || "#004b8d";
+    const regionColor = regionColors[regiao] || "#273766";
 
     color = regionColor;
     weight = 3; // um pouco mais fino pra não deformar tanto
-    if (currentMunicipiosUF && sigla === currentMunicipiosUF && municipiosLayer) {
+    if (municipiosLayersByUF[sigla]) {
       fillOpacity = 0.1;
     } else {
       fillOpacity = 0.3;
@@ -2153,7 +2452,6 @@ function estadoStyle(feature) {
             let tooltipText = "Parceria estadual do Programa Trainee Ensina Brasil"; if (sigla === "GO") { tooltipText = "Parceria estadual do Programa Trainee Ensina Brasil em Goiás"; } if (sigla === "MT") { tooltipText = "Parceria estadual do Programa Trainee Ensina Brasil em Mato Grosso"; } if (sigla === "MS") { tooltipText = "Parceria estadual do Programa Trainee Ensina Brasil em Mato Grosso do Sul"; }
 
             const marker = L.marker(markerLatLng, { icon: ensinaIcon })
-              .addTo(map)
               .bindTooltip(tooltipText, {
                 direction: "top",
                 offset: [0, -10],
@@ -2165,6 +2463,7 @@ function estadoStyle(feature) {
             // aplicar destaque hover nas logos de parceria estadual
             try { attachLogoHover(marker); } catch (e) {}
             stateLogoMarkers.push({ sigla, marker });
+            if (traineeMarkersVisible) marker.addTo(map);
           });
         })
         .catch(err => {
@@ -2205,7 +2504,7 @@ function carregarPaisesVizinhos() {
           onEachFeature: function (feature, layer) {
             layer.on("mouseover", function () {
               layer.setStyle({
-                color: "#0ea5e9",
+                color: "#273766",
                 weight: 2.8,
                 fillOpacity: 0.28
               });
@@ -2272,7 +2571,7 @@ function carregarPaisesVizinhos() {
       <div style="text-align: center; font-weight: 500; font-family: 'Inter', sans-serif;">
         <strong>${prog.pais}</strong><br>
         <span style="font-size: 0.9rem; color: #6b7280;">${prog.nome}</span><br>
-        <a href="${prog.site}" target="_blank" rel="noopener noreferrer" style="font-size: 0.85rem; color: #0ea5e9; text-decoration: underline;">Visitar site</a>
+        <a href="${prog.site}" target="_blank" rel="noopener noreferrer" style="font-size: 0.85rem; color: #273766; text-decoration: underline;">Visitar site</a>
       </div>
     `, {
       maxWidth: 200,
@@ -2792,7 +3091,7 @@ function carregarPaisesVizinhos() {
             <div style="text-align: center; font-weight: 500; font-family: 'Inter', sans-serif;">
               <strong>${prog.pais}</strong><br>
               <span style="font-size: 0.9rem; color: #6b7280;">${prog.nome}</span><br>
-              <a href="${prog.site}" target="_blank" rel="noopener noreferrer" style="font-size: 0.85rem; color: #0ea5e9; text-decoration: underline;">Visitar site</a>
+              <a href="${prog.site}" target="_blank" rel="noopener noreferrer" style="font-size: 0.85rem; color: #273766; text-decoration: underline;">Visitar site</a>
             </div>
           `, {
             maxWidth: 200,
@@ -2814,21 +3113,150 @@ function carregarPaisesVizinhos() {
     // MUNICÍPIOS
     // -------------------------
     function limparMunicipios() {
-      if (municipiosLayer) {
-        map.removeLayer(municipiosLayer);
-        municipiosLayer = null;
-      }
+      Object.values(municipiosLayersByUF).forEach(layer => {
+        if (layer && map.hasLayer(layer)) {
+          map.removeLayer(layer);
+        }
+      });
 
+      municipiosLayersByUF = {};
+      municipiosLayer = null;
       currentMunicipiosUF = null;
 
       municipalLogoMarkers.forEach(obj => map.removeLayer(obj.marker));
       municipalLogoMarkers = [];
     }
 
+    function limparMunicipiosEstado(sigla) {
+      const layer = municipiosLayersByUF[sigla];
+      if (layer && map.hasLayer(layer)) {
+        map.removeLayer(layer);
+      }
+      delete municipiosLayersByUF[sigla];
+
+      municipalLogoMarkers
+        .filter(obj => obj.uf === sigla)
+        .forEach(obj => map.removeLayer(obj.marker));
+      municipalLogoMarkers = municipalLogoMarkers.filter(obj => obj.uf !== sigla);
+
+      const ufsCarregadas = Object.keys(municipiosLayersByUF);
+      municipiosLayer = ufsCarregadas.length ? municipiosLayersByUF[ufsCarregadas[ufsCarregadas.length - 1]] : null;
+      if (currentMunicipiosUF === sigla) {
+        currentMunicipiosUF = ufsCarregadas[ufsCarregadas.length - 1] || null;
+      }
+    }
+
+    function atualizarEstiloMunicipios() {
+      Object.values(municipiosLayersByUF).forEach(layer => {
+        if (layer && layer.setStyle) {
+          layer.setStyle(municipioStyle);
+        }
+      });
+    }
+
+    function pessoaAtendeFiltrosAtuais(p) {
+      const regioesAtuais = getValoresSelecionados(filterRegiao);
+      const estadosAtuais = getValoresSelecionados(filterEstado);
+      const cidadesAtuais = getValoresSelecionados(filterCidade);
+      const turmasAtuais = getValoresSelecionados(filterTurma);
+      const programasAtuais = getValoresSelecionados(filterPrograma);
+      const cargosAtuais = getValoresSelecionados(filterCargo);
+      const instituicoesAtuais = getValoresSelecionados(filterInstituicao);
+      const buscaAtual = filterBusca.value.trim();
+
+      if (regioesAtuais.length && !regioesAtuais.includes(p.regiao)) return false;
+      if (estadosAtuais.length && !estadosAtuais.includes(p.estado_sigla)) return false;
+      if (cidadesAtuais.length && !cidadesAtuais.includes(p.cidade)) return false;
+      if (turmasAtuais.length && !turmasAtuais.includes(p.turma)) return false;
+      if (programasAtuais.length && !programasAtuais.includes(p.programa)) return false;
+      if (cargosAtuais.length && !cargosAtuais.includes(getCargoPessoa(p))) return false;
+      if (instituicoesAtuais.length && !instituicoesAtuais.includes(p.instituicao)) return false;
+      if (buscaAtual && !normalizarTexto(p.nome || "").includes(normalizarTexto(buscaAtual))) return false;
+
+      return true;
+    }
+
+    function getEstadosComPessoasFiltradas() {
+      const temFiltroAtivo =
+        getValoresSelecionados(filterRegiao).length ||
+        getValoresSelecionados(filterEstado).length ||
+        getValoresSelecionados(filterCidade).length ||
+        getValoresSelecionados(filterTurma).length ||
+        getValoresSelecionados(filterPrograma).length ||
+        getValoresSelecionados(filterCargo).length ||
+        getValoresSelecionados(filterInstituicao).length ||
+        filterBusca.value.trim();
+
+      if (!temFiltroAtivo || !pessoas) return [];
+
+      return [...new Set(
+        pessoas
+          .filter(p => p.estado_sigla && pessoaAtendeFiltrosAtuais(p))
+          .map(p => p.estado_sigla)
+      )];
+    }
+
+    function carregarMunicipiosEstadosSelecionados(focoSigla = "") {
+      const estadosSelecionados = getValoresSelecionados(filterEstado);
+      const estadosDasCidades = getEstadosDasCidadesSelecionadas();
+      const estadosDasPessoasFiltradas = getEstadosComPessoasFiltradas();
+      const estadosParaCarregar = [...new Set([...estadosSelecionados, ...estadosDasCidades, ...estadosDasPessoasFiltradas].filter(Boolean))];
+
+      Object.keys(municipiosLayersByUF).forEach(uf => {
+        if (!estadosParaCarregar.includes(uf)) {
+          limparMunicipiosEstado(uf);
+        }
+      });
+
+      if (!estadosParaCarregar.length) {
+        limparMunicipios();
+        return;
+      }
+
+      estadosParaCarregar.forEach(uf => carregarMunicipiosEstado(uf));
+      currentMunicipiosUF = focoSigla || estadosParaCarregar[estadosParaCarregar.length - 1] || currentMunicipiosUF;
+    }
+
+    function getCidadeValorFiltro(nomeMunicipio, sigla) {
+      const nomeNorm = normalizarTexto(nomeMunicipio);
+      const pessoa = pessoas.find(p =>
+        p.estado_sigla === sigla &&
+        normalizarTexto(p.cidade || "") === nomeNorm
+      );
+
+      return pessoa ? pessoa.cidade : nomeMunicipio;
+    }
+
+    function aplicarFiltroMunicipioPeloMapa(nomeMunicipio, sigla) {
+      if (!nomeMunicipio || !sigla) return;
+      const cidadeFiltro = getCidadeValorFiltro(nomeMunicipio, sigla);
+
+      pessoasSelecionadasKeys.clear();
+      highlightState = sigla;
+      highlightCityNorm = normalizarTexto(cidadeFiltro);
+
+      limparFiltroMultiplo(filterTurma);
+      limparFiltroMultiplo(filterPrograma);
+      limparFiltroMultiplo(filterCargo);
+      limparFiltroMultiplo(filterInstituicao);
+
+      aplicarEstadoNoFiltroPeloMapa(sigla);
+      atualizarCidades();
+      aplicarFiltroMultiplo(filterCidade, cidadeFiltro);
+      filterCidade.dataset.lastSelected = cidadeFiltro;
+      atualizarTurmas();
+      atualizarLista();
+      carregarMunicipiosEstadosSelecionados(sigla);
+
+      if (estadosLayer) estadosLayer.setStyle(estadoStyle);
+      atualizarEstiloMunicipios();
+      zoomEstado(sigla);
+    }
+
     function carregarMunicipiosEstado(sigla) {
       const code = stateCodeBySigla[sigla];
       if (!code) {
-        limparMunicipios();
+        limparMunicipiosEstado(sigla);
         return;
       }
 
@@ -2842,7 +3270,7 @@ function carregarPaisesVizinhos() {
       );
 
       if (!cidadesSet.size && !municipalPartnerships.some(pc => pc.uf === sigla)) {
-        limparMunicipios();
+        limparMunicipiosEstado(sigla);
         return;
       }
 
@@ -2860,21 +3288,58 @@ function carregarPaisesVizinhos() {
         const featuresFiltradas = (geo.features || []).filter(f => {
           const nomeMun = normalizarTexto(getMunicipioNome(f));
           return cidadesSet.has(nomeMun);
+        }).map(f => {
+          f.properties = f.properties || {};
+          f.properties.__uf = sigla;
+          return f;
         });
 
-        limparMunicipios();
+        limparMunicipiosEstado(sigla);
         currentMunicipiosUF = sigla;
 
         if (featuresFiltradas.length) {
           municipiosLayer = L.geoJSON(
             { type: "FeatureCollection", features: featuresFiltradas },
             {
-              style: municipioStyle
+              style: municipioStyle,
+              onEachFeature: (feature, layer) => {
+                const nomeMunicipio = getMunicipioNome(feature);
+                if (!nomeMunicipio) return;
+
+                layer.bindTooltip(nomeMunicipio, {
+                  sticky: true,
+                  direction: "auto",
+                  className: "municipio-tooltip",
+                  opacity: 0.95
+                });
+
+                layer.on("click", () => {
+                  aplicarFiltroMunicipioPeloMapa(nomeMunicipio, sigla);
+                });
+              }
             }
           ).addTo(map);
+          municipiosLayersByUF[sigla] = municipiosLayer;
 
           if (estadosLayer) {
             estadosLayer.setStyle(estadoStyle);
+          }
+
+          if (highlightCityNorm) {
+            const cidadeDestacada = featuresFiltradas.find(f =>
+              normalizarTexto(getMunicipioNome(f)) === highlightCityNorm
+            );
+
+            if (cidadeDestacada) {
+              const cidadeBounds = L.geoJSON(cidadeDestacada).getBounds();
+              if (cidadeBounds && cidadeBounds.isValid && cidadeBounds.isValid()) {
+                map.flyToBounds(cidadeBounds, {
+                  padding: [80, 80],
+                  maxZoom: 7.2,
+                  animate: true
+                });
+              }
+            }
           }
         }
 
@@ -2889,7 +3354,6 @@ function carregarPaisesVizinhos() {
             if (!center) return;
 
             const marker = L.marker(center, { icon: cityIcon })
-              .addTo(map)
               .bindTooltip("Parceria municipal do Programa Trainee Ensina Brasil", {
                 direction: "top",
                 offset: [0, -10],
@@ -2901,6 +3365,7 @@ function carregarPaisesVizinhos() {
             });
 
             municipalLogoMarkers.push({ uf: sigla, marker });
+            if (traineeMarkersVisible) marker.addTo(map);
           });
 
       };
@@ -2940,7 +3405,6 @@ function carregarPaisesVizinhos() {
           const center = bounds.getCenter();
 
           const marker = L.marker(center, { icon: cityIcon })
-            .addTo(map)
             .bindTooltip("Parceria municipal do Programa Trainee Ensina Brasil", {
               direction: "top",
               offset: [0, -10],
@@ -2959,10 +3423,10 @@ function carregarPaisesVizinhos() {
             nome: "Parceria com Municípios",
             marker
           });
+          if (traineeMarkersVisible) marker.addTo(map);
         } else {
           cities.forEach(cidade => {
             const marker = L.marker([cidade.lat, cidade.lng], { icon: cityIcon })
-              .addTo(map)
               .bindTooltip("Parceria com Municípios", {
                 direction: "top",
                 offset: [0, -10],
@@ -2981,6 +3445,7 @@ function carregarPaisesVizinhos() {
               nome: cidade.nome,
               marker
             });
+            if (traineeMarkersVisible) marker.addTo(map);
           });
         }
       });
@@ -3002,7 +3467,6 @@ function adicionarLogosLampiar() {
   lampiarCities.forEach(cidade => {
 
     const marker = L.marker([cidade.lat, cidade.lng], { icon: lampiarIcon })
-      .addTo(map)
       .bindTooltip(
         "Programa Lampiar – " + cidade.nome + "/" + cidade.uf,
         { direction: "top", offset: [0, -10], opacity: 0.9 }
@@ -3054,6 +3518,7 @@ function adicionarLogosLampiar() {
     attachLogoHover(marker);
 
     lampiarMarkers.push(marker);
+    if (lampiarMarkersVisible) marker.addTo(map);
   });
 }
 
@@ -3107,7 +3572,7 @@ function adicionarLogosLampiar() {
       );
 
       if (estadosLayer) estadosLayer.setStyle(estadoStyle);
-      if (municipiosLayer) municipiosLayer.setStyle(municipioStyle);
+      atualizarEstiloMunicipios();
     }
 
     function zoomRegiao(regiao) {
@@ -3310,38 +3775,204 @@ function adicionarLogosLampiar() {
       } else {
         pessoasSelecionadasKeys.add(key);
       }
-      atualizarLista();
+
+      aplicarFiltrosDasPessoasSelecionadas(p);
+    }
+
+    function getPessoasSelecionadas() {
+      if (!pessoasSelecionadasKeys.size) return [];
+      return pessoas.filter(p => pessoasSelecionadasKeys.has(criarChavePessoa(p)));
+    }
+
+    function aplicarValoresFiltro(select, valores) {
+      limparFiltroMultiplo(select);
+      valores.filter(Boolean).forEach(valor => aplicarFiltroMultiplo(select, valor));
+      select.dataset.lastSelected = valores.filter(Boolean).slice(-1)[0] || "";
+    }
+
+    function aplicarFiltrosDasPessoasSelecionadas(focoPessoa = null) {
+      const selecionadas = getPessoasSelecionadas();
+
+      if (!selecionadas.length) {
+        highlightState = null;
+        highlightCityNorm = null;
+
+        limparFiltroMultiplo(filterRegiao);
+        limparFiltroMultiplo(filterEstado);
+        limparFiltroMultiplo(filterCidade);
+        limparFiltroMultiplo(filterTurma);
+        limparFiltroMultiplo(filterPrograma);
+        limparFiltroMultiplo(filterCargo);
+        limparFiltroMultiplo(filterInstituicao);
+
+        atualizarOpcoesEstado();
+        atualizarCidades();
+        atualizarTurmas();
+        atualizarLista({ preservarSelecao: true });
+        limparMunicipios();
+        if (estadosLayer) estadosLayer.setStyle(estadoStyle);
+        zoomNacional();
+        return;
+      }
+
+      const valoresUnicos = (getter) => [...new Set(selecionadas.map(getter).filter(Boolean))];
+      const regioes = valoresUnicos(p => stateRegionBySigla[p.estado_sigla] || p.regiao);
+      const estados = valoresUnicos(p => p.estado_sigla);
+      const cidades = valoresUnicos(p => p.cidade);
+      const turmas = valoresUnicos(p => p.turma);
+      const programas = valoresUnicos(p => p.programa);
+      const cargos = valoresUnicos(p => getCargoPessoa(p));
+      const instituicoes = valoresUnicos(p => p.instituicao);
+
+      aplicarValoresFiltro(filterRegiao, regioes);
+      atualizarOpcoesEstado();
+      aplicarValoresFiltro(filterEstado, estados);
+      atualizarCidades();
+      aplicarValoresFiltro(filterCidade, cidades);
+      atualizarTurmas();
+      aplicarValoresFiltro(filterTurma, turmas);
+      aplicarValoresFiltro(filterPrograma, programas);
+      aplicarValoresFiltro(filterCargo, cargos);
+      aplicarValoresFiltro(filterInstituicao, instituicoes);
+
+      const foco = focoPessoa || selecionadas[selecionadas.length - 1];
+      highlightState = foco.estado_sigla || estados[estados.length - 1] || null;
+      highlightCityNorm = normalizarTexto(foco.cidade || cidades[cidades.length - 1] || "");
+
+      atualizarLista({ preservarSelecao: true });
       if (estadosLayer) {
         estadosLayer.setStyle(estadoStyle);
+      }
+      carregarMunicipiosEstadosSelecionados(highlightState || "");
+      atualizarEstiloMunicipios();
+      if (highlightState) {
+        zoomEstado(highlightState);
+      } else {
+        ajustarZoom();
       }
     }
 
     function selecionarPessoa(p) {
-      const key = criarChavePessoa(p);
-      pessoasSelecionadasKeys.clear();
-      pessoasSelecionadasKeys.add(key);
-
-      highlightState = p.estado_sigla || null;
-      highlightCityNorm = normalizarTexto(p.cidade || "");
-
-      if (p.estado_sigla) {
-        selecionarFiltroUnico(filterRegiao, stateRegionBySigla[p.estado_sigla] || "");
-        atualizarOpcoesEstado();
-        selecionarFiltroUnico(filterEstado, p.estado_sigla);
-      }
-
-      atualizarCidades();
-      atualizarLista();
-
-      if (estadosLayer) {
-        estadosLayer.setStyle(estadoStyle);
-      }
-
-      ajustarZoom();
-      if (p.estado_sigla) {
-        carregarMunicipiosEstado(p.estado_sigla);
-      }
+      toggleSelecionarPessoa(p);
     }
+
+function atualizarResumoMobilizacao(lista) {
+  if (!mobilizacaoResumo) return;
+
+  const contarUnicos = (campo) => new Set(
+    lista.map(p => p[campo]).filter(Boolean)
+  ).size;
+
+  const indicadores = [
+    { label: "lideranças", valor: lista.length },
+    { label: "cidades", valor: contarUnicos("cidade") },
+    { label: "estados", valor: contarUnicos("estado_sigla") },
+    { label: "programas", valor: contarUnicos("programa") },
+    { label: "instituições", valor: contarUnicos("instituicao") }
+  ];
+
+  mobilizacaoResumo.innerHTML = indicadores.map(item => `
+    <div class="mobilizacao-item">
+      <strong>${item.valor}</strong>
+      <span>${item.label}</span>
+    </div>
+  `).join("");
+}
+
+function formatarFiltroMensagem(nome, valores) {
+  return valores.length ? `${nome}: ${valores.join(", ")}` : "";
+}
+
+function obterResumoFiltrosAtivos() {
+  return [
+    formatarFiltroMensagem("Região", getValoresSelecionados(filterRegiao)),
+    formatarFiltroMensagem("Estado", getValoresSelecionados(filterEstado)),
+    formatarFiltroMensagem("Cidade", getValoresSelecionados(filterCidade)),
+    formatarFiltroMensagem("Turma", getValoresSelecionados(filterTurma)),
+    formatarFiltroMensagem("Programa", getValoresSelecionados(filterPrograma)),
+    formatarFiltroMensagem("Cargo", getValoresSelecionados(filterCargo)),
+    formatarFiltroMensagem("Instituição", getValoresSelecionados(filterInstituicao)),
+    filterBusca.value.trim() ? `Busca: ${filterBusca.value.trim()}` : ""
+  ].filter(Boolean);
+}
+
+function montarMensagemWhatsapp(lista) {
+  const filtros = obterResumoFiltrosAtivos();
+  const linhas = [
+    "Mapa da Rede de Lideranças Ensina Brasil",
+    "",
+    `${lista.length} liderança(s) encontrada(s)` + (filtros.length ? " com os filtros aplicados:" : ".")
+  ];
+
+  if (filtros.length) {
+    linhas.push(...filtros.map(item => `- ${item}`));
+  }
+
+  linhas.push("", "Lista:");
+
+  lista.forEach((p, index) => {
+    const local = [p.cidade, p.estado_sigla].filter(Boolean).join(" - ");
+    const detalhes = [
+      p.programa,
+      p.turma ? `Turma ${p.turma}` : "",
+      getCargoPessoa(p),
+      p.instituicao
+    ].filter(Boolean).join(" | ");
+
+    linhas.push(`${index + 1}. ${p.nome || "Sem nome"}`);
+    if (local) linhas.push(`   ${local}`);
+    if (detalhes) linhas.push(`   ${detalhes}`);
+  });
+
+  linhas.push("", "Mapa: https://maparedeliderancas.ensinabrasil.org/mapa-rede-lideranças");
+
+  return linhas.join("\n");
+}
+
+function copiarTexto(texto) {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(texto);
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = texto;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.top = "-9999px";
+  document.body.appendChild(textarea);
+  textarea.select();
+
+  try {
+    document.execCommand("copy");
+    return Promise.resolve();
+  } catch (error) {
+    return Promise.reject(error);
+  } finally {
+    document.body.removeChild(textarea);
+  }
+}
+
+function atualizarBotaoWhatsapp() {
+  if (!btnCopyWhatsapp) return;
+  const total = pessoasFiltradasAtuais.length;
+  btnCopyWhatsapp.disabled = total === 0;
+  btnCopyWhatsapp.textContent = total ? "Copiar seleção" : "Nenhuma seleção para copiar";
+}
+
+function copiarListaWhatsapp() {
+  if (!pessoasFiltradasAtuais.length || !btnCopyWhatsapp) return;
+
+  const texto = montarMensagemWhatsapp(pessoasFiltradasAtuais);
+  copiarTexto(texto)
+    .then(() => {
+      btnCopyWhatsapp.textContent = "Lista copiada!";
+      window.setTimeout(atualizarBotaoWhatsapp, 2200);
+    })
+    .catch(() => {
+      btnCopyWhatsapp.textContent = "Não foi possível copiar";
+      window.setTimeout(atualizarBotaoWhatsapp, 2600);
+    });
+}
 
 function limparSelecao() {
   pessoasSelecionadasKeys.clear();
@@ -3371,11 +4002,7 @@ function limparSelecao() {
     estadosLayer.setStyle(estadoStyle);
   }
 
-  if (municipiosLayer) {
-    map.removeLayer(municipiosLayer);
-    municipiosLayer = null;
-    currentMunicipiosUF = null;
-  }
+  limparMunicipios();
 
   clearStateExtraCityMarkers();
   clearMunicipalZoomMarkers();
@@ -3577,12 +4204,19 @@ function atualizarCargos() {
     function renderizarCardPessoa(p, shouldDim = false) {
       const div = document.createElement("div");
       div.className = "person-card";
-      div.style.borderLeft = `4px solid ${getCorCardPrograma(p.programa)}`;
+      const selectionStyle = getEstiloSelecaoPrograma(p.programa);
+      div.style.borderLeft = `4px solid ${selectionStyle.color}`;
+      div.style.setProperty("--person-program-color", selectionStyle.color);
+      div.style.setProperty("--person-program-bg", selectionStyle.bg);
+      div.style.setProperty("--person-program-shadow", selectionStyle.shadow);
 
       const key = criarChavePessoa(p);
 
-      if (shouldDim) {
+      if (shouldDim || (pessoasSelecionadasKeys.size > 0 && !pessoasSelecionadasKeys.has(key))) {
         div.classList.add("dimmed");
+      }
+      if (pessoasSelecionadasKeys.has(key)) {
+        div.classList.add("selected");
       }
 
       div.innerHTML = `
@@ -3653,9 +4287,13 @@ function atualizarCargos() {
             
             // Atualizar a lista
             atualizarLista();
+            carregarMunicipiosEstadosSelecionados();
+            if (estadosLayer) estadosLayer.setStyle(estadoStyle);
+            atualizarEstiloMunicipios();
           }
         } else {
           // Comportamento normal: toggle seleção de pessoa
+          selecionarPessoa(p);
         }
       });
 
@@ -3682,11 +4320,10 @@ function atualizarCargos() {
         if (
           estadoPessoa &&
           getValoresSelecionados(filterEstado).includes(estadoPessoa) &&
-          municipiosLayer &&
-          currentMunicipiosUF === estadoPessoa
+          municipiosLayersByUF[estadoPessoa]
         ) {
           highlightCityNorm = cidadeNorm;
-          municipiosLayer.setStyle(municipioStyle);
+          atualizarEstiloMunicipios();
         }
       });
 
@@ -3720,15 +4357,14 @@ function atualizarCargos() {
           estadosLayer.setStyle(estadoStyle);
         }
 
-        if (municipiosLayer) {
-          municipiosLayer.setStyle(municipioStyle);
-        }
+        atualizarEstiloMunicipios();
       });
 
       return div;
     }
 
-    function atualizarLista() {
+    function atualizarLista(opcoes = {}) {
+      const preservarSelecao = !!opcoes.preservarSelecao;
       const regioesAtuais = getValoresSelecionados(filterRegiao);
       const estadosAtuais = getValoresSelecionados(filterEstado);
       const cidadesAtuais = getValoresSelecionados(filterCidade);
@@ -3769,8 +4405,12 @@ function atualizarCargos() {
 
       // Ordenar alfabeticamente por nome
       filtradas.sort((a, b) => (a.nome || "").localeCompare(b.nome || "", 'pt-BR'));
+      pessoasFiltradasAtuais = filtradas;
+      atualizarBotaoWhatsapp();
 
-      pessoasSelecionadasKeys.clear();
+      if (!preservarSelecao) {
+        pessoasSelecionadasKeys.clear();
+      }
       peopleList.innerHTML = "";
 
       summary.textContent =
@@ -3778,6 +4418,8 @@ function atualizarCargos() {
         (regioesAtuais.length || estadosAtuais.length || cidadesAtuais.length || turmasAtuais.length || programasAtuais.length || cargosAtuais.length || instituicoesAtuais.length || buscaAtual
           ? " com os filtros aplicados."
           : " no total.");
+
+      atualizarResumoMobilizacao(filtradas);
 
       if (!filtradas.length) {
         if (estadosAtuais.length) {
@@ -3834,7 +4476,7 @@ function atualizarCargos() {
         estadosLayer.setStyle(estadoStyle);
       }
 
-      limparMunicipios();
+      carregarMunicipiosEstadosSelecionados();
       ajustarZoom();
     });
 
@@ -3859,16 +4501,10 @@ function atualizarCargos() {
 
       atualizarCidades();
       atualizarLista();
-      if (est) {
-        carregarMunicipiosEstado(est);
-      } else if (estados.length) {
-        carregarMunicipiosEstado(estados.slice(-1)[0]);
-      } else {
-        limparMunicipios();
-      }
+      carregarMunicipiosEstadosSelecionados(est || estados.slice(-1)[0] || "");
 
       if (estadosLayer) estadosLayer.setStyle(estadoStyle);
-      if (municipiosLayer) municipiosLayer.setStyle(municipioStyle);
+      atualizarEstiloMunicipios();
 
       if (est) {
         zoomEstado(est);
@@ -3884,15 +4520,15 @@ function atualizarCargos() {
       const estadoDaUltimaCidade = getEstadoDaCidade(ultimaCidade);
       const estadoParaMunicipios = estadoDaUltimaCidade || estadosDasCidades.slice(-1)[0] || estadosSelecionados.slice(-1)[0] || "";
 
-      if (estadoParaMunicipios && (!municipiosLayer || currentMunicipiosUF !== estadoParaMunicipios)) {
-        carregarMunicipiosEstado(estadoParaMunicipios);
+      if (estadoParaMunicipios) {
+        carregarMunicipiosEstadosSelecionados(estadoParaMunicipios);
       } else if (!estadoParaMunicipios) {
         limparMunicipios();
       }
       atualizarTurmas();
       atualizarLista();
       if (estadosLayer) estadosLayer.setStyle(estadoStyle);
-      if (municipiosLayer) municipiosLayer.setStyle(municipioStyle);
+      atualizarEstiloMunicipios();
       if (estadoParaMunicipios) {
         zoomEstado(estadoParaMunicipios);
       } else {
@@ -3903,21 +4539,25 @@ function atualizarCargos() {
     filterTurma.addEventListener("change", () => {
       atualizarInstituicoes();
       atualizarLista();
+      carregarMunicipiosEstadosSelecionados();
       if (estadosLayer) estadosLayer.setStyle(estadoStyle);
-    
+      atualizarEstiloMunicipios();
     });
 
     filterPrograma.addEventListener("change", () => {
       atualizarLista();
-      // Atualizar estilo dos estados com transição suave
+      carregarMunicipiosEstadosSelecionados();
       if (estadosLayer) {
         estadosLayer.setStyle(estadoStyle);
       }
+      atualizarEstiloMunicipios();
     });
 
     filterCargo.addEventListener("change", () => {
       atualizarLista();
+      carregarMunicipiosEstadosSelecionados();
       if (estadosLayer) estadosLayer.setStyle(estadoStyle);
+      atualizarEstiloMunicipios();
     });
 
     document.addEventListener("click", () => {
@@ -3932,15 +4572,45 @@ function atualizarCargos() {
       atualizarCidades();
       atualizarTurmas();
       atualizarLista();
+      carregarMunicipiosEstadosSelecionados();
       if (estadosLayer) estadosLayer.setStyle(estadoStyle);
-      if (municipiosLayer) municipiosLayer.setStyle(municipioStyle);
+      atualizarEstiloMunicipios();
     });
 
     filterBusca.addEventListener("input", () => {
       atualizarLista();
+      carregarMunicipiosEstadosSelecionados();
+      if (estadosLayer) estadosLayer.setStyle(estadoStyle);
+      atualizarEstiloMunicipios();
     });
 
+    if (btnCopyWhatsapp) {
+      btnCopyWhatsapp.addEventListener("click", copiarListaWhatsapp);
+      atualizarBotaoWhatsapp();
+    }
+
     btnLimpar.addEventListener("click", limparSelecao);
+    if (btnLimparResultados) {
+      btnLimparResultados.addEventListener("click", limparSelecao);
+    }
+
+    document.addEventListener("dblclick", (event) => {
+      const alvo = event.target;
+      if (
+        alvo.closest("#map") ||
+        alvo.closest(".filters-panel") ||
+        alvo.closest(".results-panel") ||
+        alvo.closest("button") ||
+        alvo.closest("a") ||
+        alvo.closest("input") ||
+        alvo.closest(".multi-filter")
+      ) {
+        return;
+      }
+
+      limparSelecao();
+    });
+
     mapHomeBtn.addEventListener("click", () => {
       centralizarMapaNacional();
     });
@@ -3957,6 +4627,9 @@ function atualizarCargos() {
       adicionarLogosMunicipaisIniciais();
       criarLegendaEnsina();
       adicionarLogosLampiar(); // Lampiar no mapa
+      configurarLegendasInterativas();
+      setTraineeMarkersVisible(false);
+      setLampiarMarkersVisible(false);
 
       const popupCloseBtn = document.getElementById("popup-close-btn");
       if (popupCloseBtn) {
