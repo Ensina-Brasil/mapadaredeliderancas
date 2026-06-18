@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -427,6 +427,100 @@ main {
       border-color: var(--ensina-green);
       box-shadow: 0 0 0 1px rgba(0, 191, 165, 0.4);
       background: #ffffff;
+    }
+
+    .multi-filter {
+      position: relative;
+    }
+
+    .multi-filter-button {
+      width: 100%;
+      min-height: 31px;
+      padding: 6px 32px 6px 8px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      color: var(--text-main);
+      font-size: 0.86rem;
+      line-height: 1.2;
+      text-align: left;
+      cursor: pointer;
+      outline: none;
+      position: relative;
+      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+
+    .multi-filter-button::after {
+      content: "";
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-35%);
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid #6b7280;
+    }
+
+    .multi-filter.open .multi-filter-button,
+    .multi-filter-button:focus {
+      border-color: var(--ensina-green);
+      box-shadow: 0 0 0 1px rgba(0, 191, 165, 0.4);
+      background: #ffffff;
+    }
+
+    .multi-filter-panel {
+      position: absolute;
+      z-index: 10000;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      display: none;
+      max-height: 230px;
+      overflow-y: auto;
+      padding: 6px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      background: #ffffff;
+      box-shadow: 0 14px 32px rgba(15, 23, 42, 0.18);
+    }
+
+    .multi-filter.open .multi-filter-panel {
+      display: block;
+    }
+
+    .multi-filter-option {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 6px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    .filters .multi-filter-option {
+      flex-direction: row;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .multi-filter-option:hover {
+      background: #f3f4f6;
+    }
+
+    .multi-filter-option input {
+      width: 14px;
+      height: 14px;
+      accent-color: var(--ensina-green);
+      flex-shrink: 0;
+    }
+
+    .multi-filter-option span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .btn-limpar {
@@ -933,45 +1027,31 @@ main {
       <div class="filters">
         <label>
           Região
-          <select id="filter-regiao">
-            <option value="">Todas</option>
-          </select>
+          <div class="multi-filter" id="filter-regiao"></div>
         </label>
         <label>
           Estado
-          <select id="filter-estado">
-            <option value="">Todos</option>
-          </select>
+          <div class="multi-filter" id="filter-estado"></div>
         </label>
         <label>
           Cidade
-          <select id="filter-cidade">
-            <option value="">Todas</option>
-          </select>
+          <div class="multi-filter" id="filter-cidade"></div>
         </label>
         <label>
           Turma
-          <select id="filter-turma">
-            <option value="">Todas</option>
-          </select>
+          <div class="multi-filter" id="filter-turma"></div>
         </label>
         <label>
           Programa
-          <select id="filter-programa">
-            <option value="">Todos</option>
-          </select>
+          <div class="multi-filter" id="filter-programa"></div>
         </label>
         <label>
           Cargo
-          <select id="filter-cargo">
-            <option value="">Todos</option>
-          </select>
+          <div class="multi-filter" id="filter-cargo"></div>
         </label>
         <label>
           Instituição
-          <select id="filter-instituicao">
-            <option value="">Todas</option>
-          </select>
+          <div class="multi-filter" id="filter-instituicao"></div>
         </label>
         <label>
           Buscar pessoa
@@ -1513,9 +1593,11 @@ const lampiarCities = [
     // Estilo dos municípios (para highlight por pessoa)
     function municipioStyle(feature) {
       const nomeMunNorm = normalizarTexto(getMunicipioNome(feature));
+      const cidadesSelecionadasNorm = getValoresSelecionados(filterCidade).map(normalizarTexto);
       const isHighlight =
-        highlightCityNorm &&
-        nomeMunNorm === highlightCityNorm;
+        (highlightCityNorm && nomeMunNorm === highlightCityNorm) ||
+        cidadesSelecionadasNorm.includes(nomeMunNorm);
+      const hasSelectedCities = cidadesSelecionadasNorm.length > 0 || !!highlightCityNorm;
 
       const regiao = stateRegionBySigla[currentMunicipiosUF] || "";
       const baseColor = regionColors[regiao] || "#16a34a";
@@ -1526,6 +1608,15 @@ const lampiarCities = [
           weight: 3,
           fillColor: baseColor,
           fillOpacity: 0.85
+        };
+      }
+
+      if (hasSelectedCities) {
+        return {
+          color: "#cbd5e1",
+          weight: 1,
+          fillColor: "#f8fafc",
+          fillOpacity: 0.22
         };
       }
 
@@ -1680,21 +1771,29 @@ function estadoStyle(feature) {
   const sigla = getSiglaFromFeature(feature);
   const regiao = stateRegionBySigla[sigla];
   const baseColor = regionColors[regiao] || "#9ca3af";
+  const estadosSelecionados = getValoresSelecionados(filterEstado);
+  const regioesSelecionadas = getValoresSelecionados(filterRegiao);
 
   const hasPeople = pessoas && pessoas.some((p) => p.estado_sigla === sigla);
-  const isSelectedState = !!highlightState && sigla === highlightState;
-  const isInSelectedRegion = !selectedRegion || regiao === selectedRegion;
+  const isSelectedState =
+    estadosSelecionados.includes(sigla) ||
+    (!!highlightState && sigla === highlightState);
+  const hasSelectedStates = estadosSelecionados.length > 0 || !!highlightState;
+  const isInSelectedRegion =
+    !regioesSelecionadas.length ||
+    regioesSelecionadas.includes(regiao) ||
+    (!regioesSelecionadas.length && (!selectedRegion || regiao === selectedRegion));
 
   // Verificar se há filtro de programa ativo
-  const programaFiltrado = filterPrograma ? filterPrograma.value : null;
+  const programasFiltrados = filterPrograma ? getValoresSelecionados(filterPrograma) : [];
   let hasProgramInState = false;
   
-  if (programaFiltrado && pessoas) {
-    hasProgramInState = pessoas.some(p => p.programa === programaFiltrado && p.estado_sigla === sigla);
+  if (programasFiltrados.length && pessoas) {
+    hasProgramInState = pessoas.some(p => programasFiltrados.includes(p.programa) && p.estado_sigla === sigla);
   }
 
   // Estados de outra região quando filtro de região estiver ativo
-  if (selectedRegion && !isInSelectedRegion) {
+  if ((regioesSelecionadas.length || selectedRegion) && !isInSelectedRegion) {
     return {
       color: "#e5e7eb",
       weight: 1,
@@ -1705,7 +1804,7 @@ function estadoStyle(feature) {
   }
 
   // Se há filtro de programa, destacar apenas estados com pessoas desse programa
-  if (programaFiltrado) {
+  if (programasFiltrados.length) {
     if (hasProgramInState) {
       // Estado COM pessoas do programa filtrado - destaque forte
       return {
@@ -1728,7 +1827,7 @@ function estadoStyle(feature) {
   }
 
   // Quando há estado destacado, os outros ficam suaves (aplica também a estados sem alumni)
-  if (highlightState && sigla !== highlightState) {
+  if (hasSelectedStates && !isSelectedState) {
     return {
       color: "#d1d5db",
       weight: 1,
@@ -1831,9 +1930,9 @@ function estadoStyle(feature) {
         highlightState = sigla;
         highlightCityNorm = null;
 
-        filterRegiao.value = regiao;
-        atualizarOpcoesEstado(regiao);
-        filterEstado.value = sigla;
+        selecionarFiltroUnico(filterRegiao, regiao);
+        atualizarOpcoesEstado();
+        selecionarFiltroUnico(filterEstado, sigla);
 
         atualizarCidades();
         atualizarLista();
@@ -1894,12 +1993,12 @@ function estadoStyle(feature) {
           }
         });
 
-        filterRegiao.value = regiao;
-        filterEstado.value = "";
+        selecionarFiltroUnico(filterRegiao, regiao);
+        limparFiltroMultiplo(filterEstado);
         highlightState = null;
         highlightCityNorm = null;
 
-        atualizarOpcoesEstado(regiao);
+        atualizarOpcoesEstado();
         atualizarCidades();
         atualizarLista();
         if (estadosLayer) {
@@ -2901,11 +3000,11 @@ function adicionarLogosLampiar() {
       highlightCityNorm = null;
 
       // Ajusta filtros da lateral
-      filterRegiao.value = regiao;
-      atualizarOpcoesEstado(regiao || null);
-      filterEstado.value = uf;
-      filterCidade.value = "";
-      filterTurma.value = "";
+      selecionarFiltroUnico(filterRegiao, regiao);
+      atualizarOpcoesEstado();
+      selecionarFiltroUnico(filterEstado, uf);
+      limparFiltroMultiplo(filterCidade);
+      limparFiltroMultiplo(filterTurma);
 
       atualizarCidades();
       atualizarLista();
@@ -3042,6 +3141,90 @@ function adicionarLogosLampiar() {
       return (p.nome || "") + "|" + (p.estado_sigla || "") + "|" + (p.cidade || "");
     }
 
+    function getValoresSelecionados(select) {
+      return Array.from(select.querySelectorAll('input[type="checkbox"]:checked'))
+        .map(input => input.value)
+        .filter(Boolean);
+    }
+
+    function limparFiltroMultiplo(select) {
+      Array.from(select.querySelectorAll('input[type="checkbox"]')).forEach(input => {
+        input.checked = false;
+      });
+      atualizarResumoFiltroMultiplo(select);
+    }
+
+    function aplicarFiltroMultiplo(select, value) {
+      if (!select || !value) return;
+      const input = select.querySelector(`input[type="checkbox"][value="${CSS.escape(value)}"]`);
+      if (input) input.checked = true;
+      atualizarResumoFiltroMultiplo(select);
+    }
+
+    function selecionarFiltroUnico(select, value) {
+      limparFiltroMultiplo(select);
+      aplicarFiltroMultiplo(select, value);
+    }
+
+    function getPrimeiroValorSelecionado(select) {
+      return getValoresSelecionados(select)[0] || "";
+    }
+
+    function atualizarResumoFiltroMultiplo(container) {
+      const button = container.querySelector(".multi-filter-button");
+      if (!button) return;
+      const label = container.dataset.allLabel || "Todos";
+      const selected = getValoresSelecionados(container);
+      button.textContent = selected.length ? `${selected.length} selecionado(s)` : label;
+    }
+
+    function renderizarFiltroMultiplo(container, opcoes, allLabel, selecionados = new Set()) {
+      container.dataset.allLabel = allLabel;
+      container.innerHTML = "";
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "multi-filter-button";
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        document.querySelectorAll(".multi-filter.open").forEach(item => {
+          if (item !== container) item.classList.remove("open");
+        });
+        container.classList.toggle("open");
+      });
+
+      const panel = document.createElement("div");
+      panel.className = "multi-filter-panel";
+      panel.addEventListener("click", (event) => {
+        event.stopPropagation();
+      });
+
+      opcoes.forEach(opcao => {
+        const row = document.createElement("label");
+        row.className = "multi-filter-option";
+
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.value = opcao;
+        input.checked = selecionados.has(opcao);
+        input.addEventListener("change", () => {
+          atualizarResumoFiltroMultiplo(container);
+        });
+
+        const text = document.createElement("span");
+        text.textContent = opcao;
+        text.title = opcao;
+
+        row.appendChild(input);
+        row.appendChild(text);
+        panel.appendChild(row);
+      });
+
+      container.appendChild(button);
+      container.appendChild(panel);
+      atualizarResumoFiltroMultiplo(container);
+    }
+
     function toggleSelecionarPessoa(p) {
       const key = criarChavePessoa(p);
       if (pessoasSelecionadasKeys.has(key)) {
@@ -3064,9 +3247,9 @@ function adicionarLogosLampiar() {
       highlightCityNorm = normalizarTexto(p.cidade || "");
 
       if (p.estado_sigla) {
-        filterRegiao.value = stateRegionBySigla[p.estado_sigla] || "";
-        atualizarOpcoesEstado(filterRegiao.value || null);
-        filterEstado.value = p.estado_sigla;
+        selecionarFiltroUnico(filterRegiao, stateRegionBySigla[p.estado_sigla] || "");
+        atualizarOpcoesEstado();
+        selecionarFiltroUnico(filterEstado, p.estado_sigla);
       }
 
       atualizarCidades();
@@ -3089,16 +3272,16 @@ function limparSelecao() {
   selectedRegion = null;
   hoverState = null;
 
-  filterRegiao.value = "";
-  filterEstado.value = "";
-  filterCidade.value = "";
-  filterTurma.value = "";
-  filterPrograma.value = "";
-  filterCargo.value = "";
-  filterInstituicao.value = "";
+  limparFiltroMultiplo(filterRegiao);
+  limparFiltroMultiplo(filterEstado);
+  limparFiltroMultiplo(filterCidade);
+  limparFiltroMultiplo(filterTurma);
+  limparFiltroMultiplo(filterPrograma);
+  limparFiltroMultiplo(filterCargo);
+  limparFiltroMultiplo(filterInstituicao);
   filterBusca.value = "";
 
-  atualizarOpcoesEstado(null);
+  atualizarOpcoesEstado();
   atualizarCidades();
   atualizarTurmas();
   atualizarProgramas();
@@ -3126,17 +3309,19 @@ function limparSelecao() {
 }
 
     function ajustarZoom() {
-      const regiaoAtual = filterRegiao.value;
-      const estadoAtual = filterEstado.value;
-      const cidadeAtual = filterCidade.value;
+      const regioesAtuais = getValoresSelecionados(filterRegiao);
+      const estadosAtuais = getValoresSelecionados(filterEstado);
+      const cidadesAtuais = getValoresSelecionados(filterCidade);
+      const regiaoAtual = regioesAtuais.length === 1 ? regioesAtuais[0] : "";
+      const estadoAtual = estadosAtuais.length === 1 ? estadosAtuais[0] : "";
 
-      if (!regiaoAtual && !estadoAtual && !cidadeAtual) {
+      if (!regioesAtuais.length && !estadosAtuais.length && !cidadesAtuais.length) {
         zoomNacional();
       } else if (regiaoAtual && !estadoAtual) {
         zoomRegiao(regiaoAtual);
-      } else if (estadoAtual && !cidadeAtual) {
+      } else if (estadoAtual && !cidadesAtuais.length) {
         zoomEstado(estadoAtual);
-      } else if (estadoAtual && cidadeAtual) {
+      } else if (estadoAtual && cidadesAtuais.length) {
         zoomLocal(estadoAtual);
       }
     }
@@ -3211,84 +3396,55 @@ function limparSelecao() {
     // -------------------------
     // FILTROS E LISTA
     // -------------------------
-    function atualizarOpcoesEstado(regiao) {
-      filterEstado.innerHTML = "";
-      const optEstadoAll = document.createElement("option");
-      optEstadoAll.value = "";
-      optEstadoAll.textContent = regiao ? "Todos da região" : "Todos";
-      filterEstado.appendChild(optEstadoAll);
+    function atualizarOpcoesEstado() {
+      const regioesAtuais = getValoresSelecionados(filterRegiao);
+      const estadosSelecionados = new Set(getValoresSelecionados(filterEstado));
 
       let estados = [...new Set(pessoas.map((p) => p.estado_sigla).filter(Boolean))].sort();
 
-      if (regiao) {
-        estados = estados.filter((sigla) => stateRegionBySigla[sigla] === regiao);
+      if (regioesAtuais.length) {
+        estados = estados.filter((sigla) => regioesAtuais.includes(stateRegionBySigla[sigla]));
       }
 
-      estados.forEach((sigla) => {
-        const opt = document.createElement("option");
-        opt.value = sigla;
-        opt.textContent = sigla;
-        filterEstado.appendChild(opt);
-      });
+      renderizarFiltroMultiplo(filterEstado, estados, regioesAtuais.length ? "Todos da regiao" : "Todos", estadosSelecionados);
     }
 
     function popularFiltros() {
       const regioes = [...new Set(pessoas.map(p => p.regiao).filter(Boolean))].sort();
-      regioes.forEach(r => {
-        const opt = document.createElement("option");
-        opt.value = r;
-        opt.textContent = r;
-        filterRegiao.appendChild(opt);
-      });
-
-      atualizarOpcoesEstado(null);
+      renderizarFiltroMultiplo(filterRegiao, regioes, "Todas");
+      atualizarOpcoesEstado();
       atualizarCidades();
     }
 
     function atualizarTurmas() {
-      const regiaoAtual = filterRegiao.value;
-      const estadoAtual = filterEstado.value;
-      const cidadeAtual = filterCidade.value;
-
-      filterTurma.innerHTML = "";
-      const optAll = document.createElement("option");
-      optAll.value = "";
-      optAll.textContent = "Todas";
-      filterTurma.appendChild(optAll);
+      const regioesAtuais = getValoresSelecionados(filterRegiao);
+      const estadosAtuais = getValoresSelecionados(filterEstado);
+      const cidadesAtuais = getValoresSelecionados(filterCidade);
+      const turmasSelecionadas = new Set(getValoresSelecionados(filterTurma));
 
       let filtradas = [...pessoas];
 
-      if (regiaoAtual) {
-        filtradas = filtradas.filter(p => p.regiao === regiaoAtual);
+      if (regioesAtuais.length) {
+        filtradas = filtradas.filter(p => regioesAtuais.includes(p.regiao));
       }
-      if (estadoAtual) {
-        filtradas = filtradas.filter(p => p.estado_sigla === estadoAtual);
+      if (estadosAtuais.length) {
+        filtradas = filtradas.filter(p => estadosAtuais.includes(p.estado_sigla));
       }
-      if (cidadeAtual) {
-        filtradas = filtradas.filter(p => p.cidade === cidadeAtual);
+      if (cidadesAtuais.length) {
+        filtradas = filtradas.filter(p => cidadesAtuais.includes(p.cidade));
       }
 
       const turmas = [...new Set(
         filtradas.map(p => p.turma).filter(Boolean)
       )].sort();
 
-      turmas.forEach(t => {
-        const opt = document.createElement("option");
-        opt.value = t;
-        opt.textContent = t;
-        filterTurma.appendChild(opt);
-      });
+      renderizarFiltroMultiplo(filterTurma, turmas, "Todas", turmasSelecionadas);
     }
 
     function atualizarProgramas() {
-      filterPrograma.innerHTML = '<option value="">Todos</option>';
+      const programasSelecionados = new Set(getValoresSelecionados(filterPrograma));
       const programas = [...new Set(pessoas.map(p => p.programa).filter(Boolean))].sort();
-      programas.forEach(prog => {
-        const opt = document.createElement("option");
-        opt.value = prog;
-        opt.textContent = prog;
-        filterPrograma.appendChild(opt);
-      });
+      renderizarFiltroMultiplo(filterPrograma, programas, "Todos", programasSelecionados);
     }
 
   function getCargoPessoa(p) {
@@ -3304,84 +3460,56 @@ function limparSelecao() {
 }
 
 function atualizarCargos() {
-  filterCargo.innerHTML = '<option value="">Todos</option>';
+  const cargosSelecionados = new Set(getValoresSelecionados(filterCargo));
 
   const cargos = [...new Set(
     pessoas.map(p => getCargoPessoa(p)).filter(Boolean)
   )].sort();
 
-  cargos.forEach(cargo => {
-    const opt = document.createElement("option");
-    opt.value = cargo;
-    opt.textContent = cargo;
-    filterCargo.appendChild(opt);
-  });
+  renderizarFiltroMultiplo(filterCargo, cargos, "Todos", cargosSelecionados);
 }
     function atualizarInstituicoes() {
-      filterInstituicao.innerHTML = '<option value="">Todas</option>';
+      const instituicoesSelecionadas = new Set(getValoresSelecionados(filterInstituicao));
       const instituicoes = [...new Set(pessoas.map(p => p.instituicao).filter(Boolean))].sort();
-      instituicoes.forEach(inst => {
-        const opt = document.createElement("option");
-        opt.value = inst;
-        opt.textContent = inst;
-        filterInstituicao.appendChild(opt);
-      });
+      renderizarFiltroMultiplo(filterInstituicao, instituicoes, "Todas", instituicoesSelecionadas);
     }
 
     function atualizarCidades() {
-      const regiaoAtual = filterRegiao.value;
-      const estadoAtual = filterEstado.value;
-
-      filterCidade.innerHTML = "";
-      const optAll = document.createElement("option");
-      optAll.value = "";
-      optAll.textContent = "Todas";
-      filterCidade.appendChild(optAll);
+      const regioesAtuais = getValoresSelecionados(filterRegiao);
+      const estadosAtuais = getValoresSelecionados(filterEstado);
+      const cidadesSelecionadas = new Set(getValoresSelecionados(filterCidade));
 
       let filtradas = [...pessoas];
 
-      if (regiaoAtual) {
-        filtradas = filtradas.filter(p => p.regiao === regiaoAtual);
+      if (regioesAtuais.length) {
+        filtradas = filtradas.filter(p => regioesAtuais.includes(p.regiao));
       }
-      if (estadoAtual) {
-        filtradas = filtradas.filter(p => p.estado_sigla === estadoAtual);
+      if (estadosAtuais.length) {
+        filtradas = filtradas.filter(p => estadosAtuais.includes(p.estado_sigla));
       }
 
       const cidades = [...new Set(
         filtradas.map(p => p.cidade).filter(Boolean)
       )].sort();
 
-      cidades.forEach(c => {
-        const opt = document.createElement("option");
-        opt.value = c;
-        opt.textContent = c;
-        filterCidade.appendChild(opt);
-      });
+      renderizarFiltroMultiplo(filterCidade, cidades, "Todas", cidadesSelecionadas);
 
       atualizarTurmas();
     }
-
     function renderizarCardPessoa(p, shouldDim = false) {
       const div = document.createElement("div");
       div.className = "person-card";
       div.style.borderLeft = `4px solid ${getCorCardPrograma(p.programa)}`;
 
       const key = criarChavePessoa(p);
-      const isSelected = pessoasSelecionadasKeys.has(key);
 
       if (shouldDim) {
         div.classList.add("dimmed");
-      } else if (isSelected) {
-        div.classList.add("selected");
       }
 
       div.innerHTML = `
   <div class="person-main-row">
     <!-- Checkbox à esquerda -->
-    <div style="flex: 0 0 auto;">
-      <input type="checkbox" class="person-checkbox" data-key="${key}" ${isSelected ? 'checked' : ''} style="cursor: pointer; width: 18px; height: 18px;">
-    </div>
-    
     <!-- Nome -->
     <div class="person-main-left">
       <strong>${p.nome}</strong>
@@ -3423,12 +3551,6 @@ function atualizarCargos() {
 
       div.addEventListener("click", (e) => {
         // Se clicou no checkbox, toggle seleção
-        if (e.target.classList.contains('person-checkbox')) {
-          e.stopPropagation();
-          toggleSelecionarPessoa(p);
-          return;
-        }
-        
         // Se clicou em um badge de filtro, aplicar filtro
         if (e.target.classList.contains('clickable-filter')) {
           e.stopPropagation();
@@ -3437,19 +3559,25 @@ function atualizarCargos() {
           
           if (filterType && filterValue) {
             // Aplicar o filtro
-            if (filterType === 'cidade') filterCidade.value = filterValue;
-            else if (filterType === 'estado') filterEstado.value = filterValue;
-            else if (filterType === 'turma') filterTurma.value = filterValue;
-            else if (filterType === 'programa') filterPrograma.value = filterValue;
-            else if (filterType === 'cargo') filterCargo.value = filterValue;
-            else if (filterType === 'instituicao') filterInstituicao.value = filterValue;
+            if (filterType === 'cidade') {
+              aplicarFiltroMultiplo(filterCidade, filterValue);
+              atualizarTurmas();
+            }
+            else if (filterType === 'estado') {
+              aplicarFiltroMultiplo(filterEstado, filterValue);
+              atualizarCidades();
+              atualizarTurmas();
+            }
+            else if (filterType === 'turma') aplicarFiltroMultiplo(filterTurma, filterValue);
+            else if (filterType === 'programa') aplicarFiltroMultiplo(filterPrograma, filterValue);
+            else if (filterType === 'cargo') aplicarFiltroMultiplo(filterCargo, filterValue);
+            else if (filterType === 'instituicao') aplicarFiltroMultiplo(filterInstituicao, filterValue);
             
             // Atualizar a lista
             atualizarLista();
           }
         } else {
           // Comportamento normal: toggle seleção de pessoa
-          toggleSelecionarPessoa(p);
         }
       });
 
@@ -3475,7 +3603,7 @@ function atualizarCargos() {
 
         if (
           estadoPessoa &&
-          filterEstado.value === estadoPessoa &&
+          getValoresSelecionados(filterEstado).includes(estadoPessoa) &&
           municipiosLayer &&
           currentMunicipiosUF === estadoPessoa
         ) {
@@ -3505,7 +3633,7 @@ function atualizarCargos() {
           highlightState = ufSel || null;
           highlightCityNorm = normalizarTexto(cidadeSel || "");
         } else {
-          highlightState = filterEstado.value || null;
+          highlightState = getPrimeiroValorSelecionado(filterEstado) || null;
           highlightCityNorm = null;
         }
 
@@ -3523,28 +3651,36 @@ function atualizarCargos() {
     }
 
     function atualizarLista() {
-      const regiaoAtual = filterRegiao.value;
-      const estadoAtual = filterEstado.value;
-      const cidadeAtual = filterCidade.value;
-      const turmaAtual  = filterTurma.value;
-      const cargoAtual = filterCargo.value;
+      const regioesAtuais = getValoresSelecionados(filterRegiao);
+      const estadosAtuais = getValoresSelecionados(filterEstado);
+      const cidadesAtuais = getValoresSelecionados(filterCidade);
+      const turmasAtuais  = getValoresSelecionados(filterTurma);
+      const programasAtuais = getValoresSelecionados(filterPrograma);
+      const cargosAtuais = getValoresSelecionados(filterCargo);
+      const instituicoesAtuais = getValoresSelecionados(filterInstituicao);
 
       let filtradas = [...pessoas];
 
-      if (regiaoAtual) {
-        filtradas = filtradas.filter(p => p.regiao === regiaoAtual);
+      if (regioesAtuais.length) {
+        filtradas = filtradas.filter(p => regioesAtuais.includes(p.regiao));
       }
-      if (estadoAtual) {
-        filtradas = filtradas.filter(p => p.estado_sigla === estadoAtual);
+      if (estadosAtuais.length) {
+        filtradas = filtradas.filter(p => estadosAtuais.includes(p.estado_sigla));
       }
-      if (cidadeAtual) {
-        filtradas = filtradas.filter(p => p.cidade === cidadeAtual);
+      if (cidadesAtuais.length) {
+        filtradas = filtradas.filter(p => cidadesAtuais.includes(p.cidade));
       }
-      if (turmaAtual) {
-        filtradas = filtradas.filter(p => p.turma === turmaAtual);
+      if (turmasAtuais.length) {
+        filtradas = filtradas.filter(p => turmasAtuais.includes(p.turma));
       }
-      if (cargoAtual) {
-        filtradas = filtradas.filter(p => getCargoPessoa(p) === cargoAtual);
+      if (programasAtuais.length) {
+        filtradas = filtradas.filter(p => programasAtuais.includes(p.programa));
+      }
+      if (cargosAtuais.length) {
+        filtradas = filtradas.filter(p => cargosAtuais.includes(getCargoPessoa(p)));
+      }
+      if (instituicoesAtuais.length) {
+        filtradas = filtradas.filter(p => instituicoesAtuais.includes(p.instituicao));
       }
 
       const buscaAtual = filterBusca.value.trim();
@@ -3556,57 +3692,17 @@ function atualizarCargos() {
       // Ordenar alfabeticamente por nome
       filtradas.sort((a, b) => (a.nome || "").localeCompare(b.nome || "", 'pt-BR'));
 
-      // Obter pessoas selecionadas para mostrar no topo
-      const selecionadas = [];
-      for (const key of pessoasSelecionadasKeys) {
-        const person = pessoas.find(p => criarChavePessoa(p) === key);
-        if (person) selecionadas.push(person);
-      }
-      selecionadas.sort((a, b) => (a.nome || "").localeCompare(b.nome || "", 'pt-BR'));
-
+      pessoasSelecionadasKeys.clear();
       peopleList.innerHTML = "";
-
-      // Renderizar seção de pessoas selecionadas
-      if (selecionadas.length > 0) {
-        const headerDiv = document.createElement("div");
-        headerDiv.style.cssText = `
-          padding: 10px 7px;
-          margin-bottom: 8px;
-          background: linear-gradient(135deg, rgba(0, 75, 141, 0.08), rgba(0, 191, 165, 0.08));
-          border-left: 4px solid var(--ensina-blue);
-          border-radius: 4px;
-          font-weight: 600;
-          font-size: 0.85rem;
-          color: var(--ensina-blue);
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        `;
-        headerDiv.textContent = `📍 Selecionadas (${selecionadas.length})`;
-        peopleList.appendChild(headerDiv);
-
-        selecionadas.forEach(p => {
-          const card = renderizarCardPessoa(p, false);
-          peopleList.appendChild(card);
-        });
-
-        // Separador
-        const separatorDiv = document.createElement("div");
-        separatorDiv.style.cssText = `
-          height: 1px;
-          background: var(--border-soft);
-          margin: 12px 0;
-        `;
-        peopleList.appendChild(separatorDiv);
-      }
 
       summary.textContent =
         `${filtradas.length} pessoa(s) encontrada(s)` +
-        (regiaoAtual || estadoAtual || cidadeAtual || turmaAtual || cargoAtual || buscaAtual
+        (regioesAtuais.length || estadosAtuais.length || cidadesAtuais.length || turmasAtuais.length || programasAtuais.length || cargosAtuais.length || instituicoesAtuais.length || buscaAtual
           ? " com os filtros aplicados."
           : " no total.");
 
       if (!filtradas.length) {
-        if (estadoAtual && pessoasSelecionadasKeys.size === 0) {
+        if (estadosAtuais.length) {
           summary.textContent = "Nenhuma pessoa cadastrada neste estado até o momento.";
           peopleList.innerHTML += `
             <div style="font-size:0.85rem; color:#6b7280; line-height:1.5;">
@@ -3622,40 +3718,17 @@ function atualizarCargos() {
               </p>
             </div>
           `;
-        } else if (!estadoAtual && pessoasSelecionadasKeys.size === 0) {
+        } else if (!estadosAtuais.length) {
           summary.textContent = "Nenhuma pessoa encontrada com os filtros aplicados.";
           peopleList.innerHTML += "<div style=\"font-size:0.85rem; color:#6b7280;\">Nenhum registro encontrado para este filtro.</div>";
         }
 
-        if (pessoasSelecionadasKeys.size > 0) {
-          // Se houver selecionadas, não mostrar mensagem de vazio
-          return;
-        }
         return;
-      }
-
-      // Renderizar cabeçalho de filtrados (se houver selecionadas)
-      if (selecionadas.length > 0 && filtradas.length > 0) {
-        const filteredHeaderDiv = document.createElement("div");
-        filteredHeaderDiv.style.cssText = `
-          padding: 10px 7px;
-          margin-bottom: 8px;
-          background: rgba(107, 114, 128, 0.08);
-          border-left: 4px solid var(--text-muted);
-          border-radius: 4px;
-          font-weight: 600;
-          font-size: 0.85rem;
-          color: var(--text-muted);
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        `;
-        filteredHeaderDiv.textContent = `🔍 Resultados da Busca`;
-        peopleList.appendChild(filteredHeaderDiv);
       }
 
       // Renderizar pessoas filtradas
       filtradas.forEach(p => {
-        const card = renderizarCardPessoa(p, selecionadas.length > 0 && !pessoasSelecionadasKeys.has(criarChavePessoa(p)));
+        const card = renderizarCardPessoa(p, false);
         peopleList.appendChild(card);
       });
     }
@@ -3664,17 +3737,18 @@ function atualizarCargos() {
     // EVENTOS DOS FILTROS E BOTÕES
     // -------------------------
     filterRegiao.addEventListener("change", () => {
-      const regiao = filterRegiao.value || "";
+      const regioes = getValoresSelecionados(filterRegiao);
+      const regiao = regioes.length === 1 ? regioes[0] : "";
 
       selectedRegion = regiao || null;
       highlightState = null;
       highlightCityNorm = null;
 
-      filterEstado.value = "";
-      filterCidade.value = "";
-      filterTurma.value = "";
+      limparFiltroMultiplo(filterEstado);
+      limparFiltroMultiplo(filterCidade);
+      limparFiltroMultiplo(filterTurma);
 
-      atualizarOpcoesEstado(regiao || null);
+      atualizarOpcoesEstado();
       atualizarCidades();
       atualizarLista();
 
@@ -3687,26 +3761,31 @@ function atualizarCargos() {
     });
 
     filterEstado.addEventListener("change", () => {
-      const est = filterEstado.value;
+      const estados = getValoresSelecionados(filterEstado);
+      const est = estados.length === 1 ? estados[0] : "";
 
       if (est) {
         const regiao = stateRegionBySigla[est] || "";
-        filterRegiao.value = regiao;
         selectedRegion = regiao || null;
         highlightState = est;
       } else {
         highlightState = null;
-        if (!filterRegiao.value) {
+        if (!getValoresSelecionados(filterRegiao).length) {
           selectedRegion = null;
         }
       }
 
       highlightCityNorm = null;
-      filterCidade.value = "";
-      filterTurma.value = "";
+      limparFiltroMultiplo(filterCidade);
+      limparFiltroMultiplo(filterTurma);
 
       atualizarCidades();
       atualizarLista();
+      if (estados.length) {
+        carregarMunicipiosEstado(estados[0]);
+      } else {
+        limparMunicipios();
+      }
 
       if (estadosLayer) estadosLayer.setStyle(estadoStyle);
       if (municipiosLayer) municipiosLayer.setStyle(municipioStyle);
@@ -3715,14 +3794,21 @@ function atualizarCargos() {
     });
 
     filterCidade.addEventListener("change", () => {
+      const estados = getValoresSelecionados(filterEstado);
+      if (estados.length && (!municipiosLayer || currentMunicipiosUF !== estados[0])) {
+        carregarMunicipiosEstado(estados[0]);
+      }
       atualizarTurmas();
       atualizarLista();
+      if (estadosLayer) estadosLayer.setStyle(estadoStyle);
+      if (municipiosLayer) municipiosLayer.setStyle(municipioStyle);
       ajustarZoom();
     });
 
     filterTurma.addEventListener("change", () => {
       atualizarInstituicoes();
       atualizarLista();
+      if (estadosLayer) estadosLayer.setStyle(estadoStyle);
     
     });
 
@@ -3736,14 +3822,23 @@ function atualizarCargos() {
 
     filterCargo.addEventListener("change", () => {
       atualizarLista();
+      if (estadosLayer) estadosLayer.setStyle(estadoStyle);
+    });
+
+    document.addEventListener("click", () => {
+      document.querySelectorAll(".multi-filter.open").forEach(item => {
+        item.classList.remove("open");
+      });
     });
 
     filterInstituicao.addEventListener("change", () => {
       // Ao mudar instituição, respeita os outros filtros ativos
-      atualizarOpcoesEstado(filterRegiao.value || null);
+      atualizarOpcoesEstado();
       atualizarCidades();
       atualizarTurmas();
       atualizarLista();
+      if (estadosLayer) estadosLayer.setStyle(estadoStyle);
+      if (municipiosLayer) municipiosLayer.setStyle(municipioStyle);
     });
 
     filterBusca.addEventListener("input", () => {
