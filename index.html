@@ -1670,10 +1670,10 @@ const lampiarCities = [
     function initMap() {
      map = L.map("map").fitBounds(
   [
-    [-35, -75],
-    [7, -28]
+    [-34, -74],
+    [6, -30]
   ],
-  { padding: [24, 24] }
+  { padding: [12, 12] }
 );
 
       L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
@@ -1794,12 +1794,14 @@ function estadoStyle(feature) {
   const baseColor = regionColors[regiao] || "#9ca3af";
   const estadosSelecionados = getValoresSelecionados(filterEstado);
   const regioesSelecionadas = getValoresSelecionados(filterRegiao);
+  const estadosDasCidadesSelecionadas = getEstadosDasCidadesSelecionadas();
 
   const hasPeople = pessoas && pessoas.some((p) => p.estado_sigla === sigla);
   const isSelectedState =
     estadosSelecionados.includes(sigla) ||
+    estadosDasCidadesSelecionadas.includes(sigla) ||
     (!!highlightState && sigla === highlightState);
-  const hasSelectedStates = estadosSelecionados.length > 0 || !!highlightState;
+  const hasSelectedStates = estadosSelecionados.length > 0 || estadosDasCidadesSelecionadas.length > 0 || !!highlightState;
   const isInSelectedRegion =
     !regioesSelecionadas.length ||
     regioesSelecionadas.includes(regiao) ||
@@ -1951,9 +1953,7 @@ function estadoStyle(feature) {
         highlightState = sigla;
         highlightCityNorm = null;
 
-        selecionarFiltroUnico(filterRegiao, regiao);
-        atualizarOpcoesEstado();
-        selecionarFiltroUnico(filterEstado, sigla);
+        aplicarEstadoNoFiltroPeloMapa(sigla);
 
         atualizarCidades();
         atualizarLista();
@@ -1962,7 +1962,7 @@ function estadoStyle(feature) {
           estadosLayer.setStyle(estadoStyle);
         }
 
-        ajustarZoom();
+        zoomEstado(sigla);
       });
 
       layer.on("mouseover", function (e) {
@@ -2014,12 +2014,9 @@ function estadoStyle(feature) {
           }
         });
 
-        selecionarFiltroUnico(filterRegiao, regiao);
-        limparFiltroMultiplo(filterEstado);
         highlightState = null;
         highlightCityNorm = null;
 
-        atualizarOpcoesEstado();
         atualizarCidades();
         atualizarLista();
         if (estadosLayer) {
@@ -2034,6 +2031,7 @@ function estadoStyle(feature) {
       currentStateLogoZoom = sigla;
       highlightState = sigla;
       highlightCityNorm = null;
+      aplicarEstadoNoFiltroPeloMapa(sigla);
       if (estadosLayer) {
         estadosLayer.setStyle(estadoStyle);
       }
@@ -3021,9 +3019,7 @@ function adicionarLogosLampiar() {
       highlightCityNorm = null;
 
       // Ajusta filtros da lateral
-      selecionarFiltroUnico(filterRegiao, regiao);
-      atualizarOpcoesEstado();
-      selecionarFiltroUnico(filterEstado, uf);
+      aplicarEstadoNoFiltroPeloMapa(uf);
       limparFiltroMultiplo(filterCidade);
       limparFiltroMultiplo(filterTurma);
 
@@ -3076,12 +3072,12 @@ function adicionarLogosLampiar() {
       if (map) {
         map.flyToBounds(
           [
-            [-35, -75],
-            [7, -28]
+            [-34, -74],
+            [6, -30]
           ],
           {
-            padding: [24, 24],
-            maxZoom: 4.2,
+            padding: [12, 12],
+            maxZoom: 4.5,
             animate: true
           }
         );
@@ -3093,6 +3089,25 @@ function adicionarLogosLampiar() {
       currentStateLogoZoom = null;
       setLegendPoloMode(false);
       // Lampiar continua visível
+    }
+
+    function centralizarMapaNacional() {
+      if (!map) return;
+
+      map.flyToBounds(
+        [
+          [-34, -74],
+          [6, -30]
+        ],
+        {
+          padding: [12, 12],
+          maxZoom: 4.5,
+          animate: true
+        }
+      );
+
+      if (estadosLayer) estadosLayer.setStyle(estadoStyle);
+      if (municipiosLayer) municipiosLayer.setStyle(municipioStyle);
     }
 
     function zoomRegiao(regiao) {
@@ -3182,6 +3197,26 @@ function adicionarLogosLampiar() {
       atualizarResumoFiltroMultiplo(select);
     }
 
+    function aplicarEstadoNoFiltroPeloMapa(sigla) {
+      if (!sigla || !filterEstado) return;
+
+      const estadoJaVisivel = filterEstado.querySelector(`input[type="checkbox"][value="${CSS.escape(sigla)}"]`);
+
+      if (!estadoJaVisivel) {
+        const regioesSelecionadas = getValoresSelecionados(filterRegiao);
+        const regiaoDoEstado = stateRegionBySigla[sigla] || "";
+
+        if (regioesSelecionadas.length && regiaoDoEstado && !regioesSelecionadas.includes(regiaoDoEstado)) {
+          aplicarFiltroMultiplo(filterRegiao, regiaoDoEstado);
+        }
+
+        atualizarOpcoesEstado();
+      }
+
+      aplicarFiltroMultiplo(filterEstado, sigla);
+      filterEstado.dataset.lastSelected = sigla;
+    }
+
     function selecionarFiltroUnico(select, value) {
       limparFiltroMultiplo(select);
       aplicarFiltroMultiplo(select, value);
@@ -3189,6 +3224,23 @@ function adicionarLogosLampiar() {
 
     function getPrimeiroValorSelecionado(select) {
       return getValoresSelecionados(select)[0] || "";
+    }
+
+    function getEstadosDasCidadesSelecionadas() {
+      const cidadesSelecionadas = getValoresSelecionados(filterCidade);
+      if (!cidadesSelecionadas.length || !pessoas) return [];
+
+      return [...new Set(
+        pessoas
+          .filter(p => cidadesSelecionadas.includes(p.cidade) && p.estado_sigla)
+          .map(p => p.estado_sigla)
+      )];
+    }
+
+    function getEstadoDaCidade(cidade) {
+      if (!cidade || !pessoas) return "";
+      const pessoa = pessoas.find(p => p.cidade === cidade && p.estado_sigla);
+      return pessoa ? pessoa.estado_sigla : "";
     }
 
     function atualizarResumoFiltroMultiplo(container) {
@@ -3229,6 +3281,11 @@ function adicionarLogosLampiar() {
         input.value = opcao;
         input.checked = selecionados.has(opcao);
         input.addEventListener("change", () => {
+          if (input.checked) {
+            container.dataset.lastSelected = input.value;
+          } else if (container.dataset.lastSelected === input.value) {
+            container.dataset.lastSelected = getValoresSelecionados(container).slice(-1)[0] || "";
+          }
           atualizarResumoFiltroMultiplo(container);
         });
 
@@ -3783,7 +3840,7 @@ function atualizarCargos() {
 
     filterEstado.addEventListener("change", () => {
       const estados = getValoresSelecionados(filterEstado);
-      const est = estados.length === 1 ? estados[0] : "";
+      const est = filterEstado.dataset.lastSelected || estados.slice(-1)[0] || "";
 
       if (est) {
         const regiao = stateRegionBySigla[est] || "";
@@ -3802,8 +3859,10 @@ function atualizarCargos() {
 
       atualizarCidades();
       atualizarLista();
-      if (estados.length) {
-        carregarMunicipiosEstado(estados[0]);
+      if (est) {
+        carregarMunicipiosEstado(est);
+      } else if (estados.length) {
+        carregarMunicipiosEstado(estados.slice(-1)[0]);
       } else {
         limparMunicipios();
       }
@@ -3811,19 +3870,34 @@ function atualizarCargos() {
       if (estadosLayer) estadosLayer.setStyle(estadoStyle);
       if (municipiosLayer) municipiosLayer.setStyle(municipioStyle);
 
-      ajustarZoom();
+      if (est) {
+        zoomEstado(est);
+      } else {
+        ajustarZoom();
+      }
     });
 
     filterCidade.addEventListener("change", () => {
-      const estados = getValoresSelecionados(filterEstado);
-      if (estados.length && (!municipiosLayer || currentMunicipiosUF !== estados[0])) {
-        carregarMunicipiosEstado(estados[0]);
+      const estadosSelecionados = getValoresSelecionados(filterEstado);
+      const estadosDasCidades = getEstadosDasCidadesSelecionadas();
+      const ultimaCidade = filterCidade.dataset.lastSelected || getValoresSelecionados(filterCidade).slice(-1)[0] || "";
+      const estadoDaUltimaCidade = getEstadoDaCidade(ultimaCidade);
+      const estadoParaMunicipios = estadoDaUltimaCidade || estadosDasCidades.slice(-1)[0] || estadosSelecionados.slice(-1)[0] || "";
+
+      if (estadoParaMunicipios && (!municipiosLayer || currentMunicipiosUF !== estadoParaMunicipios)) {
+        carregarMunicipiosEstado(estadoParaMunicipios);
+      } else if (!estadoParaMunicipios) {
+        limparMunicipios();
       }
       atualizarTurmas();
       atualizarLista();
       if (estadosLayer) estadosLayer.setStyle(estadoStyle);
       if (municipiosLayer) municipiosLayer.setStyle(municipioStyle);
-      ajustarZoom();
+      if (estadoParaMunicipios) {
+        zoomEstado(estadoParaMunicipios);
+      } else {
+        ajustarZoom();
+      }
     });
 
     filterTurma.addEventListener("change", () => {
@@ -3867,7 +3941,9 @@ function atualizarCargos() {
     });
 
     btnLimpar.addEventListener("click", limparSelecao);
-    mapHomeBtn.addEventListener("click", limparSelecao);
+    mapHomeBtn.addEventListener("click", () => {
+      centralizarMapaNacional();
+    });
 
     // -------------------------
     // INICIALIZAÇÃO
