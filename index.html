@@ -1774,6 +1774,98 @@ const lampiarCities = [
         .trim();
     }
 
+    function normalizarChavePessoa(nome) {
+      return normalizarTexto(nome).replace(/\s+/g, " ");
+    }
+
+    function registroPareceForms(p) {
+      return Object.entries(p || {}).some(([key, value]) => {
+        const texto = normalizarTexto(`${key} ${value || ""}`);
+        return (
+          texto.includes("forms") ||
+          texto.includes("formulario") ||
+          texto.includes("resposta") ||
+          texto.includes("carimbo")
+        );
+      });
+    }
+
+    function registroImportadoRaw(p) {
+      return Object.entries(p || {}).some(([key, value]) => {
+        const texto = normalizarTexto(`${key} ${value || ""}`);
+        return texto.includes("importado_raw");
+      });
+    }
+
+    function normalizarLinkedin(url) {
+      return normalizarTexto(url || "")
+        .replace(/^https?:\/\//, "")
+        .replace(/^www\./, "")
+        .replace(/\/$/, "");
+    }
+
+    function pontuarRegistroPessoa(p) {
+      const camposPrincipais = [
+        p.nome,
+        p.cidade,
+        p.estado_sigla,
+        p.programa,
+        p.turma,
+        getCargoPessoa(p),
+        p.instituicao,
+        p.linkedin
+      ];
+
+      const preenchidos = camposPrincipais.filter(v => String(v || "").trim()).length;
+      const detalheCidade = String(p.cidade || "").length > 12 ? 2 : 0;
+      const detalheInstituicao = String(p.instituicao || "").length > 12 ? 2 : 0;
+      const origemForms = registroPareceForms(p) ? 100 : 0;
+      const origemImportadoRaw = registroImportadoRaw(p) ? -100 : 0;
+
+      return origemForms + origemImportadoRaw + preenchidos + detalheCidade + detalheInstituicao;
+    }
+
+    function nomesParecemMesmaPessoa(a, b) {
+      const nomeA = normalizarChavePessoa(a.nome || "");
+      const nomeB = normalizarChavePessoa(b.nome || "");
+      if (!nomeA || !nomeB) return false;
+      return nomeA === nomeB || nomeA.includes(nomeB) || nomeB.includes(nomeA);
+    }
+
+    function registrosParecemMesmaPessoa(a, b) {
+      const linkedinA = normalizarLinkedin(a.linkedin);
+      const linkedinB = normalizarLinkedin(b.linkedin);
+      if (linkedinA && linkedinB && linkedinA === linkedinB) return true;
+
+      const mesmoNome = nomesParecemMesmaPessoa(a, b);
+      if (!mesmoNome) return false;
+
+      const mesmoEstado = !a.estado_sigla || !b.estado_sigla || a.estado_sigla === b.estado_sigla;
+      const mesmaCidade = !a.cidade || !b.cidade || normalizarTexto(a.cidade) === normalizarTexto(b.cidade);
+      const mesmaTurma = !a.turma || !b.turma || String(a.turma) === String(b.turma);
+      const mesmoPrograma = !a.programa || !b.programa || normalizarTexto(a.programa) === normalizarTexto(b.programa);
+
+      return mesmoEstado && mesmaCidade && mesmaTurma && mesmoPrograma;
+    }
+
+    function removerDuplicidadesPreferindoForms(lista) {
+      const unicos = [];
+
+      lista.forEach(p => {
+        const index = unicos.findIndex(atual => registrosParecemMesmaPessoa(p, atual));
+        if (index === -1) {
+          unicos.push(p);
+          return;
+        }
+
+        if (pontuarRegistroPessoa(p) >= pontuarRegistroPessoa(unicos[index])) {
+          unicos[index] = p;
+        }
+      });
+
+      return unicos;
+    }
+
     function getCorPrograma(programa) {
       if (!programa) return 'background: rgba(27, 35, 78, 0.08); color: #1B234E; border: 1px solid rgba(27, 35, 78, 0.25);'; // padrão azul-escuro
 
@@ -3243,7 +3335,10 @@ function carregarPaisesVizinhos() {
       aplicarEstadoNoFiltroPeloMapa(sigla);
       atualizarCidades();
       aplicarFiltroMultiplo(filterCidade, cidadeFiltro);
-      filterCidade.dataset.lastSelected = cidadeFiltro;
+      const cidadeMarcada = Array.from(filterCidade.querySelectorAll('input[type="checkbox"]:checked'))
+        .map(input => input.value)
+        .find(value => normalizarTexto(value) === normalizarTexto(cidadeFiltro)) || cidadeFiltro;
+      filterCidade.dataset.lastSelected = cidadeMarcada;
       atualizarTurmas();
       atualizarLista();
       carregarMunicipiosEstadosSelecionados(sigla);
@@ -3657,7 +3752,11 @@ function adicionarLogosLampiar() {
 
     function aplicarFiltroMultiplo(select, value) {
       if (!select || !value) return;
-      const input = select.querySelector(`input[type="checkbox"][value="${CSS.escape(value)}"]`);
+      const valueNorm = normalizarTexto(value);
+      const input =
+        select.querySelector(`input[type="checkbox"][value="${CSS.escape(value)}"]`) ||
+        Array.from(select.querySelectorAll('input[type="checkbox"]'))
+          .find(item => normalizarTexto(item.value) === valueNorm);
       if (input) input.checked = true;
       atualizarResumoFiltroMultiplo(select);
     }
@@ -3692,19 +3791,20 @@ function adicionarLogosLampiar() {
     }
 
     function getEstadosDasCidadesSelecionadas() {
-      const cidadesSelecionadas = getValoresSelecionados(filterCidade);
+      const cidadesSelecionadas = getValoresSelecionados(filterCidade).map(normalizarTexto);
       if (!cidadesSelecionadas.length || !pessoas) return [];
 
       return [...new Set(
         pessoas
-          .filter(p => cidadesSelecionadas.includes(p.cidade) && p.estado_sigla)
+          .filter(p => cidadesSelecionadas.includes(normalizarTexto(p.cidade || "")) && p.estado_sigla)
           .map(p => p.estado_sigla)
       )];
     }
 
     function getEstadoDaCidade(cidade) {
       if (!cidade || !pessoas) return "";
-      const pessoa = pessoas.find(p => p.cidade === cidade && p.estado_sigla);
+      const cidadeNorm = normalizarTexto(cidade);
+      const pessoa = pessoas.find(p => normalizarTexto(p.cidade || "") === cidadeNorm && p.estado_sigla);
       return pessoa ? pessoa.estado_sigla : "";
     }
 
@@ -4074,7 +4174,7 @@ function limparSelecao() {
     function inicializarComDados(data) {
       console.log("🚀 Inicializando mapa com", data.length, "alumni");
       
-      pessoas = data
+      const pessoasValidas = data
         .filter(p => p.nome && p.nome.trim() !== "")
         .map(p => {
           if (!p.regiao && p.estado_sigla) {
@@ -4082,8 +4182,10 @@ function limparSelecao() {
           }
           return p;
         });
+
+      pessoas = removerDuplicidadesPreferindoForms(pessoasValidas);
       
-      console.log("✅ Total após filtro:", pessoas.length, "alumni válidos");
+      console.log("✅ Total após filtro:", pessoas.length, "alumni válidos sem duplicidades");
       
       popularFiltros();
       atualizarTurmas();
@@ -4136,7 +4238,8 @@ function limparSelecao() {
         filtradas = filtradas.filter(p => estadosAtuais.includes(p.estado_sigla));
       }
       if (cidadesAtuais.length) {
-        filtradas = filtradas.filter(p => cidadesAtuais.includes(p.cidade));
+        const cidadesAtuaisNorm = cidadesAtuais.map(normalizarTexto);
+        filtradas = filtradas.filter(p => cidadesAtuaisNorm.includes(normalizarTexto(p.cidade || "")));
       }
 
       const turmas = [...new Set(
