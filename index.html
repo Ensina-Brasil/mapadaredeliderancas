@@ -1252,7 +1252,7 @@ main {
 
       <aside class="panel">
         <h2>Lideranças encontradas</h2>
-        <div id="summary" style="margin: 0 0 10px 0; font-size: 0.95rem; color: var(--text-muted);">Carregando dados...</div>
+        <div id="summary" style="margin: 0 0 10px 0; font-size: 0.95rem; color: var(--text-muted);"></div>
         <div id="mobilizacao-resumo" class="mobilizacao-resumo" aria-label="Resumo da mobilização"></div>
         <div class="results-actions">
           <button id="btn-copy-whatsapp" class="btn-copy-whatsapp" type="button">Copiar seleção</button>
@@ -1970,6 +1970,18 @@ const lampiarCities = [
         if (buscaFiltrada && !normalizarTexto(p.nome || "").includes(normalizarTexto(buscaFiltrada))) return false;
         return true;
       }));
+      const hasPessoaCompativelNoMunicipio = !!(pessoas && pessoas.some(p => {
+        if (p.estado_sigla !== ufMunicipio) return false;
+        if (normalizarTexto(p.cidade || "") !== nomeMunNorm) return false;
+        if (regioesFiltradas.length && !regioesFiltradas.includes(p.regiao)) return false;
+        if (estadosFiltrados.length && !estadosFiltrados.includes(p.estado_sigla)) return false;
+        if (turmasFiltradas.length && !turmasFiltradas.includes(p.turma)) return false;
+        if (programasFiltrados.length && !programasFiltrados.includes(p.programa)) return false;
+        if (cargosFiltrados.length && !cargosFiltrados.includes(getCargoPessoa(p))) return false;
+        if (instituicoesFiltradas.length && !instituicoesFiltradas.includes(p.instituicao)) return false;
+        if (buscaFiltrada && !normalizarTexto(p.nome || "").includes(normalizarTexto(buscaFiltrada))) return false;
+        return true;
+      }));
       const hasAlumniNoMunicipio = !!(pessoas && pessoas.some(p =>
         p.estado_sigla === ufMunicipio &&
         normalizarTexto(p.cidade || "") === nomeMunNorm
@@ -1987,15 +1999,6 @@ const lampiarCities = [
         };
       }
 
-      if (hasSelectedCities && hasAlumniNoMunicipio) {
-        return {
-          color: baseColor,
-          weight: 2.2,
-          fillColor: baseColor,
-          fillOpacity: 0.28
-        };
-      }
-
       if (hasFiltrosDePessoas) {
         if (hasPessoaFiltradaNoMunicipio) {
           return {
@@ -2006,11 +2009,29 @@ const lampiarCities = [
           };
         }
 
+        if (hasSelectedCities && hasPessoaCompativelNoMunicipio) {
+          return {
+            color: baseColor,
+            weight: 2.2,
+            fillColor: baseColor,
+            fillOpacity: 0.28
+          };
+        }
+
         return {
           color: "#cbd5e1",
           weight: 1,
           fillColor: "#f8fafc",
           fillOpacity: 0.18
+        };
+      }
+
+      if (hasSelectedCities && hasAlumniNoMunicipio) {
+        return {
+          color: baseColor,
+          weight: 2.2,
+          fillColor: baseColor,
+          fillOpacity: 0.28
         };
       }
 
@@ -2199,7 +2220,10 @@ function estadoStyle(feature) {
     if (p.estado_sigla !== sigla) return false;
     if (regioesSelecionadas.length && !regioesSelecionadas.includes(p.regiao)) return false;
     if (estadosSelecionados.length && !estadosSelecionados.includes(p.estado_sigla)) return false;
-    if (cidadesFiltradas.length && !cidadesFiltradas.includes(p.cidade)) return false;
+    if (cidadesFiltradas.length) {
+      const cidadesFiltradasNorm = cidadesFiltradas.map(normalizarTexto);
+      if (!cidadesFiltradasNorm.includes(normalizarTexto(p.cidade || ""))) return false;
+    }
     if (turmasFiltradas.length && !turmasFiltradas.includes(p.turma)) return false;
     if (programasFiltrados.length && !programasFiltrados.includes(p.programa)) return false;
     if (cargosFiltrados.length && !cargosFiltrados.includes(getCargoPessoa(p))) return false;
@@ -2221,12 +2245,12 @@ function estadoStyle(feature) {
 
   // Qualquer filtro ativo deve destacar os estados onde há pessoas compatíveis.
   if (hasFiltrosDePessoas) {
-    if (hasPessoaFiltradaNoEstado) {
+    if (isSelectedState || hasPessoaFiltradaNoEstado) {
       return {
         color: baseColor,
         weight: 3,
         fillColor: baseColor,
-        fillOpacity: 0.4,
+        fillOpacity: municipiosLayersByUF[sigla] ? 0.22 : 0.4,
         className: 'state-transition state-highlighted'
       };
     } else {
@@ -2348,6 +2372,8 @@ function estadoStyle(feature) {
 
         atualizarCidades();
         atualizarLista();
+        carregarMunicipiosEstadosSelecionados(sigla);
+        atualizarEstiloMunicipios();
 
         if (estadosLayer) {
           estadosLayer.setStyle(estadoStyle);
@@ -3258,7 +3284,10 @@ function carregarPaisesVizinhos() {
 
       if (regioesAtuais.length && !regioesAtuais.includes(p.regiao)) return false;
       if (estadosAtuais.length && !estadosAtuais.includes(p.estado_sigla)) return false;
-      if (cidadesAtuais.length && !cidadesAtuais.includes(p.cidade)) return false;
+      if (cidadesAtuais.length) {
+        const cidadesAtuaisNorm = cidadesAtuais.map(normalizarTexto);
+        if (!cidadesAtuaisNorm.includes(normalizarTexto(p.cidade || ""))) return false;
+      }
       if (turmasAtuais.length && !turmasAtuais.includes(p.turma)) return false;
       if (programasAtuais.length && !programasAtuais.includes(p.programa)) return false;
       if (cargosAtuais.length && !cargosAtuais.includes(getCargoPessoa(p))) return false;
@@ -3322,6 +3351,8 @@ function carregarPaisesVizinhos() {
     function aplicarFiltroMunicipioPeloMapa(nomeMunicipio, sigla) {
       if (!nomeMunicipio || !sigla) return;
       const cidadeFiltro = getCidadeValorFiltro(nomeMunicipio, sigla);
+      const cidadesAntes = new Set(getValoresSelecionados(filterCidade));
+      cidadesAntes.add(cidadeFiltro);
 
       pessoasSelecionadasKeys.clear();
       highlightState = sigla;
@@ -3331,9 +3362,11 @@ function carregarPaisesVizinhos() {
       limparFiltroMultiplo(filterPrograma);
       limparFiltroMultiplo(filterCargo);
       limparFiltroMultiplo(filterInstituicao);
+      filterBusca.value = "";
 
       aplicarEstadoNoFiltroPeloMapa(sigla);
       atualizarCidades();
+      cidadesAntes.forEach(cidade => aplicarFiltroMultiplo(filterCidade, cidade));
       aplicarFiltroMultiplo(filterCidade, cidadeFiltro);
       const cidadeMarcada = Array.from(filterCidade.querySelectorAll('input[type="checkbox"]:checked'))
         .map(input => input.value)
@@ -4485,7 +4518,8 @@ function atualizarCargos() {
         filtradas = filtradas.filter(p => estadosAtuais.includes(p.estado_sigla));
       }
       if (cidadesAtuais.length) {
-        filtradas = filtradas.filter(p => cidadesAtuais.includes(p.cidade));
+        const cidadesAtuaisNorm = cidadesAtuais.map(normalizarTexto);
+        filtradas = filtradas.filter(p => cidadesAtuaisNorm.includes(normalizarTexto(p.cidade || "")));
       }
       if (turmasAtuais.length) {
         filtradas = filtradas.filter(p => turmasAtuais.includes(p.turma));
@@ -4516,11 +4550,7 @@ function atualizarCargos() {
       }
       peopleList.innerHTML = "";
 
-      summary.textContent =
-        `${filtradas.length} pessoa(s) encontrada(s)` +
-        (regioesAtuais.length || estadosAtuais.length || cidadesAtuais.length || turmasAtuais.length || programasAtuais.length || cargosAtuais.length || instituicoesAtuais.length || buscaAtual
-          ? " com os filtros aplicados."
-          : " no total.");
+      summary.textContent = "";
 
       atualizarResumoMobilizacao(filtradas);
 
