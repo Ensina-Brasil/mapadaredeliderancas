@@ -539,6 +539,32 @@ main {
       display: block;
     }
 
+    .multi-filter-search {
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 6px;
+      padding: 6px 8px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: #f9fafb;
+      color: var(--text-main);
+      font-size: 0.82rem;
+      outline: none;
+    }
+
+    .multi-filter-search:focus {
+      border-color: var(--ensina-green);
+      background: #ffffff;
+      box-shadow: 0 0 0 1px rgba(0, 191, 165, 0.25);
+    }
+
+    .multi-filter-empty {
+      display: none;
+      padding: 8px 6px;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+
     .multi-filter-option {
       display: flex;
       flex-direction: row;
@@ -3849,9 +3875,10 @@ function adicionarLogosLampiar() {
       button.textContent = selected.length ? `${selected.length} selecionado(s)` : label;
     }
 
-    function renderizarFiltroMultiplo(container, opcoes, allLabel, selecionados = new Set()) {
+    function renderizarFiltroMultiplo(container, opcoes, allLabel, selecionados = new Set(), buscaInterna = false) {
       container.dataset.allLabel = allLabel;
       container.innerHTML = "";
+      const linhas = [];
 
       const button = document.createElement("button");
       button.type = "button";
@@ -3862,6 +3889,10 @@ function adicionarLogosLampiar() {
           if (item !== container) item.classList.remove("open");
         });
         container.classList.toggle("open");
+        if (container.classList.contains("open")) {
+          const searchInput = container.querySelector(".multi-filter-search");
+          if (searchInput) setTimeout(() => searchInput.focus(), 0);
+        }
       });
 
       const panel = document.createElement("div");
@@ -3869,6 +3900,36 @@ function adicionarLogosLampiar() {
       panel.addEventListener("click", (event) => {
         event.stopPropagation();
       });
+
+      let emptyMessage = null;
+
+      if (buscaInterna) {
+        const searchInput = document.createElement("input");
+        searchInput.type = "text";
+        searchInput.className = "multi-filter-search";
+        searchInput.placeholder = "Procurar na lista...";
+        searchInput.addEventListener("input", () => {
+          const termo = normalizarTexto(searchInput.value);
+          let visiveis = 0;
+
+          linhas.forEach(({ row, texto }) => {
+            const mostrar = !termo || normalizarTexto(texto).includes(termo);
+            row.style.display = mostrar ? "" : "none";
+            if (mostrar) visiveis++;
+          });
+
+          if (emptyMessage) {
+            emptyMessage.style.display = visiveis ? "none" : "block";
+          }
+        });
+
+        panel.appendChild(searchInput);
+
+        emptyMessage = document.createElement("div");
+        emptyMessage.className = "multi-filter-empty";
+        emptyMessage.textContent = "Nenhuma opção encontrada";
+        panel.appendChild(emptyMessage);
+      }
 
       opcoes.forEach(opcao => {
         const row = document.createElement("label");
@@ -3894,6 +3955,7 @@ function adicionarLogosLampiar() {
         row.appendChild(input);
         row.appendChild(text);
         panel.appendChild(row);
+        linhas.push({ row, texto: opcao });
       });
 
       container.appendChild(button);
@@ -4291,11 +4353,11 @@ function limparSelecao() {
   function getCargoPessoa(p) {
   return (
     p.funcao ||
-    p.função ||
+    p["função"] ||
     p.cargo ||
     p.Cargo ||
     p.posicao ||
-    p.posição ||
+    p["posição"] ||
     ""
   ).trim();
 }
@@ -4307,12 +4369,12 @@ function atualizarCargos() {
     pessoas.map(p => getCargoPessoa(p)).filter(Boolean)
   )].sort();
 
-  renderizarFiltroMultiplo(filterCargo, cargos, "Todos", cargosSelecionados);
+  renderizarFiltroMultiplo(filterCargo, cargos, "Todos", cargosSelecionados, true);
 }
     function atualizarInstituicoes() {
       const instituicoesSelecionadas = new Set(getValoresSelecionados(filterInstituicao));
       const instituicoes = [...new Set(pessoas.map(p => p.instituicao).filter(Boolean))].sort();
-      renderizarFiltroMultiplo(filterInstituicao, instituicoes, "Todas", instituicoesSelecionadas);
+      renderizarFiltroMultiplo(filterInstituicao, instituicoes, "Todas", instituicoesSelecionadas, true);
     }
 
     function atualizarCidades() {
@@ -4781,3 +4843,4 @@ function atualizarCargos() {
   </script>
 </body>
 </html>
+
