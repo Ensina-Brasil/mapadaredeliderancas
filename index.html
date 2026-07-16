@@ -873,7 +873,6 @@ main {
 
 #people-list {
   overflow-y: auto;
-  overflow-anchor: none;
   flex: 1;
   border-top: 1px solid #e5e7eb;
   margin-top: 6px;
@@ -2599,17 +2598,11 @@ const lampiarCities = [
 
       L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
         maxZoom: 8,
-        minZoom: 3,
+        minZoom: 2,
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
       }).addTo(map);
 
-      const brazilBounds = L.latLngBounds(
-        L.latLng(-34, -74),
-        L.latLng(6, -34)
-      );
-
-      map.setMaxBounds(brazilBounds);
       // Drag habilitado com bounds constraint
       map.dragging.enable();
 
@@ -4502,15 +4495,9 @@ function adicionarLogosLampiar() {
           ).find(card => card.dataset.personKey === key);
 
           if (cartaoSelecionado) {
-            const listaRect = peopleList.getBoundingClientRect();
-            const cartaoRect = cartaoSelecionado.getBoundingClientRect();
-            const destino = peopleList.scrollTop
-              + (cartaoRect.top - listaRect.top)
-              - ((listaRect.height - cartaoRect.height) / 2);
-
             peopleList.scrollTo({
-              top: Math.max(0, destino),
-              behavior: "smooth",
+              top: 0,
+              behavior: "auto"
             });
           }
         });
@@ -4763,6 +4750,10 @@ function limparSelecao() {
 }
 
     function ajustarZoom() {
+      // Filtros alteram apenas os destaques e resultados. O enquadramento
+      // permanece sob controle do usuário para evitar deslocamentos inesperados.
+      return;
+
       const regioesAtuais = getValoresSelecionados(filterRegiao);
       const estadosAtuais = getValoresSelecionados(filterEstado);
       const cidadesAtuais = getValoresSelecionados(filterCidade);
@@ -5324,11 +5315,7 @@ function atualizarCargos() {
       if (estadosLayer) estadosLayer.setStyle(estadoStyle);
       atualizarEstiloMunicipios();
 
-      if (est) {
-        zoomEstado(est);
-      } else {
-        ajustarZoom();
-      }
+      // Não reposicionar o mapa automaticamente ao trocar o estado.
     });
 
     filterCidade.addEventListener("change", () => {
@@ -5347,11 +5334,7 @@ function atualizarCargos() {
       atualizarLista();
       if (estadosLayer) estadosLayer.setStyle(estadoStyle);
       atualizarEstiloMunicipios();
-      if (estadoParaMunicipios) {
-        zoomEstado(estadoParaMunicipios);
-      } else {
-        ajustarZoom();
-      }
+      // Não reposicionar o mapa automaticamente ao trocar a cidade.
     });
 
     filterTurma.addEventListener("change", () => {
