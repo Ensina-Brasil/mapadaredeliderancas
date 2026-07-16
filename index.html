@@ -873,6 +873,7 @@ main {
 
 #people-list {
   overflow-y: auto;
+  overflow-anchor: none;
   flex: 1;
   border-top: 1px solid #e5e7eb;
   margin-top: 6px;
@@ -4501,10 +4502,15 @@ function adicionarLogosLampiar() {
           ).find(card => card.dataset.personKey === key);
 
           if (cartaoSelecionado) {
-            cartaoSelecionado.scrollIntoView({
+            const listaRect = peopleList.getBoundingClientRect();
+            const cartaoRect = cartaoSelecionado.getBoundingClientRect();
+            const destino = peopleList.scrollTop
+              + (cartaoRect.top - listaRect.top)
+              - ((listaRect.height - cartaoRect.height) / 2);
+
+            peopleList.scrollTo({
+              top: Math.max(0, destino),
               behavior: "smooth",
-              block: "center",
-              inline: "nearest"
             });
           }
         });
