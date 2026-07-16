@@ -94,6 +94,18 @@
       color: var(--text-main);
     }
 
+    button,
+    input,
+    select,
+    textarea,
+    .leaflet-container,
+    .leaflet-tooltip,
+    .leaflet-popup-content,
+    .leaflet-control {
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+
     header {
       padding: 14px 24px;
       background: var(--ensina-blue-dark);
@@ -106,13 +118,78 @@
 
     header h1 {
       margin: 0;
-      font-size: 1.2rem;
+      font-size: clamp(1rem, 1.5vw, 1.2rem);
+      line-height: 1.25;
       font-weight: 600;
     }
 
     header span {
       font-size: 0.8rem;
       opacity: 0.85;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .language-switcher {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 36px;
+      padding: 4px 5px 4px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.13);
+      box-shadow: 0 5px 16px rgba(0, 32, 61, 0.22);
+      font-size: 0.78rem;
+      font-weight: 500;
+      backdrop-filter: blur(5px);
+    }
+
+    .language-switcher::before {
+      content: "🌐";
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .language-switcher select {
+      min-height: 27px;
+      padding: 4px 27px 4px 10px;
+      border: 0;
+      border-radius: 999px;
+      background-color: var(--ensina-green);
+      color: var(--ensina-blue-dark);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 3px 9px rgba(0, 43, 85, 0.22);
+      transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .language-switcher select:hover {
+      background-color: #20d3b9;
+      transform: translateY(-1px);
+      box-shadow: 0 5px 13px rgba(0, 43, 85, 0.28);
+    }
+
+    .language-switcher select:focus-visible {
+      outline: 2px solid #ffffff;
+      outline-offset: 2px;
+    }
+
+    html[lang="es"] .multi-filter-button,
+    html[lang="en"] .multi-filter-button {
+      font-size: 0.82rem;
+    }
+
+    html[lang="es"] .intro-card p,
+    html[lang="en"] .intro-card p,
+    html[lang="es"] .join-section-text span,
+    html[lang="en"] .join-section-text span {
+      line-height: 1.55;
     }
 
     .header-logo {
@@ -715,6 +792,85 @@ main {
       }
     }
 
+    .clickable-filter-button {
+      appearance: none;
+      font: inherit;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .clickable-filter-button {
+      display: inline-flex;
+      align-items: center;
+      padding: 0;
+      border: 0;
+      background: transparent;
+    }
+
+    button.badge {
+      appearance: none;
+      font-family: inherit;
+      font-size: 0.7rem;
+      line-height: normal;
+      cursor: pointer;
+    }
+
+    .clickable-filter-button:focus-visible,
+    button.badge:focus-visible,
+    .person-card:focus-visible {
+      outline: 2px solid var(--ensina-green);
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 560px) {
+      header {
+        padding: 12px 14px;
+        flex-wrap: wrap;
+      }
+
+      header h1 {
+        width: calc(100% - 72px);
+      }
+
+      header span {
+        width: 100%;
+      }
+
+      .language-switcher span {
+        width: auto;
+      }
+
+      .header-actions {
+        width: 100%;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .page-wrap {
+        padding: 10px;
+      }
+
+      .filters {
+        grid-template-columns: 1fr;
+      }
+
+      .btn-limpar {
+        width: 100%;
+        margin-left: 0 !important;
+      }
+
+      #map {
+        height: 460px;
+      }
+
+      .map-top-right {
+        max-width: calc(100% - 16px);
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+    }
+
 #people-list {
   overflow-y: auto;
   flex: 1;
@@ -816,6 +972,38 @@ main {
       gap: 4px;
     }
 
+    .selected-results-heading,
+    .filtered-results-heading {
+      margin: 8px 0 7px;
+      padding: 7px 9px;
+      border-radius: 7px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .selected-results-heading {
+      margin-top: 0;
+      border-left: 3px solid var(--ensina-green);
+      background: rgba(0, 191, 165, 0.08);
+      color: var(--ensina-blue-dark);
+    }
+
+    .filtered-results-heading {
+      margin-top: 14px;
+      border-left: 3px solid var(--text-muted);
+      background: rgba(107, 114, 128, 0.08);
+      color: var(--text-muted);
+    }
+
+    .empty-results-message {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
     .person-card.selected {
       border-color: var(--person-program-color, var(--ensina-blue));
       box-shadow: 0 8px 20px var(--person-program-shadow, rgba(15, 23, 42, 0.16));
@@ -829,8 +1017,33 @@ main {
     }
 
     .person-checkbox {
+      width: 17px;
+      height: 17px;
       accent-color: var(--ensina-blue);
-      transition: all 0.2s ease;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .person-select-control {
+      display: flex;
+      align-items: center;
+      flex: 0 0 auto;
+      width: 0;
+      opacity: 0;
+      overflow: hidden;
+      transform: translateX(-5px);
+      pointer-events: none;
+      transition: width 0.18s ease, opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .person-card:hover .person-select-control,
+    .person-card:focus-within .person-select-control,
+    .person-card.selected .person-select-control {
+      width: 24px;
+      opacity: 1;
+      overflow: visible;
+      transform: translateX(0);
+      pointer-events: auto;
     }
 
     .person-checkbox:hover {
@@ -841,6 +1054,16 @@ main {
     .person-checkbox:checked {
       background-color: var(--ensina-blue);
       border-color: var(--ensina-blue);
+    }
+
+    @media (hover: none), (pointer: coarse) {
+      .person-select-control {
+        width: 24px;
+        opacity: 1;
+        overflow: visible;
+        transform: none;
+        pointer-events: auto;
+      }
     }
 
     .person-avatar {
@@ -1193,9 +1416,19 @@ main {
 </head>
 <body>
   <header>
-    <h1>Mapa da Rede de Lideranças Ensina Brasil</h1>
+    <h1 data-i18n="pageTitle">Mapa da Rede de Lideranças Ensina Brasil</h1>
     <img src="marca-mae.png" alt="Marca Mãe Ensina Brasil" class="header-logo">
-    <span>Visualização interna da presença territorial da rede</span>
+    <div class="header-actions">
+      <span data-i18n="headerSubtitle">Visualização da presença territorial e internacional da rede</span>
+      <label class="language-switcher">
+        <span data-i18n="languageLabel">Idioma</span>
+        <select id="language-select" aria-label="Selecionar idioma">
+          <option value="pt">Português</option>
+          <option value="es">Español</option>
+          <option value="en">English</option>
+        </select>
+      </label>
+    </div>
   </header>
 
   <div class="page-wrap">
@@ -1203,63 +1436,63 @@ main {
     <section class="intro-card">
       <div class="intro-chip">
         <span class="intro-chip-dot"></span>
-        Rede de Lideranças
+        <span data-i18n="networkChip">Rede de Lideranças</span>
       </div>
-      <h2>Onde estamos atuando pelo Brasil</h2>
-      <p>
-        Este mapa apresenta, de forma viva e acessível, a presença territorial da rede de lideranças do Ensina. Cada ponto representa uma lideranças que seguem contribuindo para a transformação da educação pública e da sociedade brasileira em diferentes cidades e contextos. Ele torna visível algo que acreditamos profundamente: que a força da nossa rede está na pluralidade de trajetórias que continuam impactando escolas, governos, organizações sociais e iniciativas comunitárias em todo o país.
+      <h2 data-i18n="introTitle">Onde estamos atuando</h2>
+      <p data-i18n="introText">
+        Este mapa apresenta, de forma viva e acessível, a presença territorial e internacional da rede de lideranças do Ensina. Cada ponto representa uma liderança que segue contribuindo para a transformação da educação pública e da sociedade em diferentes cidades, países e contextos. Ele torna visível algo em que acreditamos profundamente: a força da nossa rede está na pluralidade de trajetórias que continuam impactando escolas, governos, organizações sociais e iniciativas comunitárias em diferentes territórios.
       </p>
     </section>
 
     <section class="filters-panel">
-      <h2>Filtros da rede</h2>
+      <h2 data-i18n="filtersTitle">Filtros da rede</h2>
 
       <div class="filters">
         <label>
-          Região
+          <span data-i18n="region">Região</span>
           <div class="multi-filter" id="filter-regiao"></div>
         </label>
         <label>
-          Estado
+          <span data-i18n="state">Estado</span>
           <div class="multi-filter" id="filter-estado"></div>
         </label>
         <label>
-          Cidade
+          <span data-i18n="city">Cidade</span>
           <div class="multi-filter" id="filter-cidade"></div>
         </label>
         <label>
-          Turma
+          <span data-i18n="cohort">Turma</span>
           <div class="multi-filter" id="filter-turma"></div>
         </label>
         <label>
-          Programa
+          <span data-i18n="program">Programa</span>
           <div class="multi-filter" id="filter-programa"></div>
         </label>
         <label>
-          Cargo
+          <span data-i18n="role">Cargo</span>
           <div class="multi-filter" id="filter-cargo"></div>
         </label>
         <label>
-          Instituição
+          <span data-i18n="institution">Instituição</span>
           <div class="multi-filter" id="filter-instituicao"></div>
         </label>
         <label>
-          Buscar pessoa
-          <input type="text" id="filter-busca" placeholder="Digite o nome..." style="padding: 6px 8px; border-radius: 999px; border: 1px solid #d1d5db; font-size: 0.86rem; background: #f9fafb; outline: none; transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;">
+          <span data-i18n="searchPerson">Buscar pessoa</span>
+          <input type="text" id="filter-busca" data-i18n-placeholder="searchPlaceholder" placeholder="Digite o nome..." style="padding: 6px 8px; border-radius: 999px; border: 1px solid #d1d5db; font-size: 0.86rem; background: #f9fafb; outline: none; transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;">
         </label>
         <label style="display: flex; flex-direction: column; justify-content: flex-end;">
-          <button id="btn-limpar" class="btn-limpar" style="margin-left: 10px;">Limpar filtros</button>
+          <button id="btn-limpar" class="btn-limpar" data-i18n="clearFilters" style="margin-left: 10px;">Limpar filtros</button>
         </label>
       </div>
     </section>
 
     <main>
       <div class="map-wrapper">
-        <div id="map"></div>
+        <div id="map" role="region" aria-label="Mapa interativo da Rede de Lideranças Ensina Brasil"></div>
 
         <!-- Botão Home + legendas -->
         <div class="map-top-right">
-          <button id="map-home-btn" class="map-home-btn" title="Mapa completo">🏠</button>
+          <button id="map-home-btn" class="map-home-btn" type="button" title="Mapa completo" aria-label="Voltar ao mapa completo">🏠</button>
 
           <!-- Legenda Ensina -->
           <div id="ensina-legend" class="ensina-legend"></div>
@@ -1269,7 +1502,7 @@ main {
             <div class="lampiar-legend-logo">
               <img src="lampiar.png" alt="Programa Lampiar" />
             </div>
-            <span class="lampiar-legend-text">
+            <span class="lampiar-legend-text" data-i18n="lampiarLegend">
               Localidade onde atua o Programa Lampiar
             </span>
           </div>
@@ -1277,12 +1510,12 @@ main {
       </div>
 
       <aside class="panel">
-        <h2>Lideranças encontradas</h2>
-        <div id="summary" style="margin: 0 0 10px 0; font-size: 0.95rem; color: var(--text-muted);"></div>
+        <h2 data-i18n="resultsTitle">Lideranças encontradas</h2>
+        <div id="summary" aria-live="polite" style="margin: 0 0 10px 0; font-size: 0.95rem; color: var(--text-muted);"></div>
         <div id="mobilizacao-resumo" class="mobilizacao-resumo" aria-label="Resumo da mobilização"></div>
         <div class="results-actions">
-          <button id="btn-copy-whatsapp" class="btn-copy-whatsapp" type="button">Copiar seleção</button>
-          <button id="btn-limpar-resultados" class="btn-clear-results" type="button">Limpar filtros</button>
+          <button id="btn-copy-whatsapp" class="btn-copy-whatsapp" type="button">Copiar resultados</button>
+          <button id="btn-limpar-resultados" class="btn-clear-results" data-i18n="clearFilters" type="button">Limpar filtros</button>
         </div>
         <div id="people-list"></div>
       </aside>
@@ -1291,9 +1524,9 @@ main {
     <!-- Seção de convite para cadastro no mapa -->
     <section class="join-section">
       <div class="join-section-text">
-        <strong>Mantenha suas informações atualizadas no mapa da rede</strong>
-        <span>
-          O mapa da Rede de Lideranças é construído coletivamente e depende da atualização constante das trajetórias que seguem impactando diferentes territórios do Brasil. Caso você tenha mudado de cidade, instituição, área de atuação ou queira revisar suas informações cadastradas, preencha o formulário abaixo para manter sua presença atualizada no mapa.
+        <strong data-i18n="updateTitle">Mantenha suas informações atualizadas no mapa da rede</strong>
+        <span data-i18n="updateText">
+          O mapa da Rede de Lideranças é construído coletivamente e depende da atualização constante das trajetórias que impactam diferentes territórios e países. Caso você tenha mudado de cidade, país, instituição, área de atuação ou queira revisar suas informações cadastradas, preencha o formulário abaixo para manter sua presença atualizada no mapa.
         </span>
       </div>
       <a
@@ -1302,17 +1535,17 @@ main {
         target="_blank"
         rel="noopener noreferrer"
       >
-        Preencher formulário de atualização
+        <span data-i18n="updateButton">Preencher formulário de atualização</span>
       </a>
     </section>
 
     <section class="join-section">
       <div class="join-section-text">
-        <strong>Ajude a melhorar o mapa da rede</strong>
-        <span>
+        <strong data-i18n="feedbackTitle">Ajude a melhorar o mapa da rede</strong>
+        <span data-i18n="feedbackText">
           Este mapa é uma construção coletiva. Se você percebeu algo que pode melhorar, sentiu falta de alguma informação ou quer compartilhar um elogio sobre a experiência, envie sua contribuição pelo formulário abaixo.
         </span>
-        <div class="contribution-note">
+        <div class="contribution-note" data-i18n="contributionNote">
           <strong>Contribuições da rede:</strong> em 17/06/2026, Gabriel Guedes contribuiu com a sugestão dos filtros de múltiplas seleções, já implementada no mapa.
         </div>
       </div>
@@ -1322,31 +1555,30 @@ main {
         target="_blank"
         rel="noopener noreferrer"
       >
-        Preencher formulário de sugestão e elogios
+        <span data-i18n="feedbackButton">Preencher formulário de sugestão e elogios</span>
       </a>
     </section>
 
     <footer>
-      <strong>Mapa da Rede de Lideranças Ensina Brasil</strong>
-      <span>Criado por <a href="https://www.linkedin.com/in/viniciuspradop/" target="_blank" rel="noopener noreferrer">Vinícius Prado Pereira</a> — Alumni Ensina 2023</span>
-      <span>
+      <strong data-i18n="pageTitle">Mapa da Rede de Lideranças Ensina Brasil</strong>
+      <span><span data-i18n="createdBy">Criado por</span> <a href="https://www.linkedin.com/in/viniciuspradop/" target="_blank" rel="noopener noreferrer">Vinícius Prado Pereira</a> — Alumni Ensina 2023</span>
+      <span data-i18n="privacyText">
         Este mapa exibe dados pessoais de lideranças que consentiram com sua divulgação,
         conforme a Lei Geral de Proteção de Dados (Lei 13.709/2018). 
-        Para solicitar correção ou remoção dos seus dados, escreva para 
-        <a href="mailto:alumni@ensinabrasil.org">alumni@ensinabrasil.org</a>.
+        Para solicitar correção ou remoção dos seus dados, escreva para alumni@ensinabrasil.org.
       </span>
     </footer>
 
   </div> <!-- fim .page-wrap -->
 
   <!-- Popup: estado sem lideranças -->
-  <div id="no-alumni-popup" class="no-alumni-popup">
-    <div class="no-alumni-popup-content">
-      <h3>Nenhuma lideança cadastrada nessa localidade</h3>
+  <div id="no-alumni-popup" class="no-alumni-popup" role="dialog" aria-modal="true" aria-labelledby="no-alumni-title" aria-describedby="no-alumni-text" aria-hidden="true">
+    <div class="no-alumni-popup-content" tabindex="-1">
+      <h3 id="no-alumni-title" data-i18n="emptyLocationTitle">Nenhuma liderança cadastrada nessa localidade</h3>
       <p id="no-alumni-text">
         Nessa localidade não foram cadastradas lideranças atuando (por enquanto!).
       </p>
-      <button id="popup-close-btn" class="popup-close-btn">Fechar</button>
+      <button id="popup-close-btn" class="popup-close-btn" data-i18n="close">Fechar</button>
     </div>
   </div>
 
@@ -1407,7 +1639,217 @@ main {
     const btnLimpar    = document.getElementById("btn-limpar");
     const btnLimparResultados = document.getElementById("btn-limpar-resultados");
     const mapHomeBtn   = document.getElementById("map-home-btn");
+    const languageSelect = document.getElementById("language-select");
     let pessoasFiltradasAtuais = [];
+    let elementoFocadoAntesDoPopup = null;
+
+    const traducoes = {
+      pt: {
+        pageTitle: "Mapa da Rede de Lideranças Ensina Brasil",
+        headerSubtitle: "Visualização da presença territorial e internacional da rede",
+        languageLabel: "Idioma", networkChip: "Rede de Lideranças",
+        introTitle: "Onde estamos atuando",
+        introText: "Este mapa apresenta, de forma viva e acessível, a presença territorial e internacional da rede de lideranças do Ensina. Cada ponto representa uma liderança que segue contribuindo para a transformação da educação pública e da sociedade em diferentes cidades, países e contextos. Ele torna visível algo em que acreditamos profundamente: a força da nossa rede está na pluralidade de trajetórias que continuam impactando escolas, governos, organizações sociais e iniciativas comunitárias em diferentes territórios.",
+        filtersTitle: "Filtros da rede", region: "Região", state: "Estado", city: "Cidade",
+        cohort: "Turma", program: "Programa", role: "Cargo", institution: "Instituição",
+        searchPerson: "Buscar pessoa", searchPlaceholder: "Digite o nome...",
+        clearFilters: "Limpar filtros", resultsTitle: "Lideranças encontradas",
+        updateTitle: "Mantenha suas informações atualizadas no mapa da rede",
+        updateText: "O mapa da Rede de Lideranças é construído coletivamente e depende da atualização constante das trajetórias que impactam diferentes territórios e países. Caso você tenha mudado de cidade, país, instituição, área de atuação ou queira revisar suas informações cadastradas, preencha o formulário abaixo para manter sua presença atualizada no mapa.",
+        updateButton: "Preencher formulário de atualização",
+        feedbackTitle: "Ajude a melhorar o mapa da rede",
+        feedbackText: "Este mapa é uma construção coletiva. Se você percebeu algo que pode melhorar, sentiu falta de alguma informação ou quer compartilhar um elogio sobre a experiência, envie sua contribuição pelo formulário abaixo.",
+        feedbackButton: "Preencher formulário de sugestão e elogios",
+        contributionNote: "Contribuições da rede: em 17/06/2026, Gabriel Guedes contribuiu com a sugestão dos filtros de múltiplas seleções, já implementada no mapa.",
+        createdBy: "Criado por", lampiarLegend: "Localidade onde atua o Programa Lampiar",
+        traineeLegend: "Localidade onde atua o Programa Trainee Ensina Brasil", traineeHub: "Polo de atuação do Programa Trainee Ensina Brasil", homeMap: "Voltar ao mapa completo",
+        privacyText: "Este mapa exibe dados pessoais de lideranças que consentiram com sua divulgação, conforme a Lei Geral de Proteção de Dados (Lei 13.709/2018). Para solicitar correção ou remoção dos seus dados, escreva para alumni@ensinabrasil.org.",
+        emptyLocationTitle: "Nenhuma liderança cadastrada nessa localidade", close: "Fechar",
+        selected: "Selecionadas", filterResults: "Resultados do filtro",
+        copySelection: "Copiar seleção", copyResults: "Copiar resultados",
+        nothingToCopy: "Nenhum resultado para copiar", copied: "Lista copiada!", copyFail: "Não foi possível copiar",
+        loading: "Carregando lideranças...", allM: "Todos", allF: "Todas", allRegion: "Todos da região",
+        selectedCount: "selecionado(s)", noOption: "Nenhuma opção encontrada",
+        searchList: "Procurar na lista...", peopleFound: "liderança(s) encontrada(s)",
+        mapRegionLabel: "Mapa interativo da Rede de Lideranças Ensina Brasil",
+        noData: "Nenhuma liderança encontrada na fonte de dados.", emptyState: "Nenhuma liderança cadastrada neste estado até o momento.",
+        emptyFilter: "Nenhuma liderança encontrada com os filtros aplicados.", noRecord: "Nenhum registro encontrado para este filtro.",
+        filtersApplied: "com os filtros aplicados:", listLabel: "Lista",
+        leadersLabel: "lideranças", citiesLabel: "cidades", statesLabel: "estados", programsLabel: "programas", institutionsLabel: "instituições", noRole: "Sem função"
+      },
+      es: {
+        pageTitle: "Mapa de la Red de Liderazgos Ensina Brasil",
+        headerSubtitle: "Visualización de la presencia territorial e internacional de la red",
+        languageLabel: "Idioma", networkChip: "Red de Liderazgos",
+        introTitle: "Dónde estamos actuando",
+        introText: "Este mapa presenta, de forma viva y accesible, la presencia territorial e internacional de la red de liderazgos de Ensina. Cada punto representa a una persona que contribuye a transformar la educación pública y la sociedad en diferentes ciudades, países y contextos. Hace visible algo en lo que creemos profundamente: la fuerza de nuestra red está en la pluralidad de trayectorias que siguen impactando escuelas, gobiernos, organizaciones sociales e iniciativas comunitarias en diferentes territorios.",
+        filtersTitle: "Filtros de la red", region: "Región", state: "Estado", city: "Ciudad",
+        cohort: "Cohorte", program: "Programa", role: "Cargo", institution: "Institución",
+        searchPerson: "Buscar persona", searchPlaceholder: "Escribe el nombre...",
+        clearFilters: "Limpiar filtros", resultsTitle: "Liderazgos encontrados",
+        updateTitle: "Mantén tu información actualizada en el mapa de la red",
+        updateText: "El mapa de la Red de Liderazgos se construye colectivamente y depende de la actualización constante de las trayectorias que impactan diferentes territorios y países. Si cambiaste de ciudad, país, institución o área de actuación, completa el formulario para mantener tu presencia actualizada.",
+        updateButton: "Completar formulario de actualización",
+        feedbackTitle: "Ayuda a mejorar el mapa de la red",
+        feedbackText: "Este mapa es una construcción colectiva. Si encontraste algo que puede mejorar, falta información o quieres compartir un elogio, envía tu contribución en el formulario.",
+        feedbackButton: "Enviar sugerencias y comentarios",
+        contributionNote: "Contribuciones de la red: el 17/06/2026, Gabriel Guedes sugirió los filtros de selección múltiple, ya implementados en el mapa.",
+        createdBy: "Creado por", lampiarLegend: "Localidad donde actúa el Programa Lampiar",
+        traineeLegend: "Localidad donde actúa el Programa Trainee Ensina Brasil", traineeHub: "Polo de actuación del Programa Trainee Ensina Brasil", homeMap: "Volver al mapa completo",
+        privacyText: "Este mapa muestra datos personales de liderazgos que autorizaron su divulgación. Para solicitar una corrección o eliminación, escribe a alumni@ensinabrasil.org.",
+        emptyLocationTitle: "No hay liderazgos registrados en esta localidad", close: "Cerrar",
+        selected: "Seleccionadas", filterResults: "Resultados del filtro",
+        copySelection: "Copiar selección", copyResults: "Copiar resultados",
+        nothingToCopy: "No hay resultados para copiar", copied: "¡Lista copiada!", copyFail: "No se pudo copiar",
+        loading: "Cargando liderazgos...", allM: "Todos", allF: "Todas", allRegion: "Todos de la región",
+        selectedCount: "seleccionado(s)", noOption: "No se encontraron opciones",
+        searchList: "Buscar en la lista...", peopleFound: "liderazgo(s) encontrado(s)",
+        mapRegionLabel: "Mapa interactivo de la Red de Liderazgos Ensina Brasil",
+        noData: "No se encontraron liderazgos en la fuente de datos.", emptyState: "Todavía no hay liderazgos registrados en este estado.",
+        emptyFilter: "No se encontraron liderazgos con los filtros aplicados.", noRecord: "No se encontraron registros para este filtro.",
+        filtersApplied: "con los filtros aplicados:", listLabel: "Lista",
+        leadersLabel: "liderazgos", citiesLabel: "ciudades", statesLabel: "estados", programsLabel: "programas", institutionsLabel: "instituciones", noRole: "Sin función"
+      },
+      en: {
+        pageTitle: "Ensina Brasil Leadership Network Map",
+        headerSubtitle: "Territorial and international network presence",
+        languageLabel: "Language", networkChip: "Leadership Network",
+        introTitle: "Where we are making an impact",
+        introText: "This map presents the territorial and international presence of Ensina’s leadership network in a lively and accessible way. Each point represents a leader contributing to the transformation of public education and society across different cities, countries, and contexts. It makes visible something we deeply believe: the strength of our network lies in the diversity of journeys that continue to impact schools, governments, social organizations, and community initiatives across different territories.",
+        filtersTitle: "Network filters", region: "Region", state: "State", city: "City",
+        cohort: "Cohort", program: "Program", role: "Role", institution: "Institution",
+        searchPerson: "Search for a person", searchPlaceholder: "Type a name...",
+        clearFilters: "Clear filters", resultsTitle: "Leaders found",
+        updateTitle: "Keep your information up to date on the network map",
+        updateText: "The Leadership Network map is built collectively and depends on continuously updated journeys impacting different territories and countries. If you have changed city, country, institution, or field of work, complete the form to keep your presence up to date.",
+        updateButton: "Open update form", feedbackTitle: "Help improve the network map",
+        feedbackText: "This map is a collective effort. If you found something that can be improved, noticed missing information, or want to share positive feedback, send your contribution through the form.",
+        feedbackButton: "Send suggestions and feedback",
+        contributionNote: "Network contributions: on June 17, 2026, Gabriel Guedes suggested the multiple-selection filters, now implemented on the map.",
+        createdBy: "Created by", lampiarLegend: "Location where the Lampiar Program operates",
+        traineeLegend: "Location where the Ensina Brasil Trainee Program operates", traineeHub: "Ensina Brasil Trainee Program hub", homeMap: "Return to the full map",
+        privacyText: "This map displays personal data from leaders who consented to its publication. To request a correction or removal, email alumni@ensinabrasil.org.",
+        emptyLocationTitle: "No leaders registered in this location", close: "Close",
+        selected: "Selected", filterResults: "Filter results",
+        copySelection: "Copy selection", copyResults: "Copy results",
+        nothingToCopy: "No results to copy", copied: "List copied!", copyFail: "Could not copy",
+        loading: "Loading leaders...", allM: "All", allF: "All", allRegion: "All in region",
+        selectedCount: "selected", noOption: "No options found",
+        searchList: "Search the list...", peopleFound: "leader(s) found",
+        mapRegionLabel: "Interactive Ensina Brasil Leadership Network map",
+        noData: "No leaders were found in the data source.", emptyState: "No leaders are registered in this state yet.",
+        emptyFilter: "No leaders were found with the selected filters.", noRecord: "No records found for this filter.",
+        filtersApplied: "with the selected filters:", listLabel: "List",
+        leadersLabel: "leaders", citiesLabel: "cities", statesLabel: "states", programsLabel: "programs", institutionsLabel: "institutions", noRole: "No role provided"
+      }
+    };
+
+    function detectarIdiomaDoNavegador() {
+      const idiomas = Array.isArray(navigator.languages) && navigator.languages.length
+        ? navigator.languages
+        : [navigator.language || "pt-BR"];
+
+      for (const idioma of idiomas) {
+        const codigo = String(idioma).toLowerCase();
+        if (codigo.startsWith("pt")) return "pt";
+        if (codigo.startsWith("es")) return "es";
+        if (codigo.startsWith("en")) return "en";
+      }
+
+      return "en";
+    }
+
+    let idiomaAtual = localStorage.getItem("mapa-rede-liderancas:idioma")
+      || detectarIdiomaDoNavegador();
+
+    function t(chave) {
+      return traducoes[idiomaAtual]?.[chave] || traducoes.pt[chave] || chave;
+    }
+
+    function traduzirOpcaoFiltro(container, opcao) {
+      if (container.id === "filter-cargo") return traduzirCargo(opcao);
+
+      if (container.id === "filter-regiao") {
+        const regioes = {
+          pt: { Norte: "Norte", Nordeste: "Nordeste", "Centro-Oeste": "Centro-Oeste", Sudeste: "Sudeste", Sul: "Sul" },
+          es: { Norte: "Norte", Nordeste: "Nordeste", "Centro-Oeste": "Centro-Oeste", Sudeste: "Sudeste", Sul: "Sur" },
+          en: { Norte: "North", Nordeste: "Northeast", "Centro-Oeste": "Central-West", Sudeste: "Southeast", Sul: "South" }
+        };
+        return regioes[idiomaAtual]?.[opcao] || opcao;
+      }
+
+      return opcao;
+    }
+
+    function traduzirCargo(cargo) {
+      const traducoesCargo = {
+        pt: {
+          "Docência": "Docência", "Professor(a)": "Docência", "Coordenação": "Coordenação",
+          "Gestão/Gerência": "Gestão/Gerência", "Direção": "Direção", "Analista": "Analista",
+          "Consultoria": "Consultoria", "Assessoria": "Assessoria", "Pesquisa": "Pesquisa",
+          "Formação acadêmica": "Formação acadêmica", "Estudante/Pesquisa acadêmica": "Formação acadêmica",
+          "Setor Público": "Setor Público", "Terceiro Setor": "Terceiro Setor"
+        },
+        es: {
+          "Docência": "Docencia", "Professor(a)": "Docencia", "Coordenação": "Coordinación",
+          "Gestão/Gerência": "Gestión/Gerencia", "Direção": "Dirección", "Analista": "Analista",
+          "Consultoria": "Consultoría", "Assessoria": "Asesoría", "Pesquisa": "Investigación",
+          "Formação acadêmica": "Formación académica", "Estudante/Pesquisa acadêmica": "Formación académica",
+          "Setor Público": "Sector público", "Terceiro Setor": "Tercer sector"
+        },
+        en: {
+          "Docência": "Teaching", "Professor(a)": "Teaching", "Coordenação": "Coordination",
+          "Gestão/Gerência": "Management", "Direção": "Leadership", "Analista": "Analyst",
+          "Consultoria": "Consulting", "Assessoria": "Advisory", "Pesquisa": "Research",
+          "Formação acadêmica": "Academic studies", "Estudante/Pesquisa acadêmica": "Academic studies",
+          "Setor Público": "Public sector", "Terceiro Setor": "Nonprofit sector"
+        }
+      };
+
+      return traducoesCargo[idiomaAtual]?.[cargo] || cargo;
+    }
+
+    function aplicarIdioma(idioma) {
+      idiomaAtual = traducoes[idioma] ? idioma : "pt";
+      document.documentElement.lang = idiomaAtual === "pt" ? "pt-BR" : idiomaAtual;
+      document.title = t("pageTitle");
+      localStorage.setItem("mapa-rede-liderancas:idioma", idiomaAtual);
+      if (languageSelect) {
+        languageSelect.value = idiomaAtual;
+        languageSelect.setAttribute("aria-label", t("languageLabel"));
+      }
+
+      document.querySelectorAll("[data-i18n]").forEach(elemento => {
+        elemento.textContent = t(elemento.dataset.i18n);
+      });
+      document.querySelectorAll("[data-i18n-placeholder]").forEach(elemento => {
+        elemento.placeholder = t(elemento.dataset.i18nPlaceholder);
+      });
+      document.getElementById("map")?.setAttribute("aria-label", t("mapRegionLabel"));
+      if (mapHomeBtn) {
+        mapHomeBtn.title = t("homeMap");
+        mapHomeBtn.setAttribute("aria-label", t("homeMap"));
+      }
+      const ensinaLegendText = document.querySelector(".ensina-legend-text");
+      if (ensinaLegendText) {
+        ensinaLegendText.textContent = ensinaLegendText.dataset.mode === "hub" ? t("traineeHub") : t("traineeLegend");
+      }
+
+      if (pessoas.length) {
+        const regioesSelecionadas = new Set(getValoresSelecionados(filterRegiao));
+        const regioes = [...new Set(pessoas.map(p => p.regiao).filter(Boolean))].sort();
+        renderizarFiltroMultiplo(filterRegiao, regioes, t("allF"), regioesSelecionadas);
+        atualizarOpcoesEstado();
+        atualizarCidades();
+        atualizarTurmas();
+        atualizarProgramas();
+        atualizarCargos();
+        atualizarInstituicoes();
+        atualizarLista({ preservarSelecao: true });
+      } else {
+        atualizarBotaoWhatsapp();
+      }
+    }
 
     // Legenda em modo polo ou não
     let poloLegendActive = false;
@@ -1674,7 +2116,7 @@ const lampiarCities = [
         <div class="ensina-legend-logo">
           <img src="${LOGO_SRC}" alt="Programa TraineeEnsina Brasil" onerror="this.parentElement.innerHTML='<span style=\'font-size:14px; font-weight:bold; color:#004b8d;\'>E</span>'" />
         </div>
-        <span class="ensina-legend-text">Localidade onde atua o Programa Trainee Ensina Brasil</span>
+        <span class="ensina-legend-text">${t("traineeLegend")}</span>
       `;
 
       // aplicar hover JS consistente (adiciona classe no elemento interno)
@@ -1693,11 +2135,13 @@ const lampiarCities = [
 
       if (active) {
         legendEl.classList.add("ensina-legend--polo");
-        textSpan.textContent = "Polo de atuação do Programa Trainee Ensina Brasil";
+        textSpan.dataset.mode = "hub";
+        textSpan.textContent = t("traineeHub");
         poloLegendActive = true;
       } else {
         legendEl.classList.remove("ensina-legend--polo");
-        textSpan.textContent = "Localidade onde atua o Programa Trainee Ensina Brasil";
+        textSpan.dataset.mode = "location";
+        textSpan.textContent = t("traineeLegend");
         poloLegendActive = false;
       }
     }
@@ -1798,6 +2242,40 @@ const lampiarCities = [
         .replace(/[\u0300-\u036f]/g, "")
         .toLowerCase()
         .trim();
+    }
+
+    function escaparHTML(valor) {
+      return String(valor ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function urlExternaSegura(valor) {
+      if (!valor) return "";
+      let texto = String(valor).trim();
+      if (!texto) return "";
+
+      if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(texto)) {
+        texto = `https://${texto}`;
+      }
+
+      try {
+        const url = new URL(texto);
+        return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+      } catch (_) {
+        return "";
+      }
+    }
+
+    function debounce(funcao, espera = 250) {
+      let temporizador;
+      return (...args) => {
+        window.clearTimeout(temporizador);
+        temporizador = window.setTimeout(() => funcao(...args), espera);
+      };
     }
 
     function normalizarChavePessoa(nome) {
@@ -1947,15 +2425,28 @@ const lampiarCities = [
       const nomeEstado = stateNameBySigla[uf] || uf;
 
       textSpan.textContent =
-        `Nessa localidade (${nomeEstado}) não foram cadastrados alumni atuando (por enquanto!).`;
+        idiomaAtual === "en"
+          ? `No leaders are registered in this location (${nomeEstado}) yet.`
+          : idiomaAtual === "es"
+            ? `Todavía no hay liderazgos registrados en esta localidad (${nomeEstado}).`
+            : `Nessa localidade (${nomeEstado}) não foram cadastradas lideranças atuando (por enquanto!).`;
 
+      elementoFocadoAntesDoPopup = document.activeElement;
       popup.classList.add("show");
+      popup.setAttribute("aria-hidden", "false");
+      const conteudo = popup.querySelector(".no-alumni-popup-content");
+      if (conteudo) conteudo.focus();
     }
 
     function hideNoAlumniPopup() {
       const popup = document.getElementById("no-alumni-popup");
       if (!popup) return;
       popup.classList.remove("show");
+      popup.setAttribute("aria-hidden", "true");
+      if (elementoFocadoAntesDoPopup && typeof elementoFocadoAntesDoPopup.focus === "function") {
+        elementoFocadoAntesDoPopup.focus();
+      }
+      elementoFocadoAntesDoPopup = null;
     }
 
     // Estilo dos municípios (para highlight por pessoa)
@@ -3380,7 +3871,6 @@ function carregarPaisesVizinhos() {
       const cidadesAntes = new Set(getValoresSelecionados(filterCidade));
       cidadesAntes.add(cidadeFiltro);
 
-      pessoasSelecionadasKeys.clear();
       highlightState = sigla;
       highlightCityNorm = normalizarTexto(cidadeFiltro);
 
@@ -3872,23 +4362,32 @@ function adicionarLogosLampiar() {
       if (!button) return;
       const label = container.dataset.allLabel || "Todos";
       const selected = getValoresSelecionados(container);
-      button.textContent = selected.length ? `${selected.length} selecionado(s)` : label;
+      button.textContent = selected.length ? `${selected.length} ${t("selectedCount")}` : label;
     }
 
     function renderizarFiltroMultiplo(container, opcoes, allLabel, selecionados = new Set(), buscaInterna = false) {
-      container.dataset.allLabel = allLabel;
+      container.dataset.allLabel = allLabel === "Todas" ? t("allF") : allLabel === "Todos" ? t("allM") : allLabel;
       container.innerHTML = "";
       const linhas = [];
 
       const button = document.createElement("button");
       button.type = "button";
       button.className = "multi-filter-button";
+      const panelId = `${container.id}-panel`;
+      button.setAttribute("aria-haspopup", "listbox");
+      button.setAttribute("aria-controls", panelId);
+      button.setAttribute("aria-expanded", "false");
       button.addEventListener("click", (event) => {
         event.stopPropagation();
         document.querySelectorAll(".multi-filter.open").forEach(item => {
-          if (item !== container) item.classList.remove("open");
+          if (item !== container) {
+            item.classList.remove("open");
+            const outroBotao = item.querySelector(".multi-filter-button");
+            if (outroBotao) outroBotao.setAttribute("aria-expanded", "false");
+          }
         });
         container.classList.toggle("open");
+        button.setAttribute("aria-expanded", String(container.classList.contains("open")));
         if (container.classList.contains("open")) {
           const searchInput = container.querySelector(".multi-filter-search");
           if (searchInput) setTimeout(() => searchInput.focus(), 0);
@@ -3897,6 +4396,9 @@ function adicionarLogosLampiar() {
 
       const panel = document.createElement("div");
       panel.className = "multi-filter-panel";
+      panel.id = panelId;
+      panel.setAttribute("role", "listbox");
+      panel.setAttribute("aria-multiselectable", "true");
       panel.addEventListener("click", (event) => {
         event.stopPropagation();
       });
@@ -3907,7 +4409,7 @@ function adicionarLogosLampiar() {
         const searchInput = document.createElement("input");
         searchInput.type = "text";
         searchInput.className = "multi-filter-search";
-        searchInput.placeholder = "Procurar na lista...";
+        searchInput.placeholder = t("searchList");
         searchInput.addEventListener("input", () => {
           const termo = normalizarTexto(searchInput.value);
           let visiveis = 0;
@@ -3927,19 +4429,22 @@ function adicionarLogosLampiar() {
 
         emptyMessage = document.createElement("div");
         emptyMessage.className = "multi-filter-empty";
-        emptyMessage.textContent = "Nenhuma opção encontrada";
+        emptyMessage.textContent = t("noOption");
         panel.appendChild(emptyMessage);
       }
 
       opcoes.forEach(opcao => {
         const row = document.createElement("label");
         row.className = "multi-filter-option";
+        row.setAttribute("role", "option");
 
         const input = document.createElement("input");
         input.type = "checkbox";
         input.value = opcao;
         input.checked = selecionados.has(opcao);
+        row.setAttribute("aria-selected", String(input.checked));
         input.addEventListener("change", () => {
+          row.setAttribute("aria-selected", String(input.checked));
           if (input.checked) {
             container.dataset.lastSelected = input.value;
           } else if (container.dataset.lastSelected === input.value) {
@@ -3949,8 +4454,8 @@ function adicionarLogosLampiar() {
         });
 
         const text = document.createElement("span");
-        text.textContent = opcao;
-        text.title = opcao;
+        text.textContent = traduzirOpcaoFiltro(container, opcao);
+        text.title = text.textContent;
 
         row.appendChild(input);
         row.appendChild(text);
@@ -3965,18 +4470,52 @@ function adicionarLogosLampiar() {
 
     function toggleSelecionarPessoa(p) {
       const key = criarChavePessoa(p);
+      const foiSelecionada = !pessoasSelecionadasKeys.has(key);
       if (pessoasSelecionadasKeys.has(key)) {
         pessoasSelecionadasKeys.delete(key);
       } else {
         pessoasSelecionadasKeys.add(key);
       }
 
-      aplicarFiltrosDasPessoasSelecionadas(p);
+      const selecionadas = getPessoasSelecionadas();
+      const foco = pessoasSelecionadasKeys.has(key)
+        ? p
+        : selecionadas[selecionadas.length - 1];
+
+      if (foco) {
+        highlightState = foco.estado_sigla || null;
+        highlightCityNorm = normalizarTexto(foco.cidade || "");
+      } else {
+        highlightState = getPrimeiroValorSelecionado(filterEstado) || null;
+        highlightCityNorm = null;
+      }
+
+      atualizarLista({ preservarSelecao: true });
+      if (estadosLayer) estadosLayer.setStyle(estadoStyle);
+      atualizarEstiloMunicipios();
+
+      if (foiSelecionada) {
+        window.requestAnimationFrame(() => {
+          const cartaoSelecionado = Array.from(
+            peopleList.querySelectorAll(".person-card")
+          ).find(card => card.dataset.personKey === key);
+
+          if (cartaoSelecionado) {
+            cartaoSelecionado.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest"
+            });
+          }
+        });
+      }
     }
 
     function getPessoasSelecionadas() {
       if (!pessoasSelecionadasKeys.size) return [];
-      return pessoas.filter(p => pessoasSelecionadasKeys.has(criarChavePessoa(p)));
+      return Array.from(pessoasSelecionadasKeys)
+        .map(key => pessoas.find(p => criarChavePessoa(p) === key))
+        .filter(Boolean);
     }
 
     function aplicarValoresFiltro(select, valores) {
@@ -4059,11 +4598,11 @@ function atualizarResumoMobilizacao(lista) {
   ).size;
 
   const indicadores = [
-    { label: "lideranças", valor: lista.length },
-    { label: "cidades", valor: contarUnicos("cidade") },
-    { label: "estados", valor: contarUnicos("estado_sigla") },
-    { label: "programas", valor: contarUnicos("programa") },
-    { label: "instituições", valor: contarUnicos("instituicao") }
+    { label: t("leadersLabel"), valor: lista.length },
+    { label: t("citiesLabel"), valor: contarUnicos("cidade") },
+    { label: t("statesLabel"), valor: contarUnicos("estado_sigla") },
+    { label: t("programsLabel"), valor: contarUnicos("programa") },
+    { label: t("institutionsLabel"), valor: contarUnicos("instituicao") }
   ];
 
   mobilizacaoResumo.innerHTML = indicadores.map(item => `
@@ -4080,37 +4619,37 @@ function formatarFiltroMensagem(nome, valores) {
 
 function obterResumoFiltrosAtivos() {
   return [
-    formatarFiltroMensagem("Região", getValoresSelecionados(filterRegiao)),
-    formatarFiltroMensagem("Estado", getValoresSelecionados(filterEstado)),
-    formatarFiltroMensagem("Cidade", getValoresSelecionados(filterCidade)),
-    formatarFiltroMensagem("Turma", getValoresSelecionados(filterTurma)),
-    formatarFiltroMensagem("Programa", getValoresSelecionados(filterPrograma)),
-    formatarFiltroMensagem("Cargo", getValoresSelecionados(filterCargo)),
-    formatarFiltroMensagem("Instituição", getValoresSelecionados(filterInstituicao)),
-    filterBusca.value.trim() ? `Busca: ${filterBusca.value.trim()}` : ""
+    formatarFiltroMensagem(t("region"), getValoresSelecionados(filterRegiao)),
+    formatarFiltroMensagem(t("state"), getValoresSelecionados(filterEstado)),
+    formatarFiltroMensagem(t("city"), getValoresSelecionados(filterCidade)),
+    formatarFiltroMensagem(t("cohort"), getValoresSelecionados(filterTurma)),
+    formatarFiltroMensagem(t("program"), getValoresSelecionados(filterPrograma)),
+    formatarFiltroMensagem(t("role"), getValoresSelecionados(filterCargo).map(traduzirCargo)),
+    formatarFiltroMensagem(t("institution"), getValoresSelecionados(filterInstituicao)),
+    filterBusca.value.trim() ? `${t("searchPerson")}: ${filterBusca.value.trim()}` : ""
   ].filter(Boolean);
 }
 
 function montarMensagemWhatsapp(lista) {
   const filtros = obterResumoFiltrosAtivos();
   const linhas = [
-    "Mapa da Rede de Lideranças Ensina Brasil",
+    t("pageTitle"),
     "",
-    `${lista.length} liderança(s) encontrada(s)` + (filtros.length ? " com os filtros aplicados:" : ".")
+    `${lista.length} ${t("peopleFound")}` + (filtros.length ? ` ${t("filtersApplied")}` : ".")
   ];
 
   if (filtros.length) {
     linhas.push(...filtros.map(item => `- ${item}`));
   }
 
-  linhas.push("", "Lista:");
+  linhas.push("", `${t("listLabel")}:`);
 
   lista.forEach((p, index) => {
     const local = [p.cidade, p.estado_sigla].filter(Boolean).join(" - ");
     const detalhes = [
       p.programa,
       p.turma ? `Turma ${p.turma}` : "",
-      getCargoPessoa(p),
+      traduzirCargo(getCargoPessoa(p)),
       p.instituicao
     ].filter(Boolean).join(" | ");
 
@@ -4149,22 +4688,31 @@ function copiarTexto(texto) {
 
 function atualizarBotaoWhatsapp() {
   if (!btnCopyWhatsapp) return;
-  const total = pessoasFiltradasAtuais.length;
+  const selecionadas = getPessoasSelecionadas();
+  const total = selecionadas.length || pessoasFiltradasAtuais.length;
   btnCopyWhatsapp.disabled = total === 0;
-  btnCopyWhatsapp.textContent = total ? "Copiar seleção" : "Nenhuma seleção para copiar";
+  btnCopyWhatsapp.textContent = selecionadas.length
+    ? `${t("copySelection")} (${selecionadas.length})`
+    : total
+      ? `${t("copyResults")} (${total})`
+      : t("nothingToCopy");
 }
 
 function copiarListaWhatsapp() {
-  if (!pessoasFiltradasAtuais.length || !btnCopyWhatsapp) return;
+  if (!btnCopyWhatsapp) return;
 
-  const texto = montarMensagemWhatsapp(pessoasFiltradasAtuais);
+  const selecionadas = getPessoasSelecionadas();
+  const listaParaCopiar = selecionadas.length ? selecionadas : pessoasFiltradasAtuais;
+  if (!listaParaCopiar.length) return;
+
+  const texto = montarMensagemWhatsapp(listaParaCopiar);
   copiarTexto(texto)
     .then(() => {
-      btnCopyWhatsapp.textContent = "Lista copiada!";
+      btnCopyWhatsapp.textContent = t("copied");
       window.setTimeout(atualizarBotaoWhatsapp, 2200);
     })
     .catch(() => {
-      btnCopyWhatsapp.textContent = "Não foi possível copiar";
+      btnCopyWhatsapp.textContent = t("copyFail");
       window.setTimeout(atualizarBotaoWhatsapp, 2600);
     });
 }
@@ -4230,13 +4778,44 @@ function limparSelecao() {
     // PESSOAS (Google Sheets - Única Fonte)
     // -------------------------
     const API_URL = "https://script.google.com/macros/s/AKfycbyLH9WrPrpbWVfXD1RRJbQIh6WkrUCJqVTRnzpM3YZ-A9cdnEUL9qayt8slwKGXvKlT/exec";
+    const CACHE_PESSOAS_KEY = "mapa-rede-liderancas:pessoas:v1";
+    const CACHE_PESSOAS_DURACAO = 15 * 60 * 1000;
+
+    function lerPessoasDoCache() {
+      try {
+        const cache = JSON.parse(localStorage.getItem(CACHE_PESSOAS_KEY) || "null");
+        if (!cache || !Array.isArray(cache.data) || !cache.salvoEm) return null;
+        if (Date.now() - cache.salvoEm > CACHE_PESSOAS_DURACAO) return null;
+        return cache.data;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function salvarPessoasNoCache(data) {
+      try {
+        localStorage.setItem(CACHE_PESSOAS_KEY, JSON.stringify({
+          salvoEm: Date.now(),
+          data
+        }));
+      } catch (_) {
+        // O mapa continua funcionando mesmo se o navegador bloquear o cache.
+      }
+    }
 
     function carregarPessoas() {
-      console.log("📊 Carregando alumni da planilha Google Sheets...");
+      const pessoasEmCache = lerPessoasDoCache();
+      if (pessoasEmCache) {
+        inicializarComDados(pessoasEmCache);
+        return;
+      }
+
+      summary.textContent = t("loading");
       
-      fetch(API_URL + "?t=" + new Date().getTime(), {
+      fetch(API_URL, {
         method: 'GET',
-        redirect: 'follow'
+        redirect: 'follow',
+        cache: 'default'
       })
         .then(resp => {
           if (!resp.ok) {
@@ -4253,11 +4832,12 @@ function limparSelecao() {
           }
           
           if (data.length === 0) {
-            summary.textContent = "Nenhum alumni encontrado na planilha.";
+            summary.textContent = t("noData");
             console.warn("⚠️ Planilha retornou 0 registros");
             return;
           }
-          
+
+          salvarPessoasNoCache(data);
           inicializarComDados(data);
         })
         .catch(err => {
@@ -4308,7 +4888,7 @@ function limparSelecao() {
         estados = estados.filter((sigla) => regioesAtuais.includes(stateRegionBySigla[sigla]));
       }
 
-      renderizarFiltroMultiplo(filterEstado, estados, regioesAtuais.length ? "Todos da regiao" : "Todos", estadosSelecionados);
+      renderizarFiltroMultiplo(filterEstado, estados, regioesAtuais.length ? t("allRegion") : t("allM"), estadosSelecionados);
     }
 
     function popularFiltros() {
@@ -4402,6 +4982,8 @@ function atualizarCargos() {
     function renderizarCardPessoa(p, shouldDim = false) {
       const div = document.createElement("div");
       div.className = "person-card";
+      div.setAttribute("role", "group");
+      div.setAttribute("aria-label", p.nome || "Liderança");
       const selectionStyle = getEstiloSelecaoPrograma(p.programa);
       div.style.borderLeft = `4px solid ${selectionStyle.color}`;
       div.style.setProperty("--person-program-color", selectionStyle.color);
@@ -4409,8 +4991,18 @@ function atualizarCargos() {
       div.style.setProperty("--person-program-shadow", selectionStyle.shadow);
 
       const key = criarChavePessoa(p);
+      div.dataset.personKey = key;
+      const nomeSeguro = escaparHTML(p.nome);
+      const cidadeSegura = escaparHTML(p.cidade);
+      const estadoSeguro = escaparHTML(p.estado_sigla);
+      const programaSeguro = escaparHTML(p.programa);
+      const cargoValorSeguro = escaparHTML(getCargoPessoa(p));
+      const cargoExibicaoSeguro = escaparHTML(traduzirCargo(getCargoPessoa(p)));
+      const instituicaoSegura = escaparHTML(p.instituicao);
+      const turmaSegura = escaparHTML(p.turma);
+      const linkedinSeguro = urlExternaSegura(p.linkedin);
 
-      if (shouldDim || (pessoasSelecionadasKeys.size > 0 && !pessoasSelecionadasKeys.has(key))) {
+      if (shouldDim) {
         div.classList.add("dimmed");
       }
       if (pessoasSelecionadasKeys.has(key)) {
@@ -4419,22 +5011,24 @@ function atualizarCargos() {
 
       div.innerHTML = `
   <div class="person-main-row">
-    <!-- Checkbox à esquerda -->
+    <div class="person-select-control">
+      <input type="checkbox" class="person-checkbox" data-key="${escaparHTML(key)}" ${pessoasSelecionadasKeys.has(key) ? "checked" : ""} aria-label="Selecionar ${nomeSeguro}">
+    </div>
     <!-- Nome -->
     <div class="person-main-left">
-      <strong>${p.nome}</strong>
+      <strong>${nomeSeguro}</strong>
     </div>
 
     <!-- LinkedIn CENTRAL -->
     <div class="person-main-middle">
       ${
-        p.linkedin
+        linkedinSeguro
           ? `
             <span class="linkedin-line">
               <img class="linkedin-icon"
                    src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png"
                    alt="LinkedIn">
-              <a href="${p.linkedin}" target="_blank">LinkedIn</a>
+              <a href="${escaparHTML(linkedinSeguro)}" target="_blank" rel="noopener noreferrer">LinkedIn</a>
             </span>
           `
           : ""
@@ -4443,29 +5037,37 @@ function atualizarCargos() {
 
     <!-- Cidade + bandeira à direita -->
     <div class="person-main-right">
-      <span class="clickable-filter" data-filter="cidade" data-value="${p.cidade || ""}" style="cursor: pointer;" title="Filtrar por ${p.cidade}">${p.cidade || ""} - ${p.estado_sigla || ""}</span>
-      <img class="person-flag clickable-filter" data-filter="estado" data-value="${p.estado_sigla}" src="bandeiras/${p.estado_sigla}.png" alt="Bandeira de ${p.estado_sigla}" style="cursor: pointer;" title="Filtrar por ${p.estado_sigla}">
+      <button type="button" class="clickable-filter clickable-filter-button" data-filter="cidade" data-value="${cidadeSegura}" title="Filtrar por ${cidadeSegura}">${cidadeSegura} - ${estadoSeguro}</button>
+      <button type="button" class="clickable-filter clickable-filter-button" data-filter="estado" data-value="${estadoSeguro}" title="Filtrar por ${estadoSeguro}"><img class="person-flag" src="bandeiras/${estadoSeguro}.png" alt="Bandeira de ${estadoSeguro}"></button>
     </div>
   </div>
           <div class="person-bottom-row">
-            ${p.programa ? `<span class="badge badge-programa ${normalizarTexto(p.programa)} clickable-filter" data-filter="programa" data-value="${p.programa}" style="cursor: pointer; ${getCorPrograma(p.programa)} font-weight: 600;" title="Filtrar por programa">${p.programa}</span>` : ""}
-            <span class="badge badge-role clickable-filter" data-filter="cargo" data-value="${getCargoPessoa(p)}" style="cursor: pointer;" title="Filtrar por cargo">${getCargoPessoa(p) || "Sem função"}</span>
+            ${p.programa ? `<button type="button" class="badge badge-programa ${normalizarTexto(p.programa)} clickable-filter" data-filter="programa" data-value="${programaSeguro}" style="${getCorPrograma(p.programa)} font-weight: 600;" title="Filtrar por programa">${programaSeguro}</button>` : ""}
+            <button type="button" class="badge badge-role clickable-filter" data-filter="cargo" data-value="${cargoValorSeguro}" title="${t("role")}">${cargoExibicaoSeguro || t("noRole")}</button>
             ${
               p.instituicao
-                ? `<span class="badge badge-inst clickable-filter" data-filter="instituicao" data-value="${p.instituicao}" style="cursor: pointer;" title="Filtrar por instituição">${p.instituicao}</span>`
+                ? `<button type="button" class="badge badge-inst clickable-filter" data-filter="instituicao" data-value="${instituicaoSegura}" title="Filtrar por instituição">${instituicaoSegura}</button>`
                 : ""
             }
-            <span class="badge badge-turma clickable-filter" data-filter="turma" data-value="${p.turma || ''}" style="cursor: pointer;" title="Filtrar por turma">Turma ${p.turma || "-"}</span>
+            <button type="button" class="badge badge-turma clickable-filter" data-filter="turma" data-value="${turmaSegura}" title="Filtrar por turma">Turma ${turmaSegura || "-"}</button>
           </div>
         `;
 
       div.addEventListener("click", (e) => {
-        // Se clicou no checkbox, toggle seleção
-        // Se clicou em um badge de filtro, aplicar filtro
-        if (e.target.classList.contains('clickable-filter')) {
+        if (e.target.closest("a")) return;
+        const checkbox = e.target.closest(".person-checkbox");
+        if (checkbox) {
           e.stopPropagation();
-          const filterType = e.target.getAttribute('data-filter');
-          const filterValue = e.target.getAttribute('data-value');
+          toggleSelecionarPessoa(p);
+          return;
+        }
+
+        // Se clicou em um badge de filtro, aplicar filtro
+        const filtroClicado = e.target.closest(".clickable-filter");
+        if (filtroClicado) {
+          e.stopPropagation();
+          const filterType = filtroClicado.getAttribute('data-filter');
+          const filterValue = filtroClicado.getAttribute('data-value');
           
           if (filterType && filterValue) {
             // Aplicar o filtro
@@ -4489,9 +5091,6 @@ function atualizarCargos() {
             if (estadosLayer) estadosLayer.setStyle(estadoStyle);
             atualizarEstiloMunicipios();
           }
-        } else {
-          // Comportamento normal: toggle seleção de pessoa
-          selecionarPessoa(p);
         }
       });
 
@@ -4602,47 +5201,65 @@ function atualizarCargos() {
         filtradas = filtradas.filter(p => normalizarTexto(p.nome || "").includes(buscaNorm));
       }
 
-      // Ordenar alfabeticamente por nome
+      // A ordem alfabética vale apenas para os resultados não selecionados.
       filtradas.sort((a, b) => (a.nome || "").localeCompare(b.nome || "", 'pt-BR'));
       pessoasFiltradasAtuais = filtradas;
       atualizarBotaoWhatsapp();
 
-      if (!preservarSelecao) {
-        pessoasSelecionadasKeys.clear();
-      }
+      // O Set mantém a ordem dos cliques. As seleções permanecem no topo,
+      // inclusive quando um filtro diferente está sendo visualizado.
+      const selecionadas = Array.from(pessoasSelecionadasKeys)
+        .map(key => pessoas.find(p => criarChavePessoa(p) === key))
+        .filter(Boolean);
+      const chavesSelecionadas = new Set(selecionadas.map(criarChavePessoa));
+      const resultadosNaoSelecionados = filtradas.filter(
+        p => !chavesSelecionadas.has(criarChavePessoa(p))
+      );
+
       peopleList.innerHTML = "";
 
       summary.textContent = "";
 
       atualizarResumoMobilizacao(filtradas);
 
+      if (selecionadas.length) {
+        const cabecalhoSelecionadas = document.createElement("div");
+        cabecalhoSelecionadas.className = "selected-results-heading";
+        cabecalhoSelecionadas.textContent = `${t("selected")} (${selecionadas.length})`;
+        peopleList.appendChild(cabecalhoSelecionadas);
+
+        selecionadas.forEach(p => {
+          peopleList.appendChild(renderizarCardPessoa(p, false));
+        });
+      }
+
       if (!filtradas.length) {
         if (estadosAtuais.length) {
-          summary.textContent = "Nenhuma pessoa cadastrada neste estado até o momento.";
-          peopleList.innerHTML += `
-            <div style="font-size:0.85rem; color:#6b7280; line-height:1.5;">
-              <p>
-                Nessa localidade ainda não foram cadastrados alumni atuando (por enquanto!).
-              </p>
-              <p>
-                Se você é alumni do Ensina Brasil e está atuando aqui,
-                <a href="https://forms.gle/K7C6H93niomnqaHPA" target="_blank" rel="noopener noreferrer">
-                  preencha o formulário de cadastro
-                </a>
-                para aparecer neste mapa.
-              </p>
-            </div>
-          `;
+          summary.textContent = t("emptyState");
+          const aviso = document.createElement("div");
+          aviso.className = "empty-results-message";
+          aviso.innerHTML = `Nessa localidade ainda não foram cadastradas lideranças atuando (por enquanto!).<br><br>Se você faz parte da Rede de Lideranças Ensina Brasil e atua aqui, <a href="https://forms.gle/nLic4hbtuTLBLeTJ7" target="_blank" rel="noopener noreferrer">preencha o formulário de atualização</a> para aparecer neste mapa.`;
+          peopleList.appendChild(aviso);
         } else if (!estadosAtuais.length) {
-          summary.textContent = "Nenhuma pessoa encontrada com os filtros aplicados.";
-          peopleList.innerHTML += "<div style=\"font-size:0.85rem; color:#6b7280;\">Nenhum registro encontrado para este filtro.</div>";
+          summary.textContent = t("emptyFilter");
+          const aviso = document.createElement("div");
+          aviso.className = "empty-results-message";
+          aviso.textContent = t("noRecord");
+          peopleList.appendChild(aviso);
         }
 
         return;
       }
 
-      // Renderizar pessoas filtradas
-      filtradas.forEach(p => {
+      if (selecionadas.length && resultadosNaoSelecionados.length) {
+        const cabecalhoResultados = document.createElement("div");
+        cabecalhoResultados.className = "filtered-results-heading";
+        cabecalhoResultados.textContent = t("filterResults");
+        peopleList.appendChild(cabecalhoResultados);
+      }
+
+      // Depois das seleções, renderizar os demais resultados alfabeticamente.
+      resultadosNaoSelecionados.forEach(p => {
         const card = renderizarCardPessoa(p, false);
         peopleList.appendChild(card);
       });
@@ -4758,6 +5375,34 @@ function atualizarCargos() {
     document.addEventListener("click", () => {
       document.querySelectorAll(".multi-filter.open").forEach(item => {
         item.classList.remove("open");
+        const button = item.querySelector(".multi-filter-button");
+        if (button) button.setAttribute("aria-expanded", "false");
+      });
+
+      div.addEventListener("keydown", (e) => {
+        if ((e.key === "Enter" || e.key === " ") && e.target === div) {
+          e.preventDefault();
+          selecionarPessoa(p);
+        }
+      });
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+
+      const popup = document.getElementById("no-alumni-popup");
+      if (popup && popup.classList.contains("show")) {
+        hideNoAlumniPopup();
+        return;
+      }
+
+      document.querySelectorAll(".multi-filter.open").forEach(item => {
+        item.classList.remove("open");
+        const button = item.querySelector(".multi-filter-button");
+        if (button) {
+          button.setAttribute("aria-expanded", "false");
+          button.focus();
+        }
       });
     });
 
@@ -4772,16 +5417,20 @@ function atualizarCargos() {
       atualizarEstiloMunicipios();
     });
 
-    filterBusca.addEventListener("input", () => {
+    filterBusca.addEventListener("input", debounce(() => {
       atualizarLista();
       carregarMunicipiosEstadosSelecionados();
       if (estadosLayer) estadosLayer.setStyle(estadoStyle);
       atualizarEstiloMunicipios();
-    });
+    }, 250));
 
     if (btnCopyWhatsapp) {
       btnCopyWhatsapp.addEventListener("click", copiarListaWhatsapp);
       atualizarBotaoWhatsapp();
+    }
+
+    if (languageSelect) {
+      languageSelect.addEventListener("change", () => aplicarIdioma(languageSelect.value));
     }
 
     btnLimpar.addEventListener("click", limparSelecao);
@@ -4814,6 +5463,7 @@ function atualizarCargos() {
     // INICIALIZAÇÃO
     // -------------------------
     document.addEventListener("DOMContentLoaded", () => {
+      aplicarIdioma(idiomaAtual);
       initMap();
       carregarPessoas();
       carregarPaisesVizinhos();
@@ -4843,4 +5493,3 @@ function atualizarCargos() {
   </script>
 </body>
 </html>
-
