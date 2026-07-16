@@ -737,8 +737,35 @@ main {
 
     .results-actions {
       display: flex;
+      flex-wrap: wrap;
       gap: 8px;
       margin: 0 0 8px;
+    }
+
+    .btn-select-all {
+      flex: 1;
+      border: 1px solid var(--ensina-blue);
+      border-radius: 999px;
+      background: #ffffff;
+      color: var(--ensina-blue-dark);
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 7px 12px;
+      transition: background 0.15s, color 0.15s, transform 0.1s;
+    }
+
+    .btn-select-all:hover:not(:disabled) {
+      background: var(--ensina-blue);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .btn-select-all:disabled {
+      border-color: #d1d5db;
+      color: #9ca3af;
+      cursor: not-allowed;
+      background: #f9fafb;
     }
 
     .btn-copy-whatsapp {
@@ -1515,6 +1542,7 @@ main {
         <div id="mobilizacao-resumo" class="mobilizacao-resumo" aria-label="Resumo da mobilização"></div>
         <div class="results-actions">
           <button id="btn-copy-whatsapp" class="btn-copy-whatsapp" type="button">Copiar resultados</button>
+          <button id="btn-selecionar-todos" class="btn-select-all" type="button">Selecionar todos</button>
           <button id="btn-limpar-resultados" class="btn-clear-results" data-i18n="clearFilters" type="button">Limpar filtros</button>
         </div>
         <div id="people-list"></div>
@@ -1636,6 +1664,7 @@ main {
     const summary      = document.getElementById("summary");
     const mobilizacaoResumo = document.getElementById("mobilizacao-resumo");
     const btnCopyWhatsapp = document.getElementById("btn-copy-whatsapp");
+    const btnSelecionarTodos = document.getElementById("btn-selecionar-todos");
     const btnLimpar    = document.getElementById("btn-limpar");
     const btnLimparResultados = document.getElementById("btn-limpar-resultados");
     const mapHomeBtn   = document.getElementById("map-home-btn");
@@ -1667,6 +1696,7 @@ main {
         emptyLocationTitle: "Nenhuma liderança cadastrada nessa localidade", close: "Fechar",
         selected: "Selecionadas", filterResults: "Resultados do filtro",
         copySelection: "Copiar seleção", copyResults: "Copiar resultados",
+        selectAll: "Selecionar todos", deselectAll: "Desmarcar todos",
         nothingToCopy: "Nenhum resultado para copiar", copied: "Lista copiada!", copyFail: "Não foi possível copiar",
         loading: "Carregando lideranças...", allM: "Todos", allF: "Todas", allRegion: "Todos da região",
         selectedCount: "selecionado(s)", noOption: "Nenhuma opção encontrada",
@@ -1700,6 +1730,7 @@ main {
         emptyLocationTitle: "No hay liderazgos registrados en esta localidad", close: "Cerrar",
         selected: "Seleccionadas", filterResults: "Resultados del filtro",
         copySelection: "Copiar selección", copyResults: "Copiar resultados",
+        selectAll: "Seleccionar todos", deselectAll: "Deseleccionar todos",
         nothingToCopy: "No hay resultados para copiar", copied: "¡Lista copiada!", copyFail: "No se pudo copiar",
         loading: "Cargando liderazgos...", allM: "Todos", allF: "Todas", allRegion: "Todos de la región",
         selectedCount: "seleccionado(s)", noOption: "No se encontraron opciones",
@@ -1732,6 +1763,7 @@ main {
         emptyLocationTitle: "No leaders registered in this location", close: "Close",
         selected: "Selected", filterResults: "Filter results",
         copySelection: "Copy selection", copyResults: "Copy results",
+        selectAll: "Select all", deselectAll: "Deselect all",
         nothingToCopy: "No results to copy", copied: "List copied!", copyFail: "Could not copy",
         loading: "Loading leaders...", allM: "All", allF: "All", allRegion: "All in region",
         selectedCount: "selected", noOption: "No options found",
@@ -4689,6 +4721,43 @@ function atualizarBotaoWhatsapp() {
     : total
       ? `${t("copyResults")} (${total})`
       : t("nothingToCopy");
+
+  atualizarBotaoSelecionarTodos();
+}
+
+function atualizarBotaoSelecionarTodos() {
+  if (!btnSelecionarTodos) return;
+
+  const resultados = pessoasFiltradasAtuais;
+  const todosSelecionados = resultados.length > 0 && resultados.every(
+    pessoa => pessoasSelecionadasKeys.has(criarChavePessoa(pessoa))
+  );
+
+  btnSelecionarTodos.disabled = resultados.length === 0;
+  btnSelecionarTodos.textContent = todosSelecionados
+    ? t("deselectAll")
+    : t("selectAll");
+}
+
+function alternarSelecionarTodos() {
+  if (!pessoasFiltradasAtuais.length) return;
+
+  const todosSelecionados = pessoasFiltradasAtuais.every(
+    pessoa => pessoasSelecionadasKeys.has(criarChavePessoa(pessoa))
+  );
+
+  pessoasFiltradasAtuais.forEach(pessoa => {
+    const chave = criarChavePessoa(pessoa);
+    if (todosSelecionados) {
+      pessoasSelecionadasKeys.delete(chave);
+    } else {
+      pessoasSelecionadasKeys.add(chave);
+    }
+  });
+
+  atualizarLista({ preservarSelecao: true });
+  if (estadosLayer) estadosLayer.setStyle(estadoStyle);
+  atualizarEstiloMunicipios();
 }
 
 function copiarListaWhatsapp() {
@@ -5416,6 +5485,11 @@ function atualizarCargos() {
     if (btnCopyWhatsapp) {
       btnCopyWhatsapp.addEventListener("click", copiarListaWhatsapp);
       atualizarBotaoWhatsapp();
+    }
+
+    if (btnSelecionarTodos) {
+      btnSelecionarTodos.addEventListener("click", alternarSelecionarTodos);
+      atualizarBotaoSelecionarTodos();
     }
 
     if (languageSelect) {
