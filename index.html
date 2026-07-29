@@ -1211,24 +1211,6 @@ main {
       margin-bottom: 4px;
     }
 
-    .contribution-note {
-      margin-top: 10px;
-      padding: 10px 12px;
-      border-left: 3px solid var(--ensina-green);
-      border-radius: 8px;
-      background: rgba(0, 191, 165, 0.07);
-      color: var(--text-main);
-      font-size: 0.82rem;
-      line-height: 1.45;
-    }
-
-    .contribution-note strong {
-      display: inline;
-      font-size: inherit;
-      color: var(--ensina-blue-dark);
-      margin: 0;
-    }
-
     .btn-cadastro {
       border: none;
       border-radius: 999px;
@@ -1349,6 +1331,19 @@ main {
       height: 90%;
       object-fit: contain;
       transition: transform 160ms ease;
+    }
+
+    /* Área de interação ampliada para o acesso ao mapa nacional */
+    .brasil-zoom-marker {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+    }
+
+    .brasil-zoom-marker .logo-marker {
+      pointer-events: auto;
     }
 
     /* destaque ao passar o mouse para logos (Ensina/Lampiar) */
@@ -1569,21 +1564,18 @@ main {
 
     <section class="join-section">
       <div class="join-section-text">
-        <strong data-i18n="feedbackTitle">Ajude a melhorar o mapa da rede</strong>
-        <span data-i18n="feedbackText">
-          Este mapa é uma construção coletiva. Se você percebeu algo que pode melhorar, sentiu falta de alguma informação ou quer compartilhar um elogio sobre a experiência, envie sua contribuição pelo formulário abaixo.
+        <strong data-i18n="removalTitle">Solicite a retirada dos seus dados do mapa</strong>
+        <span data-i18n="removalText">
+          Se você não deseja que suas informações permaneçam disponíveis no Mapa da Rede de Lideranças, utilize o formulário abaixo para solicitar a retirada. Não é necessário apresentar justificativa.
         </span>
-        <div class="contribution-note" data-i18n="contributionNote">
-          <strong>Contribuições da rede:</strong> em 17/06/2026, Gabriel Guedes contribuiu com a sugestão dos filtros de múltiplas seleções, já implementada no mapa.
-        </div>
       </div>
       <a
-        href="https://forms.gle/77BRtJN82rpPWJsL8"
+        href="https://forms.gle/k2M3eJyUf8mCAj1a7"
         class="btn-cadastro"
         target="_blank"
         rel="noopener noreferrer"
       >
-        <span data-i18n="feedbackButton">Preencher formulário de sugestão e elogios</span>
+        <span data-i18n="removalButton">Solicitar retirada dos meus dados</span>
       </a>
     </section>
 
@@ -1593,7 +1585,7 @@ main {
       <span data-i18n="privacyText">
         Este mapa exibe dados pessoais de lideranças que consentiram com sua divulgação,
         conforme a Lei Geral de Proteção de Dados (Lei 13.709/2018). 
-        Para solicitar correção ou remoção dos seus dados, escreva para alumni@ensinabrasil.org.
+        Para solicitar correção, utilize o formulário de atualização. Para solicitar a retirada dos seus dados, utilize o formulário disponível acima.
       </span>
     </footer>
 
@@ -1686,13 +1678,12 @@ main {
         updateTitle: "Mantenha suas informações atualizadas no mapa da rede",
         updateText: "O mapa da Rede de Lideranças é construído coletivamente e depende da atualização constante das trajetórias que impactam diferentes territórios e países. Caso você tenha mudado de cidade, país, instituição, área de atuação ou queira revisar suas informações cadastradas, preencha o formulário abaixo para manter sua presença atualizada no mapa.",
         updateButton: "Preencher formulário de atualização",
-        feedbackTitle: "Ajude a melhorar o mapa da rede",
-        feedbackText: "Este mapa é uma construção coletiva. Se você percebeu algo que pode melhorar, sentiu falta de alguma informação ou quer compartilhar um elogio sobre a experiência, envie sua contribuição pelo formulário abaixo.",
-        feedbackButton: "Preencher formulário de sugestão e elogios",
-        contributionNote: "Contribuições da rede: em 17/06/2026, Gabriel Guedes contribuiu com a sugestão dos filtros de múltiplas seleções, já implementada no mapa.",
+        removalTitle: "Solicite a retirada dos seus dados do mapa",
+        removalText: "Se você não deseja que suas informações permaneçam disponíveis no Mapa da Rede de Lideranças, utilize o formulário abaixo para solicitar a retirada. Não é necessário apresentar justificativa.",
+        removalButton: "Solicitar retirada dos meus dados",
         createdBy: "Criado por", lampiarLegend: "Localidade onde atua o Programa Lampiar",
         traineeLegend: "Localidade onde atua o Programa Trainee Ensina Brasil", traineeHub: "Polo de atuação do Programa Trainee Ensina Brasil", homeMap: "Voltar ao mapa completo",
-        privacyText: "Este mapa exibe dados pessoais de lideranças que consentiram com sua divulgação, conforme a Lei Geral de Proteção de Dados (Lei 13.709/2018). Para solicitar correção ou remoção dos seus dados, escreva para alumni@ensinabrasil.org.",
+        privacyText: "Este mapa exibe dados pessoais de lideranças que consentiram com sua divulgação, conforme a Lei Geral de Proteção de Dados (Lei 13.709/2018). Para solicitar correção, utilize o formulário de atualização. Para solicitar a retirada dos seus dados, utilize o formulário disponível acima.",
         emptyLocationTitle: "Nenhuma liderança cadastrada nessa localidade", close: "Fechar",
         selected: "Selecionadas", filterResults: "Resultados do filtro",
         copySelection: "Copiar seleção", copyResults: "Copiar resultados",
@@ -1720,13 +1711,12 @@ main {
         updateTitle: "Mantén tu información actualizada en el mapa de la red",
         updateText: "El mapa de la Red de Liderazgos se construye colectivamente y depende de la actualización constante de las trayectorias que impactan diferentes territorios y países. Si cambiaste de ciudad, país, institución o área de actuación, completa el formulario para mantener tu presencia actualizada.",
         updateButton: "Completar formulario de actualización",
-        feedbackTitle: "Ayuda a mejorar el mapa de la red",
-        feedbackText: "Este mapa es una construcción colectiva. Si encontraste algo que puede mejorar, falta información o quieres compartir un elogio, envía tu contribución en el formulario.",
-        feedbackButton: "Enviar sugerencias y comentarios",
-        contributionNote: "Contribuciones de la red: el 17/06/2026, Gabriel Guedes sugirió los filtros de selección múltiple, ya implementados en el mapa.",
+        removalTitle: "Solicita la eliminación de tus datos del mapa",
+        removalText: "Si no deseas que tu información siga disponible en el Mapa de la Red de Liderazgos, utiliza el formulario a continuación para solicitar su eliminación. No es necesario presentar una justificación.",
+        removalButton: "Solicitar la eliminación de mis datos",
         createdBy: "Creado por", lampiarLegend: "Localidad donde actúa el Programa Lampiar",
         traineeLegend: "Localidad donde actúa el Programa Trainee Ensina Brasil", traineeHub: "Polo de actuación del Programa Trainee Ensina Brasil", homeMap: "Volver al mapa completo",
-        privacyText: "Este mapa muestra datos personales de liderazgos que autorizaron su divulgación. Para solicitar una corrección o eliminación, escribe a alumni@ensinabrasil.org.",
+        privacyText: "Este mapa muestra datos personales de liderazgos que autorizaron su divulgación. Para solicitar una corrección, utiliza el formulario de actualización. Para solicitar la eliminación de tus datos, utiliza el formulario disponible arriba.",
         emptyLocationTitle: "No hay liderazgos registrados en esta localidad", close: "Cerrar",
         selected: "Seleccionadas", filterResults: "Resultados del filtro",
         copySelection: "Copiar selección", copyResults: "Copiar resultados",
@@ -1753,13 +1743,13 @@ main {
         clearFilters: "Clear filters", resultsTitle: "Leaders found",
         updateTitle: "Keep your information up to date on the network map",
         updateText: "The Leadership Network map is built collectively and depends on continuously updated journeys impacting different territories and countries. If you have changed city, country, institution, or field of work, complete the form to keep your presence up to date.",
-        updateButton: "Open update form", feedbackTitle: "Help improve the network map",
-        feedbackText: "This map is a collective effort. If you found something that can be improved, noticed missing information, or want to share positive feedback, send your contribution through the form.",
-        feedbackButton: "Send suggestions and feedback",
-        contributionNote: "Network contributions: on June 17, 2026, Gabriel Guedes suggested the multiple-selection filters, now implemented on the map.",
+        updateButton: "Open update form",
+        removalTitle: "Request the removal of your data from the map",
+        removalText: "If you do not want your information to remain available on the Leadership Network Map, use the form below to request its removal. You do not need to provide a reason.",
+        removalButton: "Request removal of my data",
         createdBy: "Created by", lampiarLegend: "Location where the Lampiar Program operates",
         traineeLegend: "Location where the Ensina Brasil Trainee Program operates", traineeHub: "Ensina Brasil Trainee Program hub", homeMap: "Return to the full map",
-        privacyText: "This map displays personal data from leaders who consented to its publication. To request a correction or removal, email alumni@ensinabrasil.org.",
+        privacyText: "This map displays personal data from leaders who consented to its publication. To request a correction, use the update form. To request the removal of your data, use the form available above.",
         emptyLocationTitle: "No leaders registered in this location", close: "Close",
         selected: "Selected", filterResults: "Filter results",
         copySelection: "Copy selection", copyResults: "Copy results",
@@ -3215,19 +3205,28 @@ function carregarPaisesVizinhos() {
   };
 
   function createIcon(size = 26) {
+    const hitSize = 44;
     return L.divIcon({
       html: `
         <div class="logo-marker logo-program" style="width: ${size}px; height: ${size}px; border-radius: 50%; border: 1.5px solid #004b8d; background: white; display: flex; align-items: center; justify-content: center; overflow: hidden;">
           <img src="${prog.logo}" alt="${prog.pais}" style="width: 85%; height: 85%; object-fit: cover; border-radius: 50%;" onerror="this.parentElement.innerHTML='<span style=\\'font-size: 12px; font-weight: bold; color: #004b8d;\\'>${prog.pais.charAt(0).toUpperCase()}</span>';">
         </div>
       `,
-      className: "",
-      iconSize: [size, size],
-      iconAnchor: [Math.round(size / 2), Math.round(size / 2)]
+      className: "brasil-zoom-marker",
+      iconSize: [hitSize, hitSize],
+      iconAnchor: [hitSize / 2, hitSize / 2]
     });
   }
 
-  brasilMarker = L.marker([prog.lat, prog.lng], { icon: createIcon(26) })
+  brasilMarker = L.marker([prog.lat, prog.lng], {
+    icon: createIcon(26),
+    interactive: true,
+    keyboard: true,
+    bubblingMouseEvents: false,
+    riseOnHover: true,
+    zIndexOffset: 1500,
+    title: "Brasil — clique para aproximar"
+  })
     .bindPopup(`
       <div style="text-align: center; font-weight: 500; font-family: 'Inter', sans-serif;">
         <strong>${prog.pais}</strong><br>
@@ -3238,6 +3237,16 @@ function carregarPaisesVizinhos() {
       maxWidth: 200,
       className: "programa-popup"
     });
+
+  // No panorama internacional, o clique no Brasil aproxima o mapa
+  // para a visualização nacional e volta a exibir os estados.
+  brasilMarker.on("click", (event) => {
+    if (event && event.originalEvent) {
+      L.DomEvent.stopPropagation(event.originalEvent);
+    }
+    brasilMarker.closePopup();
+    zoomNacional(true);
+  });
 
   try { attachLogoHover(brasilMarker); } catch (e) {}
 }
@@ -4195,7 +4204,7 @@ function adicionarLogosLampiar() {
     // -------------------------
     // ZOOMS
     // -------------------------
-    function zoomNacional() {
+    function zoomNacional(forcarAproximacao = false) {
       highlightState = null;
       highlightCityNorm = null;
       selectedRegion = null;
@@ -4205,17 +4214,24 @@ function adicionarLogosLampiar() {
       }
 
       if (map) {
-        map.flyToBounds(
-          [
-            [-34, -74],
-            [6, -30]
-          ],
-          {
-            padding: [12, 12],
-            maxZoom: 4.5,
-            animate: true
-          }
-        );
+        if (forcarAproximacao) {
+          map.flyTo([-14.235, -51.9253], 4.5, {
+            animate: true,
+            duration: 1
+          });
+        } else {
+          map.flyToBounds(
+            [
+              [-34, -74],
+              [6, -30]
+            ],
+            {
+              padding: [12, 12],
+              maxZoom: 4.5,
+              animate: true
+            }
+          );
+        }
       }
 
       limparMunicipios();
