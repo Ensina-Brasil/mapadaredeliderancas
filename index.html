@@ -1066,22 +1066,17 @@ main {
     }
 
     .person-flag {
-      min-width: 34px;
-      min-height: 26px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 999px;
-      border: 1px solid rgba(39, 55, 102, 0.24);
-      background: rgba(39, 55, 102, 0.08);
-      color: var(--ensina-blue-dark);
-      padding: 3px 8px;
-      font-size: 0.7rem;
-      font-weight: 800;
-      letter-spacing: 0.04em;
+      width: 40px;
+      aspect-ratio: 4 / 3;
+      object-fit: contain;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+      background: white;
+      padding: 1px;
       transition: all 0.2s ease;
     }
 
+    .person-flag.clickable-filter:hover,
     .clickable-filter-button:hover .person-flag {
       transform: scale(1.1);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -8835,7 +8830,7 @@ function atualizarCargos() {
     <!-- Localização à direita -->
     <div class="person-main-right">
       ${cidadeSegura ? `<button type="button" class="clickable-filter clickable-filter-button" data-filter="cidade" data-value="${cidadeSegura}" title="Filtrar por ${cidadeSegura}">${cidadeSegura}${estadoSeguro ? ` - ${estadoSeguro === "EXTERIOR" ? paisSeguro : estadoSeguro}` : ""}</button>` : ""}
-      ${estadoSeguro ? `<button type="button" class="clickable-filter clickable-filter-button" data-filter="estado" data-value="${estadoSeguro}" title="Filtrar por ${estadoSeguro}"><span class="person-flag" aria-hidden="true">${estadoSeguro === "EXTERIOR" ? "INT" : estadoSeguro}</span></button>` : ""}
+      ${estadoSeguro && estadoSeguro !== "EXTERIOR" ? `<button type="button" class="clickable-filter clickable-filter-button" data-filter="estado" data-value="${estadoSeguro}" title="Filtrar por ${estadoSeguro}"><img class="person-flag" src="bandeiras/${estadoSeguro}.png" alt="Bandeira de ${estadoSeguro}"></button>` : (paisSeguro ? `<button type="button" class="clickable-filter clickable-filter-button" data-filter="pais" data-value="${paisSeguro}" title="Filtrar por ${paisSeguro}"><img class="person-flag" src="${escaparHTML((TEACH_FOR_ALL_COUNTRIES[paisSeguro] && TEACH_FOR_ALL_COUNTRIES[paisSeguro].logo) || '')}" alt="Bandeira de ${paisSeguro}"></button>` : "")}
     </div>
   </div>
           <div class="person-bottom-row">
