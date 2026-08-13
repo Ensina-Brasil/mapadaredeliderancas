@@ -3988,6 +3988,8 @@ main {
     let pessoasSelecionadasKeys = new Set(); // múltiplas pessoas selecionadas
     let highlightState = null;
     let highlightCityNorm = null;
+    // Base URL para as imagens de bandeiras — pasta `bandeiras/` na base do site
+    const FLAGS_BASE_URL = "bandeiras/";
     let selectedRegion = null; // região selecionada no filtro
     let hoverState = null; // estado em hover (passar mouse sobre nome na lista)
 
@@ -8830,7 +8832,7 @@ function atualizarCargos() {
     <!-- Localização à direita -->
     <div class="person-main-right">
       ${cidadeSegura ? `<button type="button" class="clickable-filter clickable-filter-button" data-filter="cidade" data-value="${cidadeSegura}" title="Filtrar por ${cidadeSegura}">${cidadeSegura}${estadoSeguro ? ` - ${estadoSeguro === "EXTERIOR" ? paisSeguro : estadoSeguro}` : ""}</button>` : ""}
-      ${estadoSeguro && estadoSeguro !== "EXTERIOR" ? `<button type="button" class="clickable-filter clickable-filter-button" data-filter="estado" data-value="${estadoSeguro}" title="Filtrar por ${estadoSeguro}"><img class="person-flag" src="bandeiras/${estadoSeguro}.png" alt="Bandeira de ${estadoSeguro}"></button>` : (paisSeguro ? `<button type="button" class="clickable-filter clickable-filter-button" data-filter="pais" data-value="${paisSeguro}" title="Filtrar por ${paisSeguro}"><img class="person-flag" src="${escaparHTML((TEACH_FOR_ALL_COUNTRIES[paisSeguro] && TEACH_FOR_ALL_COUNTRIES[paisSeguro].logo) || '')}" alt="Bandeira de ${paisSeguro}"></button>` : "")}
+      ${estadoSeguro && estadoSeguro !== "EXTERIOR" ? `<button type="button" class="clickable-filter clickable-filter-button" data-filter="estado" data-value="${estadoSeguro}" title="Filtrar por ${estadoSeguro}"><img class="person-flag" src="${FLAGS_BASE_URL}${estadoSeguro}.png" alt="Bandeira de ${estadoSeguro}"></button>` : (paisSeguro ? `<button type="button" class="clickable-filter clickable-filter-button" data-filter="pais" data-value="${paisSeguro}" title="Filtrar por ${paisSeguro}"><img class="person-flag" src="${escaparHTML((TEACH_FOR_ALL_COUNTRIES[paisSeguro] && TEACH_FOR_ALL_COUNTRIES[paisSeguro].logo) || '')}" alt="Bandeira de ${paisSeguro}"></button>` : "")}
     </div>
   </div>
           <div class="person-bottom-row">
@@ -9306,6 +9308,58 @@ function atualizarCargos() {
         });
       }
     });
+  </script>
+  <script>
+    // Fallback: se a imagem em `bandeiras/{SIGLA}.png` não existir, desenha um SVG com a sigla
+    (function(){
+      function stateSvgDataUrl(sigla){
+        const bg = '#ffffff';
+        const fg = '#0b2540';
+        const fontSize = 18;
+        const padding = 8;
+        const width = 120;
+        const height = 90;
+        const text = sigla || '';
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`+
+          `<rect rx="6" ry="6" width="100%" height="100%" fill="${bg}" stroke="#d1d5db"/>`+
+          `<text x="50%" y="50%" fill="${fg}" font-family="Inter, system-ui, sans-serif" font-weight="700" font-size="${fontSize}" dominant-baseline="middle" text-anchor="middle">${escapeXml(text)}</text>`+
+          `</svg>`;
+        return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+      }
+
+      function escapeXml(s){
+        return String(s).replace(/[&<>"']/g, function(c){
+          return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c];
+        });
+      }
+
+      function applyFallback(){
+        document.querySelectorAll('.person-flag').forEach(img => {
+          const src = img.getAttribute('src') || '';
+          if (!src || !src.includes('bandeiras/')) return;
+          // tenta carregar; no erro usa SVG com sigla
+          const loader = new Image();
+          loader.onload = function(){ img.src = src; };
+          loader.onerror = function(){
+            // tenta extrair sigla do alt ou do nome do arquivo
+            let sigla = '';
+            if (img.alt) sigla = img.alt.replace(/^Bandeira de\s*/i, '').trim();
+            if (!sigla){
+              const parts = src.split('/');
+              sigla = (parts.pop() || '').split('.')[0] || '';
+            }
+            img.src = stateSvgDataUrl(sigla.toUpperCase());
+          };
+          loader.src = src;
+        });
+      }
+
+      if (document.readyState === 'complete' || document.readyState === 'interactive'){
+        setTimeout(applyFallback, 0);
+      } else {
+        document.addEventListener('DOMContentLoaded', applyFallback);
+      }
+    })();
   </script>
 </body>
 </html>
