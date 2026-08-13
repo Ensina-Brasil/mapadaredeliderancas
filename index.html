@@ -2532,9 +2532,10 @@ main {
       background: var(--meteor-color, var(--ensina-yellow-light));
       box-shadow: 0 0 8px var(--meteor-color, rgba(251, 213, 100, 0.85));
       opacity: 0;
-      animation: meteor-crossing 15s ease-in infinite;
+      /* animação mais lenta por padrão */
+      animation: meteor-crossing 28s ease-in infinite;
       pointer-events: auto;
-      cursor: crosshair;
+      cursor: pointer;
       touch-action: manipulation;
     }
 
@@ -2629,7 +2630,7 @@ main {
       left: 94%;
       top: 35%;
       animation-delay: -10s;
-      animation-duration: 19s;
+      animation-duration: 34s;
     }
 
     .meteor--three {
@@ -2639,7 +2640,7 @@ main {
       width: 4px;
       height: 4px;
       animation-delay: -7s;
-      animation-duration: 22s;
+      animation-duration: 36s;
     }
 
     .meteor--four {
@@ -2649,7 +2650,7 @@ main {
       width: 3px;
       height: 3px;
       animation-delay: -15s;
-      animation-duration: 26s;
+      animation-duration: 40s;
     }
 
     .meteor--five {
@@ -2659,7 +2660,7 @@ main {
       width: 4px;
       height: 4px;
       animation-delay: -20s;
-      animation-duration: 29s;
+      animation-duration: 44s;
     }
 
     .meteor-shower {
@@ -2685,7 +2686,7 @@ main {
       opacity: 0;
       transform: rotate(-31deg);
       pointer-events: none;
-      cursor: crosshair;
+      cursor: pointer;
       touch-action: manipulation;
     }
 
@@ -2701,7 +2702,8 @@ main {
     }
 
     .meteor-shower.is-active .shower-meteor {
-      animation: meteor-shower-fall var(--shower-duration, 2.8s) cubic-bezier(.2,.7,.35,1) var(--shower-delay, 0s) both;
+      /* queda mais lento por padrão */
+      animation: meteor-shower-fall var(--shower-duration, 4.2s) cubic-bezier(.2,.7,.35,1) var(--shower-delay, 0s) both;
       pointer-events: auto;
     }
 
@@ -2783,7 +2785,8 @@ main {
     }
 
     .program-orbit-track--trainee { --orbit-delay: 0s; --orbit-radius: 175px; --orbit-duration: 88s; }
-    .program-orbit-track--impulso { --orbit-delay: -35s; --orbit-radius: 199px; --orbit-duration: 104s; }
+    /* Impulso em sentido anti-horário; demais mantidos em horário */
+    .program-orbit-track--impulso { --orbit-delay: -35s; --orbit-radius: 199px; --orbit-duration: 104s; animation-direction: reverse; }
     .program-orbit-track--lampiar { --orbit-delay: -78s; --orbit-radius: 218px; --orbit-duration: 122s; }
 
     .program-orbit-position {
@@ -3576,6 +3579,30 @@ main {
   z-index: 9999;
 }
 
+    /* Estilos específicos para o modal/section de privacidade (usa coral da identidade) */
+    .join-section--privacy { --join-accent: var(--ensina-coral); }
+    /* Conteúdo do modal mais largo e rolável para usar o espaço da tela */
+    #privacy-popup .no-alumni-popup-content {
+      max-width: 760px;
+      width: min(92%, 760px);
+      padding: 22px;
+      max-height: 88vh;
+      overflow: auto;
+      box-sizing: border-box;
+    }
+    #privacy-popup .no-alumni-popup-content h3 { color: var(--ensina-coral); font-size: 1.15rem; }
+    #privacy-popup .no-alumni-popup-content p,
+    #privacy-popup .no-alumni-popup-content div { color: var(--text-main); line-height: 1.6; }
+    #privacy-popup .popup-close-btn { background: var(--ensina-coral); color: #fff; border-color: var(--ensina-coral); }
+    @media (max-width: 480px) {
+      #privacy-popup .no-alumni-popup-content {
+        width: calc(100% - 28px);
+        max-width: none;
+        border-radius: 12px;
+        padding: 16px;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -3907,6 +3934,17 @@ main {
     </section>
 
     <!-- Seção de convite para cadastro no mapa -->
+    <!-- Nova seção: Privacidade e proteção de dados (inserida acima de 'Atualize suas informações') -->
+    <section class="join-section join-section--privacy">
+      <div class="join-section-text">
+        <strong data-i18n="privacySectionTitle">Privacidade e proteção de dados</strong>
+        <span data-i18n="privacySectionText">Saiba como os dados apresentados neste mapa são utilizados e conheça os seus direitos em relação às suas informações.</span>
+      </div>
+      <button id="btn-privacy" class="btn-cadastro" type="button" onclick="(function(){ try{ if(typeof showPrivacyPopup==='function') showPrivacyPopup(); }catch(e){} })();">
+        <span data-i18n="privacySectionButton">Saiba mais sobre privacidade</span>
+      </button>
+    </section>
+
     <section class="join-section join-section--update">
       <div class="join-section-text">
         <strong data-i18n="updateTitle">Atualize suas informações</strong>
@@ -3963,6 +4001,29 @@ main {
       <button id="popup-close-btn" class="popup-close-btn" data-i18n="close">Fechar</button>
     </div>
   </div>
+
+    <!-- Modal: Privacidade e proteção de dados -->
+    <div id="privacy-popup" class="no-alumni-popup" role="dialog" aria-modal="true" aria-labelledby="privacy-title" aria-describedby="privacy-text" aria-hidden="true">
+      <div class="no-alumni-popup-content" tabindex="-1">
+        <h3 id="privacy-title">Privacidade e proteção de dados</h3>
+        <div id="privacy-text">
+          <p>O Mapa da Rede de Lideranças Ensina Brasil tem finalidade institucional de promover a conexão, o reconhecimento e a articulação entre integrantes e egressos da rede.</p>
+
+          <p>As informações apresentadas são limitadas aos dados necessários para essa finalidade, como nome, vínculo com programas, turma, localização profissional, cargo, organização e perfil profissional no LinkedIn, quando disponível.</p>
+
+          <p>Os dados utilizados no mapa são provenientes de bases institucionais disponibilizadas pelo Ensina Brasil e/ou de informações profissionais fornecidas ou tornadas públicas pelos próprios titulares.</p>
+
+          <p>As informações disponíveis neste mapa não são comercializadas e devem ser utilizadas de forma compatível com sua finalidade de conexão e articulação da rede.</p>
+
+          <p>Nos termos da Lei nº 13.709/2018 (Lei Geral de Proteção de Dados Pessoais – LGPD), o titular pode solicitar informações sobre o tratamento de seus dados, bem como sua correção, atualização ou retirada do mapa.</p>
+
+          <p>Para exercer esses direitos, utilize os canais disponíveis nesta página, incluindo as opções <strong>“Atualize suas informações”</strong> e <strong>“Solicite a retirada dos seus dados”</strong>.</p>
+
+          <p>As solicitações serão analisadas e tratadas de acordo com a legislação aplicável e com as diretrizes de proteção de dados do Ensina Brasil.</p>
+        </div>
+        <button id="privacy-popup-close" class="popup-close-btn" onclick="(function(){ try{ if(typeof hidePrivacyPopup==='function') hidePrivacyPopup(); }catch(e){} })();">Fechar</button>
+      </div>
+    </div>
 
   <!-- Leaflet JS -->
   <script
@@ -4053,6 +4114,9 @@ main {
         removalTitle: "Retire seus dados do mapa",
         removalText: "Se não quiser manter suas informações públicas, solicite a retirada. Não é necessário apresentar justificativa.",
         removalButton: "Solicitar retirada dos meus dados",
+        privacySectionTitle: "Privacidade e proteção de dados",
+        privacySectionText: "Saiba como os dados apresentados neste mapa são utilizados e conheça os seus direitos em relação às suas informações.",
+        privacySectionButton: "Saiba mais sobre privacidade",
         createdBy: "Criado por", lampiarLegend: "Localidade onde atua o Programa Lampiar",
         traineeLegend: "Localidade onde atua o Programa Trainee Ensina Brasil", traineeHub: "Polo de atuação do Programa Trainee Ensina Brasil", homeMap: "Voltar ao mapa completo",
         privacyText: "Este mapa exibe dados pessoais de lideranças que consentiram com sua divulgação, conforme a Lei Geral de Proteção de Dados (Lei 13.709/2018). Para solicitar correção, utilize o formulário de atualização. Para solicitar a retirada dos seus dados, utilize o formulário disponível acima.",
@@ -4098,6 +4162,9 @@ main {
         removalTitle: "Retira tus datos del mapa",
         removalText: "Si no deseas mantener pública tu información, solicita su eliminación. No necesitas presentar una justificación.",
         removalButton: "Solicitar la eliminación de mis datos",
+        privacySectionTitle: "Privacidad y protección de datos",
+        privacySectionText: "Conoce cómo se utilizan los datos presentados en este mapa y tus derechos sobre tu información.",
+        privacySectionButton: "Más información sobre privacidad",
         createdBy: "Creado por", lampiarLegend: "Localidad donde actúa el Programa Lampiar",
         traineeLegend: "Localidad donde actúa el Programa Trainee Ensina Brasil", traineeHub: "Polo de actuación del Programa Trainee Ensina Brasil", homeMap: "Volver al mapa completo",
         privacyText: "Este mapa muestra datos personales de liderazgos que autorizaron su divulgación. Para solicitar una corrección, utiliza el formulario de actualización. Para solicitar la eliminación de tus datos, utiliza el formulario disponible arriba.",
@@ -4143,6 +4210,9 @@ main {
         removalTitle: "Remove your data from the map",
         removalText: "If you no longer want your information to be public, request its removal. No reason is required.",
         removalButton: "Request removal of my data",
+        privacySectionTitle: "Privacy and data protection",
+        privacySectionText: "Learn how the data shown on this map is used and know your rights regarding your information.",
+        privacySectionButton: "Learn more about privacy",
         createdBy: "Created by", lampiarLegend: "Location where the Lampiar Program operates",
         traineeLegend: "Location where the Ensina Brasil Trainee Program operates", traineeHub: "Ensina Brasil Trainee Program hub", homeMap: "Return to the full map",
         privacyText: "This map displays personal data from leaders who consented to its publication. To request a correction, use the update form. To request the removal of your data, use the form available above.",
@@ -5101,6 +5171,40 @@ const lampiarCities = [
         elementoFocadoAntesDoPopup.focus();
       }
       elementoFocadoAntesDoPopup = null;
+    }
+
+    // -------------------------
+    // POPUP: PRIVACIDADE
+    // -------------------------
+    function showPrivacyPopup() {
+      const popup = document.getElementById("privacy-popup");
+      const conteudo = popup && popup.querySelector(".no-alumni-popup-content");
+      if (!popup || !conteudo) return;
+      elementoFocadoAntesDoPopup = document.activeElement;
+      popup.classList.add("show");
+      popup.setAttribute("aria-hidden", "false");
+      conteudo.focus();
+    }
+
+    function hidePrivacyPopup() {
+      const popup = document.getElementById("privacy-popup");
+      if (!popup) return;
+      popup.classList.remove("show");
+      popup.setAttribute("aria-hidden", "true");
+      if (elementoFocadoAntesDoPopup && typeof elementoFocadoAntesDoPopup.focus === "function") {
+        elementoFocadoAntesDoPopup.focus();
+      }
+      elementoFocadoAntesDoPopup = null;
+      // Após fechar, centraliza/rola para a área principal do mapa para voltar ao fluxo da página
+      try {
+        if (typeof centralizarMapaNacional === 'function') {
+          centralizarMapaNacional();
+        } else {
+          document.querySelector('main')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      } catch (e) {
+        // não bloquear caso a função não exista
+      }
     }
 
     // Estilo dos municípios (para highlight por pessoa)
@@ -9305,6 +9409,43 @@ function atualizarCargos() {
           if (e.target === popup) {
             hideNoAlumniPopup();
           }
+        });
+      }
+
+      // --- DIAGNÓSTICO RÁPIDO (temporário) ---
+      try {
+        console.log("DIAG: map existe?", !!map);
+        console.log("DIAG: estadosLayer existe?", !!estadosLayer);
+        try {
+          console.log("DIAG: estadosLayer.layers count:", estadosLayer && estadosLayer.getLayers ? estadosLayer.getLayers().length : 'n/a');
+        } catch(e) { console.log('DIAG: erro ao acessar estadosLayer.getLayers', e); }
+
+        const svgPath = document.querySelector('.leaflet-overlay-pane svg path');
+        if (svgPath) {
+          const cs = getComputedStyle(svgPath);
+          console.log('DIAG: primeiro path stroke/fill/opacity', cs.stroke, cs.fill, cs.opacity);
+        } else {
+          console.log('DIAG: nenhum path SVG encontrado na overlay');
+        }
+
+        // Captura erros globais para ver se há exceções não reportadas
+        window.addEventListener('error', e => console.log('DIAG_ERROR', e.message, e.filename, e.lineno));
+        window.addEventListener('unhandledrejection', e => console.log('DIAG_PROMISE_REJECTION', e.reason));
+      } catch (diagErr) {
+        console.log('DIAG: falha no diagnóstico', diagErr);
+      }
+
+      // Privacidade: abrir/fechar modal
+      const btnPrivacy = document.getElementById("btn-privacy");
+      const privacyPopup = document.getElementById("privacy-popup");
+      const privacyClose = document.getElementById("privacy-popup-close");
+      if (btnPrivacy && privacyPopup) {
+        btnPrivacy.addEventListener("click", () => showPrivacyPopup());
+      }
+      if (privacyClose) privacyClose.addEventListener("click", hidePrivacyPopup);
+      if (privacyPopup) {
+        privacyPopup.addEventListener("click", (e) => {
+          if (e.target === privacyPopup) hidePrivacyPopup();
         });
       }
     });
