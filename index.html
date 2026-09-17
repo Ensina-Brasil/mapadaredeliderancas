@@ -7500,11 +7500,11 @@ const lampiarCities = [
   { padding: [12, 12] }
 );
 
-      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}", {
         maxZoom: 19,
         minZoom: 2,
         attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          'Tiles &copy; <a href="https://www.arcgis.com/home/item.html?id=6e850093c837475e8c23d905ac43b7d0">Esri</a> &mdash; Esri, HERE, Garmin, Intermap, USGS, FAO, NPS, NRCAN, GeoBase, IGN, Kadaster NL, Ordnance Survey, METI, &copy; OpenStreetMap contributors, GIS User Community'
       }).addTo(map);
 
       // Drag habilitado com bounds constraint
@@ -12331,5 +12331,3 @@ function atualizarCargos() {
   </script>
 </body>
 </html>
-
-
